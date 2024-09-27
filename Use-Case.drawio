@@ -145,7 +145,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="MzG-DU7XLGtjmCk2zkSj-63" value="Os player jogam o jogo com base na missão que a AI lhes der" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;" parent="1" vertex="1">
-          <mxGeometry x="450" y="760" width="120" height="60" as="geometry" />
+          <mxGeometry x="450" y="740" width="130" height="80" as="geometry" />
         </mxCell>
         <mxCell id="MzG-DU7XLGtjmCk2zkSj-86" value="Salvar o Jogo" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;" parent="1" vertex="1">
           <mxGeometry x="250" y="700" width="120" height="60" as="geometry" />
