@@ -1,0 +1,98 @@
+create table player (
+
+	player_id Serial primary key,
+    player_name varchar(50)
+
+
+);
+
+create table campaign (
+
+campaign_id serial primary key,
+campaign_name varchar(50),
+current_act int not null,
+start_date DATETIME,
+last_updated DATETIME
+
+
+
+);
+
+
+create table character_player (
+
+	character_id Serial primary key,
+    charcater_name varchar(50),
+    character_race  varchar(50),
+    character_class varchar(50),
+    character_backstory text,
+    character_alignment varchar(50),
+    character_level int not null,
+    character_stats text,
+    character_personality varchar(50),
+    character_role varchar(50),
+    character_status varchar(50),
+	character_player_id int not null,
+	campaign_id int not null,
+    CONSTRAINT character_fk_player FOREIGN KEY (character_player_id) REFERENCES player(player_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT campaign_fk_character FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+create table quest (
+
+quest_id serial primary key,
+quest_name varchar(50),
+quest_type varchar(50),
+quest_description text,
+quest_objective text,
+quest_status varchar(50),
+quest_reward varchar(50),
+quest_start_date datetime,
+quest_end_date datetime,
+campaign_id int not null,
+CONSTRAINT campaign_fk_quest FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+
+
+
+
+
+);
+
+
+create table items (
+
+item_id serial primary key,
+item_name varchar(50),
+item_type varchar(50),
+item_description text,
+owner_id int not null,
+quest_id int not null,
+CONSTRAINT items_fk_character FOREIGN KEY (owner_id) REFERENCES character_player(character_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+CONSTRAINT item_fk_quest FOREIGN KEY (quest_id) REFERENCES quest(quest_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+
+
+);
+
+create table player_choice (
+
+choice_id serial primary key,
+campaign_choice_id int not null,
+character_choice_id int not null,
+quest_choice_id int not null,
+choice_description text,
+consequence text,
+time_choice timestamp,
+CONSTRAINT choice_fk_campaign FOREIGN KEY (campaign_choice_id) REFERENCES campaign(campaign_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+CONSTRAINT choice_fk_character FOREIGN KEY (character_choice_id) REFERENCES character_player(character_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+CONSTRAINT choice_fk_quest FOREIGN KEY (quest_choice_id) REFERENCES quest(quest_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+
+
+
+
+
+
+);
+
+
+
+
+
