@@ -6,6 +6,265 @@
   height: 40vmin;
   pointer-events: none;
 }
+/*Login*/
+
+#LoginBody {
+  margin: 0;
+}
+#LoginBody * {
+  box-sizing: border-box;
+}
+
+.main-login {
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.left-login {
+  width: 50vw;
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.left-login > h1 {
+  font-size: 3vw;
+  margin-top: 30px;
+  color: white;
+}
+
+.left-login-image {
+  width: 35vw;
+}
+
+.right-login {
+  width: 50vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-login {
+  width: 60%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 30px 35px;
+  background: #652ec7;
+  border-radius: 20px;
+  box-shadow: 0px 10px 40px #00000056;
+}
+
+.card-login > h1 {
+  color: white;
+  font-weight: 800;
+  margin: 0;
+}
+
+.textfield-login {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 10px 0px;
+}
+
+.textfield-login > input {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  background: #201b2c;
+  color: azure;
+  font-size: 12pt;
+  box-shadow: 0px 10px 40px #00000056;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.textfield-login > label {
+  color: azure;
+  margin-bottom: 10px;
+}
+
+.textfield-login > input::placeholder {
+  color: white;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 16px 0px;
+  margin: 25px;
+  border: none;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: azure;
+  background: darkslateblue;
+  cursor: pointer;
+  box-shadow: 0px 10px 40px -12px darkslateblue;
+}
+
+.btn-login:hover {
+  color: #aa3bfc;
+}
+
+.reference_login {
+  margin-top: 20px;
+  text-align: center;
+  color: azure;
+}
+.reference_login p {
+  margin: 0;
+}
+
+.reference_login a {
+  color: azure;
+  text-decoration: none;
+  text-decoration: underline;
+}
+
+/*SignIn*/
+
+#Registerbody {
+  margin: 0;
+}
+#Registerbody * {
+  box-sizing: border-box;
+}
+.main_register {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.left_register {
+  width: 50vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.card_register {
+  width: 60%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px 35px;
+  background: #652ec7;
+  border-radius: 20px;
+  box-shadow: 0px 10px 40px #00000056;
+  margin-bottom: 50px;
+  margin-top: 30px;
+}
+.card_register > h1 {
+  color: white;
+  font-weight: 800;
+  margin: 0;
+}
+.textfield_register_username,
+.textfield_email,
+.textfield_displayname,
+.textfield_register_password,
+.textfield_confirm_password {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 10px 0px;
+}
+.textfield_register_username > input,
+.textfield_email > input,
+.textfield_displayname > input,
+.textfield_register_password > input,
+.textfield_confirm_password > input {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  background: #201b2c;
+  color: azure;
+  font-size: 12pt;
+  box-shadow: 0px 10px 40px #00000056;
+  outline: none;
+  box-sizing: border-box;
+}
+.textfield_register_username > label,
+.textfield_email > label,
+.textfield_displayname > label,
+.textfield_register_password > label,
+.textfield_confirm_password > label {
+  color: azure;
+  margin-bottom: 10px;
+}
+.textfield_register_username > input::placeholder,
+.textfield_email > input::placeholder,
+.textfield_displayname > input::placeholder,
+.textfield_register_password > input::placeholder,
+.textfield_confirm_password > input::placeholder {
+  color: white;
+}
+.btn_register {
+  width: 100%;
+  padding: 16px 0px;
+  margin: 10px 0px; 
+  border: none;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: azure;
+  background: darkslateblue;
+  cursor: pointer;
+  box-shadow: 0px 10px 40px -12px darkslateblue;
+}
+.btn_register:hover {
+  color: #aa3bfc;
+}
+.reference_signin {
+  margin-top: 20px;
+  text-align: center;
+  color: azure;
+}
+.reference_signin p {
+  margin: 0;
+}
+.reference_signin a {
+  color: azure;
+  text-decoration: none;
+  text-decoration: underline;
+}
+.right_register {
+  margin-right: 50px;
+  width: 50vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.right_register > h1 {
+  font-size: 3vw;
+  color: white;
+}
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
