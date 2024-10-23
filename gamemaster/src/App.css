@@ -1,3 +1,12 @@
+body {
+  margin: 0;
+  background-image: url("./assets/grunge-vintage-old-paper-background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  font-family: Arial, sans-serif;
+}
+
 .App {
   text-align: center;
 }
@@ -225,7 +234,7 @@
 .btn_register {
   width: 100%;
   padding: 16px 0px;
-  margin: 10px 0px; 
+  margin: 10px 0px;
   border: none;
   text-transform: uppercase;
   font-weight: 800;
@@ -265,7 +274,6 @@
   color: white;
 }
 
-
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -294,4 +302,59 @@
   to {
     transform: rotate(360deg);
   }
+}
+#HostOrPlayer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  cursor: default;
+}
+
+.main_choice_appearance {
+  text-align: center;
+}
+
+.title_for_choice h1 {
+  font-family: "DragonHunter", sans-serif;
+  color: darkred;
+  font-size: 3rem;
+  margin: 0;
+}
+
+.choices_available {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.card_host,
+.card_player {
+  margin: 1rem;
+  padding: 1.5rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+}
+.card_host h2,
+.card_player h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.card_host p,
+.card_player p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.left_choice,
+.right_choice {
+  text-align: center;
+}
+@font-face {
+  font-family: "DragonHunter";
+  src: url("./assets/DragonHunter.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
 }
