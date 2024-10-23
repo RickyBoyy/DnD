@@ -7,19 +7,24 @@ const HostOrPlayer = () => {
     <div id="HostOrPlayer">
       <div className="main_choice_appearance">
         <div className="title_for_choice">
-          <h1>Make your Choice</h1>
+          <span>Make your Choice</span>
         </div>
         <div className="choices_available">
           <div className="left_choice">
             <form className="card_host">
-              <h2>Host</h2>
-              <text>Some type of description for the the host</text>
+              <div className="choice_title">
+                <h2>Host</h2>
+              </div>
+
+              <p>Some type of description for the the host</p>
             </form>
           </div>
           <div className="right_choice">
             <form className="card_player">
-              <h2>Player</h2>
-              <text>Some type of description for the player</text>
+              <div className="choice_title_player">
+                <h2>Player</h2>
+              </div>
+              <p>Some type of description for the player</p>
             </form>
           </div>
         </div>
