@@ -340,8 +340,8 @@ body {
   align-items: center;
   justify-content: center;
   background-image: url("./assets/Sally-forth______.jpg");
-  background-size: cover; /* Ensures the image covers the entire area */
-  background-position: center; /* Centers the background image */
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   color: #fff;
   height: 210px;
@@ -352,8 +352,8 @@ body {
   align-items: center;
   justify-content: center;
   background-image: url("./assets/player_img.jpg");
-  background-size: cover; /* Ensures the image covers the entire area */
-  background-position: center; /* Centers the background image */
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   color: #fff;
   height: 210px;
