@@ -41,61 +41,63 @@ const CreateCharacter = () => {
   return (
     <div id="CreateCharacter">
       <div className="player_character_creation_section">
-        <h2>Create Your Character</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Character Name Input */}
-          <div className="form-group">
-            <label htmlFor="characterName">Character Name:</label>
-            <input
-              type="text"
-              id="characterName"
-              value={characterName}
-              onChange={(e) => setCharacterName(e.target.value)}
-              placeholder="Enter your character's name"
-              required
-            />
-          </div>
+        <span>Create Your Character</span>
+        <div className="character_details">
+          <form onSubmit={handleSubmit}>
+            {/* Character Name Input */}
+            <div className="form-group">
+              <label htmlFor="characterName">Character Name:</label>
+              <input
+                type="text"
+                id="characterName"
+                value={characterName}
+                onChange={(e) => setCharacterName(e.target.value)}
+                placeholder="Enter your character's name"
+                required
+              />
+            </div>
 
-          {/* Race Selection */}
-          <div className="form-group">
-            <label htmlFor="raceSelect">Select Race:</label>
-            <select
-              id="raceSelect"
-              value={selectedRace}
-              onChange={(e) => setSelectedRace(e.target.value)}
-              required
-            >
-              <option value="">--Choose a Race--</option>
-              {races.map((race) => (
-                <option key={race.index} value={race.name}>
-                  {race.name}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Race Selection */}
+            <div className="form-group">
+              <label htmlFor="raceSelect">Select Race:</label>
+              <select
+                id="raceSelect"
+                value={selectedRace}
+                onChange={(e) => setSelectedRace(e.target.value)}
+                required
+              >
+                <option value="">--Choose a Race--</option>
+                {races.map((race) => (
+                  <option key={race.index} value={race.name}>
+                    {race.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Class Selection */}
-          <div className="form-group">
-            <label htmlFor="classSelect">Select Class:</label>
-            <select
-              id="classSelect"
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              required
-            >
-              <option value="">--Choose a Class--</option>
-              {classes.map((cls) => (
-                <option key={cls.index} value={cls.name}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Class Selection */}
+            <div className="form-group">
+              <label htmlFor="classSelect">Select Class:</label>
+              <select
+                id="classSelect"
+                value={selectedClass}
+                onChange={(e) => setSelectedClass(e.target.value)}
+                required
+              >
+                <option value="">--Choose a Class--</option>
+                {classes.map((cls) => (
+                  <option key={cls.index} value={cls.name}>
+                    {cls.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <button type="submit" className="submit-btn">
-            Create Character
-          </button>
-        </form>
+            <button type="submit" className="submit-btn">
+              Create Character
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
