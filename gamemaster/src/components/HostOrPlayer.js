@@ -16,7 +16,11 @@ const HostOrPlayer = () => {
                 <h2>Host</h2>
               </div>
 
-              <p>Some type of description for the the host</p>
+              <p>
+                Host a Dungeons and Dragons game for your friends using a
+                shareable private key to start your online session and start an
+                adventure
+              </p>
             </form>
           </div>
           <div className="right_choice">
@@ -24,7 +28,10 @@ const HostOrPlayer = () => {
               <div className="choice_title_player">
                 <h2>Player</h2>
               </div>
-              <p>Some type of description for the player</p>
+              <p>
+                Join a Dungeons and Dragons game, use a key provided by a host
+                and participate in a adventure
+              </p>
             </form>
           </div>
         </div>

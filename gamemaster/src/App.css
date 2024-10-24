@@ -369,6 +369,7 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 7%), 0 4px 4px -2px rgba(0, 0, 0, 0.1) !important;
   border-bottom-width: 2px;
   margin: 30px 30px 50px;
+  cursor: pointer;
 }
 .card_host h2,
 .card_player h2 {
