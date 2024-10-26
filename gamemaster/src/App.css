@@ -502,3 +502,126 @@ button.submit-btn {
 button.submit-btn:hover {
   background-color: red;
 }
+
+/*Lobby*/
+
+#LobbyPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background-image: url("./assets/grunge-vintage-old-paper-background.jpg");
+}
+
+.lobby-container{
+  width: 80%;
+  height: 50%;
+}
+
+.lobby-title{
+  color: darkred;
+  font-family: "DragonHunter", sans-serif;
+  font-size:2rem;
+  
+}
+
+.main_choice_appearance {
+  width: 90%;
+  max-width: 800px;
+  padding: 50px;
+  border-radius: 10px;
+  text-align: center;
+  background-color: #2c2f33;
+  color: white;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.title_for_choice span {
+  font-family: "DragonHunter", sans-serif;
+  color: darkred;
+  font-size: 3rem;
+  margin-bottom: 30px;
+}
+
+
+
+.main_choice_appearance::before {
+  top: -15px;
+  left: -15px;
+}
+
+.main_choice_appearance::after {
+  top: -15px;
+  right: -15px;
+}
+
+
+
+.main_choice_appearance .bottom-left-nail {
+  bottom: -15px;
+  left: -15px;
+}
+
+.main_choice_appearance .bottom-right-nail {
+  bottom: -15px;
+  right: -15px;
+}
+
+/* Remaining styling for player slots, game code, and button */
+.game-code-section {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.game-code-label {
+  font-size: 1.5rem;
+  color: darkred;
+  font-family: Arial, sans-serif;
+}
+
+.game-code {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.player-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.player-slot {
+  background: #201b2c;
+  padding: 20px;
+  border-radius: 5px;
+  color: white;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-slot.filled {
+  background: darkred;
+}
+
+.start-game-btn {
+  padding: 15px 25px;
+  font-size: 1.5rem;
+  color: white;
+  background-color: rgb(185, 23, 50);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.start-game-btn:hover {
+  background-color: darkred;
+}
+
+
