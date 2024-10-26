@@ -153,105 +153,119 @@ const CreateCharacter = () => {
       <div className="player_character_title">
         <span>Create Your Character</span>
       </div>
-      <div className="all_details">
-        <div className="character_details">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="characterName">Character Name:</label>
-              <input
-                type="text"
-                id="characterName"
-                value={characterName}
-                onChange={(e) => setCharacterName(e.target.value)}
-                placeholder="Enter your character's name"
-                required
-              />
-            </div>
+      <div className="create_the_character">
+        <div className="all_details">
+          <div className="character_details">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="characterName">Character Name:</label>
+                <input
+                  type="text"
+                  id="characterName"
+                  value={characterName}
+                  onChange={(e) => setCharacterName(e.target.value)}
+                  placeholder="Enter your character's name"
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="raceSelect">Select Race:</label>
-              <select
-                id="raceSelect"
-                value={selectedRace}
-                onChange={(e) => setSelectedRace(e.target.value)}
-                required
-              >
-                <option value="">--Choose a Race--</option>
-                {races.map((race) => (
-                  <option key={race.index} value={race.index}>
-                    {race.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="form-group">
+                <label htmlFor="raceSelect">Select Race:</label>
+                <select
+                  id="raceSelect"
+                  value={selectedRace}
+                  onChange={(e) => setSelectedRace(e.target.value)}
+                  required
+                >
+                  <option value="">--Choose a Race--</option>
+                  {races.map((race) => (
+                    <option key={race.index} value={race.index}>
+                      {race.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="classSelect">Select Class:</label>
-              <select
-                id="classSelect"
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                required
-              >
-                <option value="">--Choose a Class--</option>
-                {classes.map((cls) => (
-                  <option key={cls.index} value={cls.index}>
-                    {cls.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="form-group">
+                <label htmlFor="classSelect">Select Class:</label>
+                <select
+                  id="classSelect"
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  required
+                >
+                  <option value="">--Choose a Class--</option>
+                  {classes.map((cls) => (
+                    <option key={cls.index} value={cls.index}>
+                      {cls.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="alignmentSelect">Select Alignment:</label>
-              <select
-                id="alignmentSelect"
-                value={alignment}
-                onChange={(e) => setAlignment(e.target.value)}
-                required
-              >
-                <option value="">--Choose an Alignment--</option>
-                {alignments.map((align) => (
-                  <option key={align} value={align}>
-                    {align}
-                  </option>
+              <div className="form-group">
+                <label htmlFor="alignmentSelect">Select Alignment:</label>
+                <select
+                  id="alignmentSelect"
+                  value={alignment}
+                  onChange={(e) => setAlignment(e.target.value)}
+                  required
+                >
+                  <option value="">--Choose an Alignment--</option>
+                  {alignments.map((align) => (
+                    <option key={align} value={align}>
+                      {align}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </form>
+          </div>
+
+          <div className="character_abilities">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                {Object.keys(baseAbilityScores).map((ability) => (
+                  <div key={ability} className="ability-group">
+                    <label htmlFor={ability}>
+                      {ability.charAt(0).toUpperCase() + ability.slice(1)}:
+                    </label>
+                    <select
+                      id={ability}
+                      value={
+                        abilities[ability] !== undefined
+                          ? abilities[ability]
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleAbilityChange(ability, parseInt(e.target.value))
+                      }
+                      required
+                    >
+                      <option value="">--Choose Ability Score--</option>
+                      {availableScores
+                        .filter((score) => !usedScores.includes(score))
+                        .map((score) => (
+                          <option key={score} value={score}>
+                            {score}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
                 ))}
-              </select>
-            </div>
-          </form>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <div className="character_abilities">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              {Object.keys(baseAbilityScores).map((ability) => (
-                <div key={ability} className="ability-group">
-                  <label htmlFor={ability}>
-                    {ability.charAt(0).toUpperCase() + ability.slice(1)}:
-                  </label>
-                  <select
-                    id={ability}
-                    value={
-                      abilities[ability] !== undefined ? abilities[ability] : ""
-                    }
-                    onChange={(e) =>
-                      handleAbilityChange(ability, parseInt(e.target.value))
-                    }
-                    required
-                  >
-                    <option value="">--Choose Ability Score--</option>
-                    {availableScores
-                      .filter((score) => !usedScores.includes(score))
-                      .map((score) => (
-                        <option key={score} value={score}>
-                          {score}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              ))}
-            </div>
-          </form>
+        <div className="character_background">
+          <label>Character Background</label>
+          <textarea
+            name="background"
+            placeholder="Your character background"
+            rows="5"
+            cols="50"
+            className="background-textarea"
+          ></textarea>
         </div>
       </div>
     </div>
