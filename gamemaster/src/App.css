@@ -400,33 +400,76 @@ body {
   font-style: normal;
 }
 
-.player_character_creation_section {
+#CreateCharacter {
   padding: 20px;
   flex-direction: column;
-  width: 50%;
-  margin: 0 auto;
+  width: 100%;
 }
 
-.player_character_creation_section span {
+.player_character_title {
+  text-align: center; /* Centers the title text */
+  margin-bottom: 2rem; /* Adds some space below the title */
+}
+.player_character_title span {
   font-family: "DragonHunter", sans-serif;
   color: darkred;
   font-size: 3rem;
-  margin: 0;
+  justify-content: center;
   cursor: default; /* Prevents text-selection cursor */
   user-select: none; /* Prevents text selection */
   display: inline-block; /* Allows the span to behave more like a block element */
   padding: 20px; /* Adds padding around the text */
   transform: scale(1.2); /* Scales the entire span element */
+  margin: 0 auto;
+}
+/* Align `all_details` in a row */
+.all_details {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 100px; /* Add spacing between sections */
+  width: 100%;
+  margin-left: 5%;
 }
 
-.character_details {
-  margin-top: 4rem;
+/* Define the abilities section to have 3 columns */
+/* Abilities section container */
+/* Abilities section container */
+.character_abilities {
+  flex: 1;
+}
+
+/* Set up the grid with 3 rows in each column */
+.character_abilities .form-group {
+  display: grid;
+  grid-template-rows: repeat(3, auto); /* Each column has exactly 3 rows */
+  grid-auto-flow: column; /* Fill each column vertically before moving to the next */
+  gap: 20px; /* Adds space between items */
+}
+
+.ability-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Styling for labels and inputs within each ability */
+.ability-group label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.ability-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .form-group {
   margin-bottom: 1rem;
+  display: flex;
   flex-direction: column; /* Ensures labels and inputs are stacked vertically */
-  align-items: flex-start;
 }
 
 label {
