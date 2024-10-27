@@ -244,6 +244,7 @@ const CreateCharacter = () => {
             className="background-textarea"
           ></textarea>
         </div>
+        <button className="ending_character_button">Create Character</button>
       </div>
     </div>
   );

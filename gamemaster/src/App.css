@@ -403,23 +403,26 @@ body {
 #CreateCharacter {
   padding: 20px;
   flex-direction: column;
-  width: 100%;
+  max-width: 100%;
+  max-height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .player_character_title {
-  text-align: center; /* Centers the title text */
-  margin-bottom: 2rem; /* Adds some space below the title */
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 .player_character_title span {
   font-family: "DragonHunter", sans-serif;
   color: darkred;
-  font-size: 3rem;
+  font-size: 2.5rem;
   justify-content: center;
-  cursor: default; /* Prevents text-selection cursor */
-  user-select: none; /* Prevents text selection */
-  display: inline-block; /* Allows the span to behave more like a block element */
-  padding: 20px; /* Adds padding around the text */
-  transform: scale(1.2); /* Scales the entire span element */
+  cursor: default;
+  /user-select: none;
+  display: inline-block;
+  padding: 15px;
+  transform: scale(1.2);
   margin: 0 auto;
 }
 /* Align `all_details` in a row */
@@ -429,7 +432,7 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 100px; /* Add spacing between sections */
-  width: 100%;
+  width: 90%;
   margin-left: 5%;
 }
 
@@ -455,7 +458,7 @@ body {
 }
 
 .ability-group input {
-  width: 100%;
+  max-width: 100%;
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -476,8 +479,8 @@ label {
 
 input,
 select {
-  width: 100%;
   max-width: 400px;
+  width: 100%;
   padding: 0.5rem;
   margin-bottom: 1rem;
   border: 1px solid #ccc;
@@ -497,6 +500,10 @@ button.submit-btn {
 button.submit-btn:hover {
   background-color: red;
 }
+.character_background {
+  margin-left: 5%;
+  margin-right: 12%;
+}
 
 .character_background textarea {
   width: 100%;
@@ -507,6 +514,20 @@ button.submit-btn:hover {
   border-radius: 4px;
   background-color: #f8f8f8;
   resize: none;
+}
+.ending_character_button {
+  background-color: darkred;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 30px;
+}
+
+.ending_character_button:hover {
+  background-color: #a30000;
 }
 
 /*Lobby*/

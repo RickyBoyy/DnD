@@ -15,11 +15,11 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/" element={<SignInPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
           <Route path="/lobby" element={<LobbyPage />} />
-          <Route path="/" element={<CreateCharacterPage />} />
+          <Route path="/createcharacter" element={<CreateCharacterPage />} />
         </Routes>
       </Router>
     </div>
