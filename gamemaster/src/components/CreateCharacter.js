@@ -31,7 +31,7 @@ const CreateCharacter = () => {
   const [selectedClass, setSelectedClass] = useState("");
   const [characterName, setCharacterName] = useState("");
   const [alignment, setAlignment] = useState("");
-  const [abilities, setAbilities] = useState({ baseAbilityScores });
+  const [abilities, setAbilities] = useState({ ...baseAbilityScores });
   const [pointsRemaining, setPointsRemaining] = useState(27);
   const [usedScores, setUsedScores] = useState([]);
 
@@ -90,48 +90,25 @@ const CreateCharacter = () => {
   const handleAbilityChange = (ability, value) => {
     if (value < 9 || value > 14) return;
 
+    // Calculate cost changes
     const costBefore = abilityCost[abilities[ability]] || 0;
     const costAfter = abilityCost[value];
-    const totalCost = calculateTotalCost(abilities);
-    const newPointsRemaining = 27 - (totalCost - costBefore + costAfter);
-    const oldValue = abilities[ability];
+    const newPointsRemaining = pointsRemaining - costAfter + costBefore;
 
-    if (oldValue !== value) {
+    // Check if the points remaining allow this change
+    if (newPointsRemaining >= 0) {
+      setAbilities((prevAbilities) => ({
+        ...prevAbilities,
+        [ability]: value,
+      }));
       setUsedScores((prevUsedScores) => {
+        // Remove old value and add new value to usedScores
         const newUsedScores = prevUsedScores.filter(
-          (score) => score !== oldValue
+          (score) => score !== abilities[ability]
         );
         newUsedScores.push(value);
         return newUsedScores;
       });
-      setAbilities((prevAbilities) => ({
-        ...prevAbilities,
-        [ability]: value,
-      }));
-    }
-    console.log("Updated Abilities: ", { ...abilities, [ability]: value });
-
-    if (newPointsRemaining >= 0) {
-      setUsedScores((prevUsedScores) => {
-        const newUsedScores = [...prevUsedScores];
-        const oldValue = abilities[ability];
-
-        if (oldValue >= 10) {
-          const index = newUsedScores.indexOf(oldValue);
-          if (index > -1) {
-            newUsedScores.splice(index, 1);
-          }
-        }
-
-        newUsedScores.push(value);
-        return newUsedScores;
-      });
-
-      setAbilities((prevAbilities) => ({
-        ...prevAbilities,
-        [ability]: value,
-      }));
-
       setPointsRemaining(newPointsRemaining);
     }
   };
@@ -232,11 +209,7 @@ const CreateCharacter = () => {
                     </label>
                     <select
                       id={ability}
-                      value={
-                        abilities[ability] !== undefined
-                          ? abilities[ability]
-                          : ""
-                      }
+                      value={abilities[ability] || ""}
                       onChange={(e) =>
                         handleAbilityChange(ability, parseInt(e.target.value))
                       }
@@ -244,7 +217,11 @@ const CreateCharacter = () => {
                     >
                       <option value="">--Choose Ability Score--</option>
                       {availableScores
-                        .filter((score) => !usedScores.includes(score))
+                        .filter(
+                          (score) =>
+                            !usedScores.includes(score) ||
+                            score === abilities[ability]
+                        )
                         .map((score) => (
                           <option key={score} value={score}>
                             {score}
