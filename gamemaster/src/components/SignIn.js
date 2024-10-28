@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import '../App.css'; 
 
@@ -17,12 +15,11 @@ const SignIn = () => {
   return (
     <div className="signin-wrapper">
       <img 
-          src=""
-          alt=""
+          src="URL_DA_IMAGEM_AQUI"
+          alt="Logo"
           className="signin-logo"
       />
       <div className="signin-container">
-        <h2 className="signin-title">Sign In</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email address</label>

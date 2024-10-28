@@ -1,5 +1,9 @@
 body {
   margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-image: url("./assets/grunge-vintage-old-paper-background.jpg");
   background-size: cover;
   background-repeat: no-repeat;
@@ -18,49 +22,49 @@ body {
 
 
 /* Login */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-}
 
 
 .login-wrapper {
-  text-align: center; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%; 
+  max-width: 1200px; /* Limita o tamanho máximo para telas grandes */
 }
-
 
 .login-logo {
-  width: 80px; 
+  width: 100px;
   height: auto;
-  margin-bottom: 20px; 
+  position: absolute;
+  top: -50px; /* Coloca o logo acima do card */
+  z-index: 1;
 }
-
 
 .login-container {
   width: 100%;
-  max-width: 340px;
-  margin: 0 auto; 
-  padding: 20px;
+  max-width: 800px; /* Limita o tamanho do card para que não ocupe tudo */
+  padding: 60px 80px; /* Aumenta o espaçamento horizontal e vertical */
   border: 1px solid #d1d5da;
-  border-radius: 6px;
-  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
-
+  border-radius: 8px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: hsl(29, 42%, 57%);
+  text-align: center;
+  margin-top: 60px; /* Espaço para o logo acima do card */
+  box-sizing: border-box;
 }
 
-
 .login-title {
-  font-size: 2.5rem; 
+  font-size: 2rem;
   font-weight: 600;
   color: #24292e;
   margin-bottom: 20px;
 }
 
-
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-align: left;
+  width: 100%;
 }
 
 label {
@@ -72,8 +76,8 @@ label {
 
 input {
   width: 100%;
-  padding: 8px;
-  font-size: 14px;
+  padding: 12px;
+  font-size: 16px;
   border: 1px solid #d1d5da;
   border-radius: 4px;
   background-color: #fafbfc;
@@ -85,28 +89,26 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
 }
 
-
 .login-button {
   width: 100%;
-  padding: 10px;
-  font-size: 14px;
+  padding: 14px;
+  font-size: 16px;
   color: #fff;
   background-color: #ff2600;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .login-button:hover {
-  background-color: #218838;
+  background-color: #d11a00;
 }
 
-
 .forgot-password {
-  font-size: 12px;
-  margin-top: 10px;
+  font-size: 14px;
+  margin-top: 15px;
 }
 
 .forgot-password a {
@@ -119,52 +121,61 @@ input:focus {
 }
 
 
-/*SignIn*/
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-}
+
+/*SignIn*/
 
 
 .signin-wrapper {
-  text-align: center;
-  margin-top: 50px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 1200px; 
 }
 
+.signin-logo {
+  width: 100px;
+  height: auto;
+  position: absolute;
+  top: -50px; 
+  z-index: 1;
+}
 
 .signin-logo {
-  width: 100px; 
+  width: 100px;
   height: auto;
-  margin-bottom: 20px; 
+  position: absolute;
+  top: -50px; 
+  z-index: 1;
 }
 
 
 .signin-container {
   width: 100%;
-  max-width: 340px;
-  margin: 0 auto; 
-  padding: 20px;
+  max-width: 800px; 
+  padding: 60px 80px; 
   border: 1px solid #d1d5da;
-  border-radius: 6px;
-  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
-  background-color: #ffffff; 
+  border-radius: 8px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: #c48959;
+  text-align: center;
+  margin-top: 60px; 
+  box-sizing: border-box;
 }
 
-
 .signin-title {
-  font-size: 24px;
-  font-weight: 400;
+  font-size: 2rem;
+  font-weight: 600;
   color: #24292e;
   margin-bottom: 20px;
 }
 
-
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-align: left;
+  width: 100%;
 }
 
 label {
@@ -174,43 +185,41 @@ label {
   margin-bottom: 5px;
 }
 
-input, select {
+input {
   width: 100%;
-  padding: 8px;
-  font-size: 14px;
+  padding: 12px;
+  font-size: 16px;
   border: 1px solid #d1d5da;
   border-radius: 4px;
   background-color: #fafbfc;
   outline: none;
 }
 
-input:focus, select:focus {
+input:focus {
   border-color: #0366d6;
   box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
 }
 
-
 .signin-button {
   width: 100%;
-  padding: 10px;
-  font-size: 14px;
+  padding: 14px;
+  font-size: 16px;
   color: #fff;
   background-color: #ff2600;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .signin-button:hover {
-  background-color: #218838;
+  background-color: #d11a00;
 }
 
-
 .signin-footer {
-  margin-top: 10px;
-  font-size: 12px;
+  font-size: 14px;
+  margin-top: 15px;
 }
 
 .signin-footer a {
