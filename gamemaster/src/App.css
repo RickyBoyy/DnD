@@ -15,263 +15,211 @@ body {
   height: 40vmin;
   pointer-events: none;
 }
-/*Login*/
 
-#LoginBody {
+
+/* Login */
+* {
   margin: 0;
-}
-#LoginBody * {
+  padding: 0;
   box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
-.main-login {
-  width: 100vw;
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: -1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+.login-wrapper {
+  text-align: center; 
 }
 
-.left-login {
-  width: 50vw;
-  height: 50vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+
+.login-logo {
+  width: 80px; 
+  height: auto;
+  margin-bottom: 20px; 
 }
 
-.left-login > h1 {
-  font-size: 3vw;
-  margin-top: 30px;
-  color: white;
-}
 
-.left-login-image {
-  width: 35vw;
-}
-
-.right-login {
-  width: 50vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.card-login {
-  width: 60%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  padding: 30px 35px;
-  background: #652ec7;
-  border-radius: 20px;
-  box-shadow: 0px 10px 40px #00000056;
-}
-
-.card-login > h1 {
-  color: white;
-  font-weight: 800;
-  margin: 0;
-}
-
-.textfield-login {
+.login-container {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  margin: 10px 0px;
+  max-width: 340px;
+  margin: 0 auto; 
+  padding: 20px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
+
 }
 
-.textfield-login > input {
+
+.login-title {
+  font-size: 2.5rem; 
+  font-weight: 600;
+  color: #24292e;
+  margin-bottom: 20px;
+}
+
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  color: #24292e;
+  margin-bottom: 5px;
+}
+
+input {
   width: 100%;
-  border: none;
-  border-radius: 10px;
-  padding: 15px;
-  background: #201b2c;
-  color: azure;
-  font-size: 12pt;
-  box-shadow: 0px 10px 40px #00000056;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  background-color: #fafbfc;
   outline: none;
-  box-sizing: border-box;
 }
 
-.textfield-login > label {
-  color: azure;
-  margin-bottom: 10px;
+input:focus {
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
 }
 
-.textfield-login > input::placeholder {
-  color: white;
-}
 
-.btn-login {
+.login-button {
   width: 100%;
-  padding: 16px 0px;
-  margin: 25px;
+  padding: 10px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #ff2600;
   border: none;
-  text-transform: uppercase;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: azure;
-  background: darkslateblue;
+  border-radius: 6px;
   cursor: pointer;
-  box-shadow: 0px 10px 40px -12px darkslateblue;
+  font-weight: 600;
+  margin-top: 10px;
 }
 
-.btn-login:hover {
-  color: #aa3bfc;
+.login-button:hover {
+  background-color: #218838;
 }
 
-.reference_login {
-  margin-top: 20px;
-  text-align: center;
-  color: azure;
-}
-.reference_login p {
-  margin: 0;
+
+.forgot-password {
+  font-size: 12px;
+  margin-top: 10px;
 }
 
-.reference_login a {
-  color: azure;
+.forgot-password a {
+  color: #0366d6;
   text-decoration: none;
+}
+
+.forgot-password a:hover {
   text-decoration: underline;
 }
+
 
 /*SignIn*/
 
-#Registerbody {
+* {
   margin: 0;
-}
-#Registerbody * {
+  padding: 0;
   box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
-.main_register {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.left_register {
-  width: 50vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-.card_register {
-  width: 60%;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  padding: 30px 35px;
-  background: #652ec7;
-  border-radius: 20px;
-  box-shadow: 0px 10px 40px #00000056;
-  margin-bottom: 50px;
-  margin-top: 30px;
-}
-.card_register > h1 {
-  color: white;
-  font-weight: 800;
-  margin: 0;
-}
-.textfield_register_username,
-.textfield_email,
-.textfield_displayname,
-.textfield_register_password,
-.textfield_confirm_password {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  margin: 10px 0px;
-}
-.textfield_register_username > input,
-.textfield_email > input,
-.textfield_displayname > input,
-.textfield_register_password > input,
-.textfield_confirm_password > input {
-  width: 100%;
-  border: none;
-  border-radius: 10px;
-  padding: 15px;
-  background: #201b2c;
-  color: azure;
-  font-size: 12pt;
-  box-shadow: 0px 10px 40px #00000056;
-  outline: none;
-  box-sizing: border-box;
-}
-.textfield_register_username > label,
-.textfield_email > label,
-.textfield_displayname > label,
-.textfield_register_password > label,
-.textfield_confirm_password > label {
-  color: azure;
-  margin-bottom: 10px;
-}
-.textfield_register_username > input::placeholder,
-.textfield_email > input::placeholder,
-.textfield_displayname > input::placeholder,
-.textfield_register_password > input::placeholder,
-.textfield_confirm_password > input::placeholder {
-  color: white;
-}
-.btn_register {
-  width: 100%;
-  padding: 16px 0px;
-  margin: 10px 0px;
-  border: none;
-  text-transform: uppercase;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: azure;
-  background: darkslateblue;
-  cursor: pointer;
-  box-shadow: 0px 10px 40px -12px darkslateblue;
-}
-.btn_register:hover {
-  color: #aa3bfc;
-}
-.reference_signin {
-  margin-top: 20px;
+
+
+.signin-wrapper {
   text-align: center;
-  color: azure;
+  margin-top: 50px; 
 }
-.reference_signin p {
-  margin: 0;
+
+
+.signin-logo {
+  width: 100px; 
+  height: auto;
+  margin-bottom: 20px; 
 }
-.reference_signin a {
-  color: azure;
+
+
+.signin-container {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto; 
+  padding: 20px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
+  background-color: #ffffff; 
+}
+
+
+.signin-title {
+  font-size: 24px;
+  font-weight: 400;
+  color: #24292e;
+  margin-bottom: 20px;
+}
+
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  color: #24292e;
+  margin-bottom: 5px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  background-color: #fafbfc;
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
+}
+
+
+.signin-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #ff2600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.signin-button:hover {
+  background-color: #218838;
+}
+
+
+.signin-footer {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.signin-footer a {
+  color: #0366d6;
   text-decoration: none;
+}
+
+.signin-footer a:hover {
   text-decoration: underline;
-}
-.right_register {
-  margin-right: 50px;
-  width: 50vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.right_register > h1 {
-  font-size: 3vw;
-  color: white;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -419,7 +367,6 @@ body {
   font-size: 2.5rem;
   justify-content: center;
   cursor: default;
-  /user-select: none;
   display: inline-block;
   padding: 15px;
   transform: scale(1.2);
