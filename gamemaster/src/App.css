@@ -578,7 +578,8 @@ button.submit-btn:hover {
 }
 /*Game Chat*/
 :root {
-  --text-color: #ffffff;
+  --text-color: #000000;
+  --input-color: #ffffff;
   --icon-color: #acacbe;
   --icon-hover-bg: #5b5e71;
   --placeholder-color: #cccccc;
@@ -587,8 +588,7 @@ button.submit-btn:hover {
   --outgoing-chat-border: #343541;
   --incoming-chat-border: #444654;
 }
-#game_id {
-  background: var(--outgoing-chat-bg);
+#GameId {
 }
 .chat-container .chat {
   padding: 25px 10px;
@@ -596,14 +596,7 @@ button.submit-btn:hover {
   justify-content: center;
   color: var(--text-color);
 }
-.chat-container .chat.outgoing {
-  background-color: var(--outgoing-chat-bg);
-  border: 1px solid var(--outgoing-chat-border);
-}
-.chat-container .chat.incoming {
-  background-color: var(--incoming-chat-bg);
-  border: 1px solid var(--incoming-chat-border);
-}
+
 .chat .chat-content {
   display: flex;
   align-items: flex-start;
@@ -666,4 +659,62 @@ span.material-symbols-rounded {
   44% {
     opacity: 0.2;
   }
+}
+/*Typing Container Styling*/
+
+.typing-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  padding: 20px 10px;
+
+  justify-content: center;
+}
+
+.typing-container .typing-content {
+  max-width: 950px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.typing-content .typing-textarea {
+  width: 100%;
+  display: flex;
+  position: relative;
+}
+.typing-textarea textarea {
+  width: 100%;
+  height: 55px;
+  border: none;
+  resize: none;
+  font-size: 1rem;
+  padding: 15px 45px 15px 20px;
+  border-radius: 4px;
+  color: var(--input-color);
+  background: var(--input-color);
+  outline: 1px solid var(--incoming-chat-border);
+}
+.typing-textarea span {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+.typing-content span {
+  height: 50px;
+  width: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--icon-color);
+}
+.typing-controls {
+  display: flex;
+}
+.typing-controls span {
+  margin-left: 7px;
+  font-size: 1.4rem;
+  border-radius: 4px;
+  background: var(--incoming-chat-bg);
+  border: 1px solid var(--incoming-chat-border);
 }
