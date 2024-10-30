@@ -7,8 +7,9 @@ const Game = () => {
       <Helmet>
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&text=delete,send,content_copy"
         />
+        <script src="scripts/chat.js" defer></script>
       </Helmet>
 
       <div id="GameId">
@@ -29,6 +30,18 @@ const Game = () => {
             <div className="chat-content">
               <div className="chat-details">
                 <img src="" alt="logo-img" />
+                <p>
+                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                  Maiores, nemo.
+                </p>
+              </div>
+              <span className="material-symbols-rounded">content_copy</span>
+            </div>
+          </div>
+          <div className="chat incoming">
+            <div className="chat-content">
+              <div className="chat-details">
+                <img src="" alt="logo-img" />
                 <div className="typing-animation">
                   <div
                     className="typing-dot"
@@ -44,18 +57,20 @@ const Game = () => {
                   ></div>
                 </div>
               </div>
-              <span className="material-symbols-outlined">content_copy</span>
+              <span className="material-symbols-rounded">content_copy</span>
             </div>
           </div>
         </div>
+
         <div className="typing-container">
           <div className="typing-content">
             <div className="typing-textarea">
               <textarea
                 id="chat-input"
                 placeholder="Enter prompt here!!"
+                required
               ></textarea>
-              <span id="send_btn" className="material-symbols-outlined">
+              <span id="send_btn" className="material-symbols-rounded">
                 send
               </span>
             </div>
