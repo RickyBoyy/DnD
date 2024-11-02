@@ -3,7 +3,7 @@
 
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
-  let typingChatDiv = null; // To store the typing animation element
+  let typingChatDiv = null;
   const API_KEY =
     "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";
 
@@ -80,7 +80,7 @@
       createChatElement(userText, "outgoing");
       chatInput.value = "";
       showTypingAnimation();
-      getChatResponse(userText); // Pass user input to getChatResponse
+      getChatResponse(userText);
     }
   };
 
