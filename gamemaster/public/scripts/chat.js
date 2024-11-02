@@ -3,11 +3,50 @@
 
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
+  let typingChatDiv = null; // To store the typing animation element
+  const API_KEY =
+    "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";
 
   if (!chatInput || !sendButton) {
     console.error("Chat input or send button not found.");
     return;
   }
+
+  const getChatResponse = async (userText) => {
+    const API_URL = "https://api.openai.com/v1/completions";
+
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userText }],
+        max_tokens: 100,
+        temperature: 0.2,
+      }),
+    };
+
+    try {
+      const response = await fetch(API_URL, requestOptions);
+      const data = await response.json();
+
+      console.log("API Response:", data);
+
+      if (response.ok && data.choices && data.choices.length > 0) {
+        const reply = data.choices[0].text.trim();
+        createChatElement(reply, "incoming");
+      } else {
+        console.error("Error in response data:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching chat response:", error);
+    } finally {
+      hideTypingAnimation();
+    }
+  };
 
   const createChatElement = (message, className) => {
     const chatDiv = document.createElement("div");
@@ -41,11 +80,14 @@
       createChatElement(userText, "outgoing");
       chatInput.value = "";
       showTypingAnimation();
+      getChatResponse(userText); // Pass user input to getChatResponse
     }
   };
 
   const showTypingAnimation = () => {
-    const typingChatDiv = document.createElement("div");
+    if (typingChatDiv) return;
+
+    typingChatDiv = document.createElement("div");
     typingChatDiv.classList.add("chat", "incoming");
 
     const chatContent = document.createElement("div");
@@ -75,10 +117,13 @@
 
     const chatContainer = document.querySelector(".chat-container");
     chatContainer.appendChild(typingChatDiv);
+  };
 
-    setTimeout(() => {
-      chatContainer.removeChild(typingChatDiv);
-    }, 2000);
+  const hideTypingAnimation = () => {
+    if (typingChatDiv) {
+      typingChatDiv.remove();
+      typingChatDiv = null;
+    }
   };
 
   sendButton.addEventListener("click", handleOutgoingChat);
