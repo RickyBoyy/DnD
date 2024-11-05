@@ -30,27 +30,27 @@ body {
   align-items: center;
   position: relative;
   width: 100%; 
-  max-width: 1200px; /* Limita o tamanho máximo para telas grandes */
+  max-width: 1200px; 
 }
 
 .login-logo {
   width: 100px;
   height: auto;
   position: absolute;
-  top: -50px; /* Coloca o logo acima do card */
+  top: -50px; 
   z-index: 1;
 }
 
 .login-container {
   width: 100%;
-  max-width: 800px; /* Limita o tamanho do card para que não ocupe tudo */
-  padding: 60px 80px; /* Aumenta o espaçamento horizontal e vertical */
+  max-width: 800px; 
+  padding: 60px 80px; 
   border: 1px solid #d1d5da;
   border-radius: 8px;
   box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
   background-color: hsl(29, 42%, 57%);
   text-align: center;
-  margin-top: 60px; /* Espaço para o logo acima do card */
+  margin-top: 60px; 
   box-sizing: border-box;
 }
 
@@ -603,4 +603,81 @@ button.submit-btn:hover {
 
 .start-game-btn:hover {
   background-color: darkred;
+}
+
+
+/* header */
+
+
+.header {
+  width: 100%;
+  background-color: transparent;  
+  color: #fff;
+  position: fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+}
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.logo a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+
+
+.profile-container {
+  display: flex;
+  align-items: center;
+  
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; 
+  object-fit: cover;
+  border: 2px solid #ccc; 
+  transition: transform 0.2s;
+  margin: 0; 
+}
+
+.profile-pic:hover {
+  transform: scale(1.1);
+}
+
+
+
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    display: none; 
+  }
+
+  .nav-links.active {
+    display: flex; 
+    background-color: #333;
+    position: absolute;
+    top: 60px; 
+    left: 0;
+    right: 0;
+    z-index: 999;
+  }
+
+  .profile-container {
+    margin-top: 10px;
+  }
 }

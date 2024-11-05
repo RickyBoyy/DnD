@@ -1,5 +1,4 @@
 import React from "react";
-
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import SignInPage from "./pages/SignInPage";
@@ -14,6 +13,7 @@ function App() {
   return (
     <div className="App">
       <Router>
+        <Header />
         <Routes>
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/login" element={<LoginPage />} />

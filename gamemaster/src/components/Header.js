@@ -1,19 +1,21 @@
-/*import React from "react";
-
+import React from 'react';
+import { Link } from 'react-router-dom';
+import '../App.css'; 
+import profilePicPlaceholder from "../Images/1547006.jpg"; 
 
 const Header = () => {
   return (
-    <header id="site_header">
-      <div className="logo_container">
-        <a className="logo_for_web">
-          <img src={logo} alt="Logo" className="logo"></img>
-        </a>
-      </div>
-      <div className="profile_img">
-        <img src={profile_img} alt="Profile" className="profile_pic"></img>
-      </div>
+    <header className="header">
+      <nav className="navbar">
+        <div className="logo">
+          <Link to="/">Home</Link> 
+        </div>
+        <div className="profile-container">
+          <img src={profilePicPlaceholder} alt="Profile" className="profile-pic" />
+        </div>
+      </nav>
     </header>
   );
 };
 
-export default Header;*/
+export default Header;
