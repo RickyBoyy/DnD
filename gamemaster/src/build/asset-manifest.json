@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.css": "/static/css/main.ae22cbe6.css",
+    "main.js": "/static/js/main.ffdbb647.js",
+    "static/js/453.a0f2152c.chunk.js": "/static/js/453.a0f2152c.chunk.js",
+    "static/media/grunge-vintage-old-paper-background.jpg": "/static/media/grunge-vintage-old-paper-background.3d7faa2463916e4fc3c6.jpg",
+    "static/media/player_img.jpg": "/static/media/player_img.8e522a3ecba96ea73273.jpg",
+    "static/media/Sally-forth______.jpg": "/static/media/Sally-forth______.73130dc316f2e85e4ae9.jpg",
+    "static/media/DragonHunter.otf": "/static/media/DragonHunter.bfd266123930ca81297a.otf",
+    "index.html": "/index.html",
+    "main.ae22cbe6.css.map": "/static/css/main.ae22cbe6.css.map",
+    "main.ffdbb647.js.map": "/static/js/main.ffdbb647.js.map",
+    "453.a0f2152c.chunk.js.map": "/static/js/453.a0f2152c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ae22cbe6.css",
+    "static/js/main.ffdbb647.js"
+  ]
+}
