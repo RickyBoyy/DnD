@@ -4,7 +4,8 @@
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
   let typingChatDiv = null;
-  const API_KEY = process.env.API_KEY;
+  const API_KEY =
+    "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";
 
   if (!chatInput || !sendButton) {
     console.error("Chat input or send button not found.");
