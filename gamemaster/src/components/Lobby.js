@@ -39,8 +39,8 @@ const Lobby = () => {
   return (
     <div id="LobbyPage">
       <div className="lobby-container">
-        <h1>D&D Game Lobby</h1>
-        <div className="game-code">Game Code: {gameCode}</div>
+        <h1 className = "lobby-title">D&D Game Lobby</h1>
+        <div className = "game-code">Game Code: {gameCode}</div>
 
         <div className="player-slots">
           {[...Array(maxPlayers)].map((_, index) => (
@@ -55,7 +55,7 @@ const Lobby = () => {
           ))}
         </div>
 
-        <button onClick={startGame}>Start Game</button>
+        <button className="start-game-btn" onClick={startGame}>Start Game</button>
       </div>
     </div>
   );

@@ -477,7 +477,15 @@ button.submit-btn:hover {
 .lobby-title {
   color: darkred;
   font-family: "DragonHunter", sans-serif;
-  font-size: 2rem;
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.game-code{
+  color: darkred;
+  font-family: "DragonHunter", sans-serif;
+  font-size: 1rem;
+  margin-bottom: 30px;
 }
 
 .main_choice_appearance {
@@ -521,8 +529,6 @@ button.submit-btn:hover {
   bottom: -15px;
   right: -15px;
 }
-
-
 
 /* Remaining styling for player slots, game code, and button */
 .game-code-section {
@@ -573,28 +579,12 @@ button.submit-btn:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+ 
 }
 
 .start-game-btn:hover {
   background-color: darkred;
 }
-
-.player-slot.host {
-  background-color: red;
-  color: white;
-}
-
-.player-slot.filled {
-  background-color: lightgray;
-}
-
-.player-slot.empty {
-  background-color: white;
-}
-
-
-
-
 /*Game Chat*/
 :root {
   --text-color: #000000;
