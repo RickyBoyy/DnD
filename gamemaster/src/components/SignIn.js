@@ -1,26 +1,40 @@
 import React, { useState } from 'react';
-import '../App.css'; 
+import axios from 'axios';
+import '../App.css';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [country, setCountry] = useState('');
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    console.log({ email, password, confirmPassword, country });
+  
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+  
+    try {
+      const response = await axios.post('http://localhost:3000/register', { 
+        email, password, country 
+      });
+  
+      setError(null);
+      alert("Registration successful!");
+    } catch (err) {
+      setError("Error registering user. Please try again.");
+    }
   };
+  
 
   return (
     <div className="signin-wrapper">
-      <img 
-          src="URL_DA_IMAGEM_AQUI"
-          alt="Logo"
-          className="signin-logo"
-      />
+      <img src="URL_DA_IMAGEM_AQUI" alt="Logo" className="signin-logo" />
       <div className="signin-container">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSignUp}>
           <div className="form-group">
             <label>Email address</label>
             <input 
@@ -65,13 +79,10 @@ const SignIn = () => {
               <option value="ES">Spain</option>
               <option value="FR">France</option>
               <option value="DE">Germany</option>
-              {}
             </select>
           </div>
+          {error && <div className="error">{error}</div>}
           <button type="submit" className="signin-button">Sign in</button>
-          <div className="signin-footer">
-            <p><a href="/password-reset">Forgot password?</a></p>
-          </div>
         </form>
       </div>
     </div>

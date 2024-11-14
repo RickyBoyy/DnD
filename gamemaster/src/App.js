@@ -20,7 +20,7 @@ function App() {
           <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
           <Route path="/lobby" element={<LobbyPage />} />
           <Route path="/createcharacter" element={<CreateCharacterPage />} />
-          <Route path="/game" element={<GamePage />} />
+          <Route path="/" element={<GamePage />} />
         </Routes>
       </Router>
     </div>
