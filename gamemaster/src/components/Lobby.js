@@ -5,15 +5,14 @@ import "../App.css";
 
 const Lobby = () => {
   const { gameCode } = useParams();
-  const [players, setPlayers] = useState([{ id: "hostId", name: "Host" }]); // Initialize with an object
+  const [players, setPlayers] = useState([{ id: "hostId", name: "Host" }]);
   const maxPlayers = 6;
 
   useEffect(() => {
-    console.log("Attempting to join lobby with game code:", gameCode);
     socket.emit("joinLobbyRoom", gameCode);
   
     socket.on("playerJoined", (updatedPlayers) => {
-      setPlayers(updatedPlayers);
+      setPlayers(updatedPlayers); // Update players on receiving event
     });
   
     socket.on("lobbyError", (message) => {
@@ -25,6 +24,7 @@ const Lobby = () => {
       socket.off("lobbyError");
     };
   }, [gameCode]);
+  
   
 
   const startGame = () => {
@@ -39,8 +39,8 @@ const Lobby = () => {
   return (
     <div id="LobbyPage">
       <div className="lobby-container">
-        <h1 className = "lobby-title">D&D Game Lobby</h1>
-        <div className = "game-code">Game Code: {gameCode}</div>
+        <h1 className="lobby-title">D&D Game Lobby</h1>
+        <div className="game-code">Game Code: {gameCode}</div>
 
         <div className="player-slots">
           {[...Array(maxPlayers)].map((_, index) => (

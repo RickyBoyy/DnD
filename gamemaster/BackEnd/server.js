@@ -29,32 +29,50 @@ io.on("connection", (socket) => {
 
   socket.on("createLobby", (callback) => {
     const gameCode = generateGameCode();
-    lobbies[gameCode] = { players: ["Host"], hostId: socket.id };
-    console.log("Lobby created with game code:", gameCode); // Log when a new lobby is created
+    // Initialize the lobby with no players; only store the host's socket ID for reference
+    lobbies[gameCode] = { players: [], hostId: socket.id };
+    console.log("Lobby created with game code:", gameCode);
+    
+    // Host joins their own lobby after creation
     socket.join(gameCode);
     callback(gameCode);
   });
   
   socket.on("joinLobbyRoom", (gameCode) => {
     if (!lobbies[gameCode]) {
-      console.log("Lobby does not exist:", gameCode); // Log when lobby doesn't exist
+      console.log("Lobby does not exist:", gameCode);
       socket.emit("lobbyError", "Lobby does not exist.");
       return;
     }
   
     const lobby = lobbies[gameCode];
   
-    // Check if the player is already in the lobby
-    if (!lobby.players.includes(socket.id) && lobby.players.length < 6) {
-      const playerCount = lobby.players.length + 1;
-      lobby.players.push(`Player ${playerCount}`);
-      io.to(gameCode).emit("playerJoined", lobby.players);
-      socket.join(gameCode);
-    } else {
-      console.log("Lobby is full or player already in the lobby:", gameCode); // Log when lobby is full
-      socket.emit("lobbyError", "Lobby is full or player already in the lobby.");
+    // Check if the player is already in the lobby or if the lobby is full
+    const isPlayerInLobby = lobby.players.some((player) => player.id === socket.id);
+    if (isPlayerInLobby) {
+    
+      return;
+    } else if (lobby.players.length >= 6) {
+      console.log("Lobby is full:", gameCode);
+      socket.emit("lobbyError", "Lobby is full.");
+      return;
     }
+  
+    // Add the player to the lobby
+    const playerName = socket.id === lobby.hostId ? "Host" : `Player ${lobby.players.length + 1}`;
+    const newPlayer = { id: socket.id, name: playerName };
+    lobby.players.push(newPlayer);
+    socket.join(gameCode);
+  
+    // Send the full list of players to the joining client only
+    socket.emit("playerJoined", lobby.players);
+  
+    // Broadcast updated player list to everyone else in the room
+    socket.to(gameCode).emit("playerJoined", lobby.players);
   });
+  
+  
+  
   
 
   socket.on("disconnect", () => {

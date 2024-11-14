@@ -4,7 +4,7 @@ FROM node:16 AS build-stage
 WORKDIR /app
 
 # Copy the frontend package files and install dependencies
-COPY ./src/package*.json ./
+COPY package*.json ./
 RUN npm install
 
 # Copy frontend source code

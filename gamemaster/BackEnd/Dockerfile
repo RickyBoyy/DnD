@@ -4,7 +4,7 @@ FROM node:16
 WORKDIR /app
 
 # Copy the package.json and package-lock.json (if exists) from the src folder
-COPY ./src/package*.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
