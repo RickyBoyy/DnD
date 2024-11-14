@@ -59,7 +59,7 @@
     chatDetails.classList.add("chat-details");
 
     const userImg = document.createElement("img");
-    userImg.src = "";
+    userImg.src = "LogoOnly.jpg";
     userImg.alt = "user-img";
 
     const messagePara = document.createElement("p");
