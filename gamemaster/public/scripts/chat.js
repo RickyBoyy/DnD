@@ -4,8 +4,7 @@
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
   let typingChatDiv = null;
-  const API_KEY =
-    "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";
+  const APIKEY = "M3VDybjWAuMm4LE4Kbg0I5zRayVvHYH2iZe8L07N";
 
   if (!chatInput || !sendButton) {
     console.error("Chat input or send button not found.");
@@ -13,17 +12,17 @@
   }
 
   const getChatResponse = async (userText) => {
-    const API_URL = "https://api.openai.com/v1/completions";
+    const API_URL = "https://api.cohere.ai/v1/generate";
 
     const requestOptions = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${APIKEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userText }],
+        model: "command-xlarge-nightly",
+        prompt: userText,
         max_tokens: 100,
         temperature: 0.2,
       }),
@@ -35,11 +34,14 @@
 
       console.log("API Response:", data);
 
-      if (response.ok && data.choices && data.choices.length > 0) {
-        const reply = data.choices[0].text.trim();
+      if (response.ok && data.generations && data.generations.length > 0) {
+        const reply = data.generations[0].text.trim(); // Extract the first generation's text
         createChatElement(reply, "incoming");
       } else {
-        console.error("Error in response data:", data);
+        console.error(
+          "Error in response data:",
+          data.message || "Unexpected structure"
+        );
       }
     } catch (error) {
       console.error("Error fetching chat response:", error);
@@ -97,7 +99,7 @@
     chatDetails.classList.add("chat-details");
 
     const logoImg = document.createElement("img");
-    logoImg.src = "LogoOnly.jpg";
+    logoImg.src = "LogoOnly.png";
     logoImg.alt = "logo-img";
 
     const typingAnimationDiv = document.createElement("div");

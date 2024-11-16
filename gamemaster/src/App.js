@@ -27,10 +27,10 @@ function App() {
         <Routes>
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<HostOrPlayerPage />} />
+          <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
           <Route path="/lobby/:gameCode" element={<LobbyPage />} />
           <Route path="/createcharacter" element={<CreateCharacterPage />} />
-          <Route path="/game" element={<GamePage />} />
+          <Route path="/" element={<GamePage />} />
         </Routes>
       </Router>
     </div>
