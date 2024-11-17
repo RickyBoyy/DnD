@@ -1,8 +1,29 @@
 import React, { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
+import socket from "../socket"; // Use common socket instance
 import "../App.css";
 
 const HostOrPlayer = () => {
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [playerCode, setPlayerCode] = useState("");
+  const navigate = useNavigate();
+
+  const handleHostClick = () => {
+    socket.emit("createLobby", (gameCode) => {
+      navigate(`/lobby/${gameCode}`);
+    });
+  };
+
+  const handlePlayerClick = () => {
+    setShowCodeInput(true);
+  };
+
+  const handleCodeSubmit = (e) => {
+    e.preventDefault();
+    navigate(`/lobby/${playerCode}`);
+    setShowCodeInput(false);
+  };
+
   return (
     <div id="HostOrPlayer">
       <div className="main_choice_appearance">
@@ -11,31 +32,39 @@ const HostOrPlayer = () => {
         </div>
         <div className="choices_available">
           <div className="left_choice">
-            <form className="card_host">
-              <div className="choice_title">
-                <h2>Host</h2>
-              </div>
-
-              <p>
-                Host a Dungeons and Dragons game for your friends using a
-                shareable private key to start your online session and start an
-                adventure
-              </p>
-            </form>
+            <div className="card_host" onClick={handleHostClick}>
+              <h2>Host</h2>
+              <p>Host a Dungeons and Dragons game...</p>
+            </div>
           </div>
           <div className="right_choice">
-            <form className="card_player">
-              <div className="choice_title_player">
-                <h2>Player</h2>
-              </div>
-              <p>
-                Join a Dungeons and Dragons game, use a key provided by a host
-                and participate in a adventure
-              </p>
-            </form>
+            <div className="card_player" onClick={handlePlayerClick}>
+              <h2>Player</h2>
+              <p>Join a Dungeons and Dragons game...</p>
+            </div>
           </div>
         </div>
       </div>
+
+      {showCodeInput && (
+        <div className="code_input_overlay">
+          <div className="code_input_window">
+            <h3>Enter Lobby Code</h3>
+            <form onSubmit={handleCodeSubmit}>
+              <input
+                type="text"
+                value={playerCode}
+                onChange={(e) => setPlayerCode(e.target.value)}
+                placeholder="Enter code here"
+              />
+              <button type="submit">Submit</button>
+              <button type="button" onClick={() => setShowCodeInput(false)}>
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

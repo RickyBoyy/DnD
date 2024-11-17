@@ -1,47 +1,56 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import socket from "../socket";
 import "../App.css";
 
 const Lobby = () => {
-  const [gameCode, setGameCode] = useState("");
-  const [players, setPlayers] = useState(["Host"]); // Host is automatically added
+  const { gameCode } = useParams();
+  const [players, setPlayers] = useState([{ id: "hostId", name: "Host" }]);
   const maxPlayers = 6;
 
   useEffect(() => {
-    // Generate a random game code on component mount
-    setGameCode(generateGameCode());
-  }, []);
-
-  const generateGameCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-  };
+    socket.emit("joinLobbyRoom", gameCode);
+  
+    socket.on("playerJoined", (updatedPlayers) => {
+      setPlayers(updatedPlayers); // Update players on receiving event
+    });
+  
+    socket.on("lobbyError", (message) => {
+      alert(message);
+    });
+  
+    return () => {
+      socket.off("playerJoined");
+      socket.off("lobbyError");
+    };
+  }, [gameCode]);
+  
+  
 
   const startGame = () => {
     if (players.length > 1) {
       alert("Game Started!");
+      socket.emit("startGame", gameCode);
     } else {
-      alert("You need at least 2 players to start the game.");
+      alert("At least 2 players are needed to start.");
     }
   };
 
   return (
     <div id="LobbyPage">
       <div className="lobby-container">
-        <div className="lobby-title">
-          <h1>D&D Game Lobby</h1>
-        </div>
-
-        <div className="game-code-section">
-          <span className="game-code-label">Game Code:</span>
-          <span className="game-code">{gameCode}</span>
-        </div>
+        <h1 className="lobby-title">D&D Game Lobby</h1>
+        <div className="game-code">Game Code: {gameCode}</div>
 
         <div className="player-slots">
           {[...Array(maxPlayers)].map((_, index) => (
             <div
               key={index}
-              className={`player-slot ${index < players.length ? "filled" : "empty"}`}
+              className={`player-slot ${
+                index < players.length ? (index === 0 ? "host" : "filled") : "empty"
+              }`}
             >
-              {index < players.length ? players[index] : "Available"}
+              {index < players.length ? players[index].name : "Available"}
             </div>
           ))}
         </div>
