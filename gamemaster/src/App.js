@@ -1,7 +1,7 @@
-import React from "react";
-
+import React, { useEffect } from "react";
+import socket from "./socket";
 import "./App.css";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import SignInPage from "./pages/SignInPage";
 import LoginPage from "./pages/LoginPage";
 import HostOrPlayerPage from "./pages/HostOrPlayerPage";
@@ -24,18 +24,34 @@ function App() {
   return (
     <div className="App">
       <Router>
-        <Header />
-        <Routes>
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
-          <Route path="/lobby/:gameCode" element={<LobbyPage />} />
-          <Route path="/createcharacter" element={<CreateCharacterPage />} />
-          <Route path="/" element={<GamePage />} />
-        </Routes>
+        <Layout />
       </Router>
     </div>
   );
 }
+
+const Layout = () => {
+  const location = useLocation();
+
+ 
+  const pagesWithoutHeader = ["/signin", "/login", "/"];
+
+  const showHeader = !pagesWithoutHeader.includes(location.pathname);
+
+  return (
+    <>
+      
+      {showHeader && <Header />}
+      <Routes>
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
+        <Route path="/lobby/:gameCode" element={<LobbyPage />} />
+        <Route path="/createcharacter" element={<CreateCharacterPage />} />
+        <Route path="/" element={<GamePage />} />
+      </Routes>
+    </>
+  );
+};
 
 export default App;
