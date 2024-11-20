@@ -29,6 +29,15 @@
 
     chatDetails.appendChild(userImg);
     chatDetails.appendChild(messagePara);
+    if (className === "incoming") {
+      const copyButton = document.createElement("button");
+      copyButton.textContent = "content_copy";
+      copyButton.classList.add("copy-btn");
+
+      copyButton.addEventListener("click", () => copyResponse(copyButton));
+
+      chatDetails.appendChild(copyButton);
+    }
     chatContent.appendChild(chatDetails);
     chatDiv.appendChild(chatContent);
 
@@ -47,9 +56,20 @@
   };
   const copyResponse = (copyBtn) => {
     const responseTextElement = copyBtn.parentElement.querySelector("p");
-    navigator.clipboard.writeText(responseTextElement, textContent);
-    copyBtn.textContent = "done";
-    setTimeout(() => (copyBtn.textContent = "content_copy"), 1000);
+    if (responseTextElement) {
+      const textToCopy = responseTextElement.textContent;
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          copyBtn.textContent = "done";
+          setTimeout(() => {
+            copyBtn.textContent = "content_copy";
+          }, 1000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+        });
+    }
   };
 
   const showTypingAnimation = () => {
