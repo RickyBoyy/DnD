@@ -14,7 +14,7 @@
     "express": "^4.21.1",
     "gamemaster": "file:",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.11.3",
+    "mysql2": "^3.11.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
