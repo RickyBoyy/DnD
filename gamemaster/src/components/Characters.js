@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import dwarfImage from "../assets/dwarf_bard.jpeg";
 
 const Characters = () => {
+  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+
+  const toggleCollapsible = () => {
+    setIsCollapsibleOpen(!isCollapsibleOpen);
+  };
+
   return (
     <div className="container">
       <div className="title_characters">
@@ -16,7 +22,6 @@ const Characters = () => {
               style={{
                 width: "150px",
                 height: "150px",
-
                 marginRight: "10px",
               }}
             />
@@ -41,9 +46,28 @@ const Characters = () => {
             </div>
           </div>
         </div>
-        <button type="button" class="collapsible">
-          Open Collapsible
+        <button
+          type="button"
+          className="collapsible"
+          onClick={toggleCollapsible}
+        >
+          {isCollapsibleOpen ? "Close Collapsible" : "Open Collapsible"}
         </button>
+        <div
+          className="collapsible_content"
+          style={{
+            maxHeight: isCollapsibleOpen ? "300px" : "0",
+            overflow: "hidden",
+            transition: "max-height 0.3s ease",
+          }}
+        >
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae ad ex
+            illum, dolores fugiat unde asperiores excepturi suscipit
+            repellendus, facilis voluptate, natus necessitatibus explicabo
+            fugit! Ullam quae odio velit voluptatum!
+          </p>
+        </div>
       </div>
     </div>
   );
