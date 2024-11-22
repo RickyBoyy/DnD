@@ -72,3 +72,66 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Error logging in", error });
   }
 };
+
+exports.createCharacter = async (req, res) => {
+  const {
+    name,
+    race,
+    class_cr,
+    alignment,
+    strenght,
+    dexterity,
+    constituition,
+    intelligence,
+    wisdom,
+    charisma,
+    ch_background,
+  } = req.body;
+
+  // Extract the token from the Authorization header
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Authorization token is required" });
+  }
+
+  try {
+    // Verify and decode the token to get the user ID
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const [result] = await pool.execute(
+      `INSERT INTO character_player 
+      (character_name, character_race, character_class, character_alignment, character_strength, character_dexterity, 
+      character_constituition, character_intelligence, character_wisdom, character_charisma, 
+      character_background, character_user_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        race,
+        class_cr,
+        alignment,
+        strenght,
+        dexterity,
+        constituition,
+        intelligence,
+        wisdom,
+        charisma,
+        ch_background,
+        userId, 
+      ]
+    );
+
+    res.status(201).json({ message: "Character created successfully", characterId: result.insertId });
+  } catch (error) {
+    console.error("Error during character creation:", error);
+
+    if (error.name === "JsonWebTokenError") {
+      res.status(401).json({ message: "Invalid token" });
+    } else {
+      res.status(500).json({ message: "Error creating character", error });
+    }
+  }
+};
+
+

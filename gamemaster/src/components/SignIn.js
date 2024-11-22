@@ -3,34 +3,55 @@ import axios from 'axios';
 import '../App.css';
 import logoImage from "../assets/logo.png"; 
 
-
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [country, setCountry] = useState('');
   const [error, setError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+      return `Password must be at least ${minLength} characters long.`;
+    }
+    if (!hasNumber || !hasSpecialChar) {
+      return "Password must contain at least one number or one special character.";
+    }
+    return null;
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-  
+
+    const passwordValidationError = validatePassword(password);
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
+      return;
+    } else {
+      setPasswordError(null);
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-  
+
     try {
       const response = await axios.post('http://localhost:3000/register', { 
         email, password, country 
       });
-  
+
       setError(null);
       alert("Registration successful!");
     } catch (err) {
       setError("Error registering user. Please try again.");
     }
   };
-  
 
   return (
     <div className="signin-wrapper">
@@ -56,6 +77,7 @@ const SignIn = () => {
               onChange={(e) => setPassword(e.target.value)} 
               required 
             />
+            {passwordError && <div className="error">{passwordError}</div>}
           </div>
           <div className="form-group">
             <label>Confirm Password</label>
