@@ -304,6 +304,7 @@ select:focus {
 .card_player h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
+  color:black;
 }
 
 .card_host p,
