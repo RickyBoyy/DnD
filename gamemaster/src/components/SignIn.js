@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css';
+import logoImage from "../assets/logo.png"; 
+
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +34,7 @@ const SignIn = () => {
 
   return (
     <div className="signin-wrapper">
-      <img src="URL_DA_IMAGEM_AQUI" alt="Logo" className="signin-logo" />
+      <img src={logoImage} alt="Logo" className="signin-logo" /> 
       <div className="signin-container">
         <form onSubmit={handleSignUp}>
           <div className="form-group">

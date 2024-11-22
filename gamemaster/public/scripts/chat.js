@@ -4,49 +4,6 @@
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
   let typingChatDiv = null;
-  const API_KEY =
-    "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";
-
-  if (!chatInput || !sendButton) {
-    console.error("Chat input or send button not found.");
-    return;
-  }
-
-  const getChatResponse = async (userText) => {
-    const API_URL = "https://api.openai.com/v1/completions";
-
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userText }],
-        max_tokens: 100,
-        temperature: 0.2,
-      }),
-    };
-
-    try {
-      const response = await fetch(API_URL, requestOptions);
-      const data = await response.json();
-
-      console.log("API Response:", data);
-
-      if (response.ok && data.choices && data.choices.length > 0) {
-        const reply = data.choices[0].text.trim();
-        createChatElement(reply, "incoming");
-      } else {
-        console.error("Error in response data:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching chat response:", error);
-    } finally {
-      hideTypingAnimation();
-    }
-  };
 
   const createChatElement = (message, className) => {
     const chatDiv = document.createElement("div");
@@ -59,14 +16,28 @@
     chatDetails.classList.add("chat-details");
 
     const userImg = document.createElement("img");
-    userImg.src = "";
-    userImg.alt = "user-img";
+    if (className === "outgoing") {
+      userImg.src = "user-image.png";
+      userImg.alt = "user-img";
+    } else if (className === "incoming") {
+      userImg.src = "./logoonly.png";
+      userImg.alt = "logo-img";
+    }
 
     const messagePara = document.createElement("p");
     messagePara.textContent = message;
 
     chatDetails.appendChild(userImg);
     chatDetails.appendChild(messagePara);
+    if (className === "incoming") {
+      const copyButton = document.createElement("button");
+      copyButton.textContent = "content_copy";
+      copyButton.classList.add("copy-btn");
+
+      copyButton.addEventListener("click", () => copyResponse(copyButton));
+
+      chatDetails.appendChild(copyButton);
+    }
     chatContent.appendChild(chatDetails);
     chatDiv.appendChild(chatContent);
 
@@ -83,6 +54,23 @@
       getChatResponse(userText);
     }
   };
+  const copyResponse = (copyBtn) => {
+    const responseTextElement = copyBtn.parentElement.querySelector("p");
+    if (responseTextElement) {
+      const textToCopy = responseTextElement.textContent;
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          copyBtn.textContent = "done";
+          setTimeout(() => {
+            copyBtn.textContent = "content_copy";
+          }, 1000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+        });
+    }
+  };
 
   const showTypingAnimation = () => {
     if (typingChatDiv) return;
@@ -97,7 +85,7 @@
     chatDetails.classList.add("chat-details");
 
     const logoImg = document.createElement("img");
-    logoImg.src = "LogoOnly.jpg";
+    logoImg.src = "./logoonly.png";
     logoImg.alt = "logo-img";
 
     const typingAnimationDiv = document.createElement("div");
