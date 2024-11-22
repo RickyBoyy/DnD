@@ -21,8 +21,8 @@ body {
 }
 
 .login-logo {
-  width: 72px;
-  height: 72px;
+  width: 230px;
+  height: 100px;
   margin-bottom: 20px;
 }
 
@@ -115,8 +115,8 @@ body {
 }
 
 .signin-logo {
-  width: 100px;
-  height: auto;
+  width: 230px;
+  height: 100px;
   margin-bottom: 20px;
 }
 
@@ -203,6 +203,8 @@ select:focus {
     animation: App-logo-spin infinite 20s linear;
   }
 }
+
+
 
 .App-header {
   background-color: #282c34;
@@ -471,9 +473,13 @@ button.submit-btn:hover {
 
 .lobby-title {
   display: flex;
+  justify-content: center; 
+  align-items: center; 
   color: darkred;
   font-family: "DragonHunter", sans-serif;
   font-size: 2rem;
+  text-align: center; 
+  margin-bottom: 30px; 
 }
 
 .main_choice_appearance {
@@ -535,6 +541,8 @@ button.submit-btn:hover {
 .game-code {
   font-size: 2rem;
   font-weight: bold;
+  margin: 20px 0; 
+  text-align: center; 
 }
 
 .player-slots {
@@ -567,6 +575,12 @@ button.submit-btn:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .start-game-btn:hover {
@@ -577,14 +591,11 @@ button.submit-btn:hover {
 
 .header {
   width: 100%;
-  background-color: transparent;
-  color: #fff;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   padding: 10px 20px;
 }
 
@@ -595,8 +606,8 @@ button.submit-btn:hover {
 }
 
 .profile-pic {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #ccc;
@@ -605,7 +616,7 @@ button.submit-btn:hover {
 
 .logo-img {
   width: 250px;
-  height: 80px;
+  height: 90px;
   object-fit: contain;
 }
 

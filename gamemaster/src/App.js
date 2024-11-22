@@ -1,12 +1,7 @@
 import React, { useEffect } from "react";
 import socket from "./socket";
 import "./App.css";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import {BrowserRouter as Router,Route,Routes,useLocation,} from "react-router-dom";
 import SignInPage from "./pages/SignInPage";
 import LoginPage from "./pages/LoginPage";
 import HostOrPlayerPage from "./pages/HostOrPlayerPage";
@@ -37,12 +32,16 @@ function App() {
 const Layout = () => {
   const location = useLocation();
 
-  const pagesWithoutHeader = ["/signin", "/login", "/"];
+  
+  const pagesWithoutHeader = ["/", "/signin", "/login", "/game"];
 
-  const showHeader = !pagesWithoutHeader.includes(location.pathname);
+ 
+  const currentPath = location.pathname.trim().toLowerCase();
+  const showHeader = !pagesWithoutHeader.includes(currentPath);
 
   return (
     <>
+      
       {showHeader && <Header />}
       <Routes>
         <Route path="/signin" element={<SignInPage />} />
@@ -56,5 +55,7 @@ const Layout = () => {
     </>
   );
 };
+
+
 
 export default App;
