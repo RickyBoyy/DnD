@@ -28,7 +28,7 @@ create table character_player (
     character_backstory text,
     character_alignment varchar(50),
     character_level int not null,
-    character_strenght int not null,
+    character_strength int not null,
     character_dexterity int not null,
     charcater_constitution int not null,
     character_inteligence int not null,
