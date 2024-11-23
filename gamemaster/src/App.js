@@ -9,6 +9,8 @@ import Header from "./components/Header";
 import GamePage from "./pages/GamePage";
 import CreateCharacterPage from "./pages/CreateCharacterPage";
 import LobbyPage from "./pages/LobbyPage";
+import ProfilePage from "./pages/ProfilePage";
+import SetUsernamePage from "./pages/SetUsernamePage";
 
 function App() {
   useEffect(() => {
@@ -28,6 +30,8 @@ function App() {
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/set-username" element={<SetUsernamePage />} />
           <Route path="/lobby/:gameCode" element={<LobbyPage />} />
           <Route path="/createcharacter" element={<CreateCharacterPage />} />
           <Route path="/" element={<GamePage />} />
