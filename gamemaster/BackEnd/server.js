@@ -113,11 +113,14 @@ function generateGameCode() {
 // API routes
 app.post("/register", authController.register);
 app.post("/login", authController.login);
+
 app.post("/set-username", authController.setUsername);
 app.get("/profile", authenticate, authController.getProfile);
 
 
 
+
+app.post("/createCharacter", authController.createCharacter);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));

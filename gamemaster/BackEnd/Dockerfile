@@ -1,19 +1,16 @@
-# Use the official Node.js image
 FROM node:16
 
 WORKDIR /app
 
-# Copy the package.json and package-lock.json (if exists) from the src folder
+# Copiar o arquivo de pacotes da raiz
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Instalar apenas as dependências do backend
+RUN npm install --only=prod
 
-# Copy the rest of the backend code from the src folder
-COPY ./src ./
+# Copiar o código do backend
+COPY ./BackEnd ./
 
-# Expose the port
+# Expor a porta e iniciar a aplicação
 EXPOSE 5000
-
-# Start the application
 CMD ["npm", "start"]

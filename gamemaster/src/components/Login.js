@@ -3,6 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
+import React, { useState } from 'react';
+import axios from 'axios';
+import '../App.css';
+import logoImage from "../assets/logo.png";
+
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +39,8 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
+
+      <img src={logoImage} alt="Logo" className="login-logo"  />
       <div className="login-container">
         <form onSubmit={handleLogin}>
           <div className="form-group">

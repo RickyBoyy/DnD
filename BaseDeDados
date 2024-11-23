@@ -28,13 +28,18 @@ create table character_player (
     character_backstory text,
     character_alignment varchar(50),
     character_level int not null,
-    character_stats text,
+    character_strength int not null,
+    character_dexterity int not null,
+    charcater_constitution int not null,
+    character_inteligence int not null,
+    charcater_charisma int not null,
+    charcater_wisdom int not null,
     character_personality varchar(50),
     character_role varchar(50),
     character_status varchar(50),
-	character_player_id int not null,
+	character_user_id int not null,
 	campaign_id int not null,
-    CONSTRAINT character_fk_player FOREIGN KEY (character_player_id) REFERENCES player(player_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT character_fk_user FOREIGN KEY (character_user_id) REFERENCES users(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT campaign_fk_character FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 create table quest (
