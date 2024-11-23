@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error("Error during user registration:", error); // Log the error
+    console.error("Error during user registration:", error);
     if (error.code === "ER_DUP_ENTRY") {
       res.status(400).json({ message: "Email already in use" });
     } else {
@@ -34,6 +34,7 @@ exports.register = async (req, res) => {
     }
   }
 };
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -108,6 +109,7 @@ exports.setUsername = async (req, res) => {
     res.status(500).json({ message: "Error setting username", error });
 
   }
+};
 
 exports.createCharacter = async (req, res) => {
   const {
@@ -123,7 +125,7 @@ exports.createCharacter = async (req, res) => {
     charisma,
     ch_background,
   } = req.body;
-}
+
 
   // Extract the token from the Authorization header
   const token = req.headers.authorization?.split(" ")[1];

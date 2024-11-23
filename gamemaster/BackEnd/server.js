@@ -112,6 +112,7 @@ function generateGameCode() {
 
 // API routes
 app.post("/register", authController.register);
+
 app.post("/login", authController.login);
 
 app.post("/set-username", authController.setUsername);
