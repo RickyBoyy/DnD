@@ -818,38 +818,96 @@ span.material-symbols-rounded {
 
 /*Profile*/
 
-.profile-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+/* General styling for the profile page */
 
 .profile-container {
-  background-color: #2c2f38;
-  border: 2px solid #8b4513;
-  border-radius: 10px;
-  padding: 30px;
-  max-width: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-family: "DragonHunter", sans-serif;
+  margin: 0 auto;
+  margin-top:10%;
+  padding: 20px;
+  max-width: 600px;
+  background: linear-gradient(to bottom, #3e1d0d, #1c0c04); /* Dark fantasy gradient */
+  border: 3px solid #a52a2a; /* Red-brown border */
+  border-radius: 15px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.7);
+  color: #f4d03f; /* Gold text color for a medieval look */
   text-align: center;
 }
 
-.profile-card {
-  background-color: #3a3f4b;
-  padding: 20px;
-  border-radius: 5px;
+/* Styling for the profile header */
+.profile-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #ffcc00; /* Bright gold */
+  text-shadow: 2px 2px 5px #000; /* Dramatic text shadow for depth */
+  border-bottom: 2px solid #ffcc00;
+  display: block; /* Ensures it's on its own line */
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+/* Styling for the user information */
+.profile-container p {
+  font-size: 1.2rem;
+  margin: 15px 0;
+  color: #fff5e6; /* Off-white for better readability on dark backgrounds */
+  text-shadow: 1px 1px 3px #000; /* Subtle shadow for depth */
+  line-height: 1.8;
+}
+
+/* Loading/Error message styling */
+.loading,
+.error {
+  font-size: 1.2rem;
   margin-top: 20px;
+  font-style: italic;
+  color: #d9534f; /* Red for errors or warnings */
+  text-shadow: 1px 1px 3px #000;
 }
 
-.profile-card h2 {
-  color: #f39c12;
+/* Add some flair to the error */
+.error {
+  font-weight: bold;
+  text-decoration: underline;
 }
 
-.profile-card p {
-  color: #ffffff;
-  margin: 5px 0;
+/* Button-like decorative flair for page details */
+.decorative-flair {
+  margin: 20px auto; /* Centers the element */
+  display: block; /* Forces it to a new line */
+  background-color: #a52a2a; /* Dark red-brown */
+  color: #fff5e6;
+  padding: 5px 10px;
+  border: 2px solid #ffcc00;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px #000;
+  text-align: center; /* Centers text inside the element */
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 15px;
+  }
+
+  .profile-container h1 {
+    font-size: 2rem;
+  }
+
+  .profile-container p {
+    font-size: 1rem;
+  }
+
+  .decorative-flair {
+    font-size: 0.9rem;
+  }
+}
+
+
 .container {
   overflow: hidden;
   margin-bottom: 20px;
@@ -948,3 +1006,97 @@ span.material-symbols-rounded {
   transition: max-height 0.2s ease-out;
 
 }
+
+/*SetUsername*/
+
+/* Ensure the custom font is applied globally or specifically to the component */
+
+.setusername-wrapper {
+   /* Dark background for a fantasy vibe */
+  color: #f5e6d7; /* Soft parchment-like text color */
+  font-family: "DragonHunter", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+.setusername-container {
+  background-color: #2c2c2c; /* Slightly lighter than the background */
+  border: 3px solid #a0522d; /* Bronze/golden borders */
+  border-radius: 10px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0px 0px 15px 5px #a0522d; /* Fantasy glowing effect */
+  text-align: center;
+}
+
+.setusername-container h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #ffcc66; /* Warm, golden title */
+}
+
+.setusername-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setusername-form .form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.setusername-form label {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #e0b084;
+}
+
+.setusername-form input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 2px solid #a0522d;
+  border-radius: 5px;
+  background-color: #1a1a1a;
+  color: #f5e6d7;
+}
+
+.setusername-form input:focus {
+  outline: none;
+  border-color: #ffcc66;
+  box-shadow: 0 0 5px #ffcc66;
+}
+
+.setusername-button {
+  padding: 12px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6600;
+  color: #1a1a1a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.setusername-button:hover {
+  background-color: #e65c00;
+}
+
+.setusername-button:disabled {
+  background-color: #7f7f7f;
+  cursor: not-allowed;
+}
+
+.setusername-error {
+  margin-top: 15px;
+  color: #ff4d4d; /* Error messages in red */
+  font-size: 0.9rem;
+  font-style: italic;
+}
+

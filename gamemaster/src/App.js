@@ -49,7 +49,7 @@ const Layout = () => {
   const location = useLocation();
 
   
-  const pagesWithoutHeader = ["/", "/signin", "/login", "/game","/profile"];
+  const pagesWithoutHeader = ["/", "/signin", "/login", "/game","/profile","/set-username"];
 
  
   const currentPath = location.pathname.trim().toLowerCase();

@@ -16,24 +16,27 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
     try {
       const response = await axios.post("http://localhost:3000/login", { email, password });
-      
+  
       // Save the token to localStorage
       localStorage.setItem('token', response.data.token);
   
       alert("Login successful!");
       setError(null);
   
-      // Redirect to profile page
-      navigate("/profile");
-      
+      // Check if the user has a username
+      if (!response.data.hasUsername) {
+        navigate("/set-username", { state: { email } }); // Pass email to SetUsername page
+      } else {
+        navigate("/profile"); // Redirect to profile page if username exists
+      }
     } catch (error) {
       console.error("Error during login:", error);
       setError("Invalid email or password");
     }
   };
+  
   
 
   return (

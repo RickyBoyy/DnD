@@ -42,10 +42,10 @@ const SetUsername = () => {
   };
 
   return (
-    <div className="username-wrapper">
-      <div className="username-container">
+    <div className="setusername-wrapper">
+      <div className="setusername-container">
         <h2>Set Your Username</h2>
-        <form onSubmit={handleUsernameSubmit}>
+        <form className="setusername-form" onSubmit={handleUsernameSubmit}>
           <div className="form-group">
             <label>Username</label>
             <input
@@ -56,14 +56,15 @@ const SetUsername = () => {
               required
             />
           </div>
-          <button className="submit-button" type="submit" disabled={loading}>
+          <button className="setusername-button" type="submit" disabled={loading}>
             {loading ? 'Setting Username...' : 'Set Username'}
           </button>
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="setusername-error">{error}</div>}
         </form>
       </div>
     </div>
   );
+  
 };
 
 export default SetUsername;
