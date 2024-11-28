@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import '../App.css';
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  // Fetch user data when the component mounts
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -18,7 +19,7 @@ const Profile = () => {
 
         const response = await axios.get("http://localhost:3000/profile", {
           headers: {
-            Authorization: `Bearer ${token}`, // Send token in Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -31,6 +32,10 @@ const Profile = () => {
 
     fetchUserData();
   }, []);
+
+  const handlePlayButtonClick = () => {
+    navigate("/hostorplayer"); // Navigate to HostOrPlayer page
+  };
 
   if (error) {
     return <div>{error}</div>;
@@ -47,10 +52,13 @@ const Profile = () => {
       <p>Username: {profile.username}</p>
       <p>Email: {profile.email}</p>
       <div className="decorative-flair">Quest Log</div>
+
+      {/* Floating Play Button */}
+      <button className="play-button" onClick={handlePlayButtonClick}>
+        Play
+      </button>
     </div>
   );
-  
-  
 };
 
 export default Profile;

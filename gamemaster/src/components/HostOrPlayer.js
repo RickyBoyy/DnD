@@ -9,10 +9,14 @@ const HostOrPlayer = () => {
   const navigate = useNavigate();
 
   const handleHostClick = () => {
-    socket.emit("createLobby", (gameCode) => {
+    const token = localStorage.getItem("token");
+    const username = JSON.parse(atob(token.split('.')[1])).username; // Decode username from token
+  
+    socket.emit("createLobby", { username }, (gameCode) => {
       navigate(`/lobby/${gameCode}`);
     });
   };
+  
 
   const handlePlayerClick = () => {
     setShowCodeInput(true);
@@ -20,9 +24,14 @@ const HostOrPlayer = () => {
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
+  
+    const token = localStorage.getItem("token");
+    const username = JSON.parse(atob(token.split('.')[1])).username;
+  
+    socket.emit("joinLobbyRoom", { gameCode: playerCode, username });
     navigate(`/lobby/${playerCode}`);
-    setShowCodeInput(false);
   };
+  
 
   return (
     <div id="HostOrPlayer">

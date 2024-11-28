@@ -9,6 +9,7 @@ const authController = require("./authController");
 
 const app = express();
 const server = http.createServer(app);
+const MAX_PLAYERS = 6;
 const io = socketIo(server, {
   cors: {
     origin: "http://localhost:3001",
@@ -45,39 +46,70 @@ const lobbies = {};
 
 // Socket.IO connection handling
 io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  socket.on("createLobby", (callback) => {
+  const token = socket.handshake.auth.token; // Send token in auth query
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.username = decoded.username; // Attach username to the socket
+    } catch (err) {
+      console.error("Invalid token:", err.message);
+    }
+  }
+  socket.on("createLobby", (data, callback) => {
+    const username = socket.username || "Unknown Host"; // Fallback if undefined
     const gameCode = generateGameCode();
-    // Initialize the lobby with no players; only store the host's socket ID for reference
-    lobbies[gameCode] = { players: [], hostId: socket.id };
-    console.log("Lobby created with game code:", gameCode);
+  
+    lobbies[gameCode] = {
+      players: [{ id: socket.id, name: socket.username }], // Add host with username
+      hostId: socket.id,
+    };
     
-    // Host joins their own lobby after creation
+  
+    console.log(`Lobby created with game code: ${gameCode} by ${username}`);
+  
     socket.join(gameCode);
     callback(gameCode);
   });
   
+  
+  
+  
+  
   socket.on("joinLobbyRoom", ({ gameCode, username }) => {
-    if (!lobbies[gameCode]) {
-      socket.emit("lobbyError", "Lobby does not exist.");
-      return;
-    }
+    console.log("Received joinLobbyRoom event with:", { gameCode, username });
   
     const lobby = lobbies[gameCode];
-    if (lobby.players.length >= 6) {
-      socket.emit("lobbyError", "Lobby is full.");
-      return;
+  
+    if (!lobby) {
+      return socket.emit("lobbyError", "Lobby not found.");
     }
   
-    const newPlayer = { id: socket.id, name: username || `Player ${lobby.players.length + 1}` };
-    lobby.players.push(newPlayer);
+    if (!username) {
+      console.error("Username is missing for socket ID:", socket.id);
+      return socket.emit("lobbyError", "Username is required to join the lobby.");
+    }
+  
+    if (lobby.players.length >= MAX_PLAYERS) {
+      return socket.emit("lobbyError", "Lobby is full.");
+    }
+  
+    if (!lobby.players.some((player) => player.id === socket.id)) {
+      lobby.players.push({ id: socket.id, name: username });
+      console.log(`${username} joined lobby ${gameCode}`);
+    }
+  
     socket.join(gameCode);
   
+    console.log("Current players in lobby:", lobby.players);
+  
     io.to(gameCode).emit("playerJoined", lobby.players);
-    
-  });
 
+  });
+  
+  
+  
+  
+  
   
 
   

@@ -19,7 +19,7 @@
 .env.test.local
 .env.production.local
 
-/src/server/.env
+/BackEnd/.env
 /public/scripts/.env
 
 npm-debug.log*

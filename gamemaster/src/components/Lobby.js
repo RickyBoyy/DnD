@@ -9,21 +9,41 @@
     const maxPlayers = 6;
 
     useEffect(() => {
-      socket.emit("joinLobbyRoom", gameCode);
-    
-      socket.on("playerJoined", (updatedPlayers) => {
-        setPlayers(updatedPlayers); // Update players on receiving event
-      });
-    
-      socket.on("lobbyError", (message) => {
-        alert(message);
-      });
-    
-      return () => {
-        socket.off("playerJoined");
-        socket.off("lobbyError");
-      };
+      const token = localStorage.getItem("token");
+
+if (!token) {
+  console.error("Token not found in localStorage");
+} else {
+  console.log("Token:", token);
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload
+    console.log("Decoded token payload:", payload);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+  }
+}
+
+const username = token
+  ? JSON.parse(atob(token.split('.')[1])).username
+  : undefined;
+
+console.log("Username from token:", username);
+
+socket.emit("joinLobbyRoom", { gameCode, username });
+
+socket.on("playerJoined", (updatedPlayers) => {
+  console.log("Updated players received:", updatedPlayers); // Debugging
+  setPlayers(updatedPlayers); // Ensure this updates the `players` state
+});
+
+
+
     }, [gameCode]);
+    
+    
+    
+    
     
     
 
@@ -43,17 +63,20 @@
           <div className="game-code"> {gameCode}</div>
 
           <div className="player-slots">
-            {[...Array(maxPlayers)].map((_, index) => (
-              <div
-                key={index}
-                className={`player-slot ${
-                  index < players.length ? (index === 0 ? "host" : "filled") : "empty"
-                }`}
-              >
-                {index < players.length ? players[index].name : "Available"}
-              </div>
-            ))}
-          </div>
+  {[...Array(maxPlayers)].map((_, index) => (
+    <div
+      key={index}
+      className={`player-slot ${
+        index < players.length ? (index === 0 ? "host" : "filled") : "empty"
+      }`}
+    >
+      {index < players.length ? players[index].name : "Available"}
+    </div>
+  ))}
+</div>
+
+
+
 
           <button className="start-game-btn" onClick={startGame}>Start Game</button>
         </div>
