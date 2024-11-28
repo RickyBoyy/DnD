@@ -1,12 +1,7 @@
 import React, { useEffect } from "react";
 import socket from "./socket";
 import "./App.css";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import {BrowserRouter as Router,Route,Routes,useLocation,} from "react-router-dom";
 import SignInPage from "./pages/SignInPage";
 import LoginPage from "./pages/LoginPage";
 import HostOrPlayerPage from "./pages/HostOrPlayerPage";
@@ -14,6 +9,10 @@ import Header from "./components/Header";
 import GamePage from "./pages/GamePage";
 import CreateCharacterPage from "./pages/CreateCharacterPage";
 import LobbyPage from "./pages/LobbyPage";
+ 
+import ProfilePage from "./pages/ProfilePage";
+import SetUsernamePage from "./pages/SetUsernamePage";
+
 import CharactersPage from "./pages/CharactersPage";
 
 function App() {
@@ -28,6 +27,18 @@ function App() {
   return (
     <div className="App">
       <Router>
+ 
+        <Routes>
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/set-username" element={<SetUsernamePage />} />
+          <Route path="/lobby/:gameCode" element={<LobbyPage />} />
+          <Route path="/createcharacter" element={<CreateCharacterPage />} />
+          <Route path="/" element={<GamePage />} />
+        </Routes>
+
         <Layout />
       </Router>
     </div>
@@ -37,12 +48,20 @@ function App() {
 const Layout = () => {
   const location = useLocation();
 
-  const pagesWithoutHeader = ["/signin", "/login", "/"];
+  
+  const pagesWithoutHeader = ["/", "/signin", "/login", "/game","/profile","/set-username"];
 
-  const showHeader = !pagesWithoutHeader.includes(location.pathname);
+ 
+  const currentPath = location.pathname.trim().toLowerCase();
+  const showHeader = !pagesWithoutHeader.includes(currentPath);
 
   return (
     <>
+<<<<<<< HEAD
+=======
+      
+     
+>>>>>>> c9c40e89a0a7f0237f3d07c85914cb76be782466
       <Routes>
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -55,5 +74,7 @@ const Layout = () => {
     </>
   );
 };
+
+
 
 export default App;

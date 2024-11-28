@@ -21,8 +21,8 @@ body {
 }
 
 .login-logo {
-  width: 72px;
-  height: 72px;
+  width: 230px;
+  height: 100px;
   margin-bottom: 20px;
 }
 
@@ -115,8 +115,8 @@ body {
 }
 
 .signin-logo {
-  width: 100px;
-  height: auto;
+  width: 230px;
+  height: 100px;
   margin-bottom: 20px;
 }
 
@@ -203,6 +203,8 @@ select:focus {
     animation: App-logo-spin infinite 20s linear;
   }
 }
+
+
 
 .App-header {
   background-color: #282c34;
@@ -299,6 +301,7 @@ select:focus {
 .card_player h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
+  color:black;
 }
 
 .card_host p,
@@ -471,9 +474,13 @@ button.submit-btn:hover {
 
 .lobby-title {
   display: flex;
+  justify-content: center; 
+  align-items: center; 
   color: darkred;
   font-family: "DragonHunter", sans-serif;
   font-size: 2rem;
+  text-align: center; 
+  margin-bottom: 30px; 
 }
 
 .main_choice_appearance {
@@ -535,6 +542,8 @@ button.submit-btn:hover {
 .game-code {
   font-size: 2rem;
   font-weight: bold;
+  margin: 20px 0; 
+  text-align: center; 
 }
 
 .player-slots {
@@ -567,6 +576,12 @@ button.submit-btn:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .start-game-btn:hover {
@@ -577,14 +592,11 @@ button.submit-btn:hover {
 
 .header {
   width: 100%;
-  background-color: transparent;
-  color: #fff;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   padding: 10px 20px;
 }
 
@@ -595,8 +607,8 @@ button.submit-btn:hover {
 }
 
 .profile-pic {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #ccc;
@@ -605,7 +617,7 @@ button.submit-btn:hover {
 
 .logo-img {
   width: 250px;
-  height: 80px;
+  height: 90px;
   object-fit: contain;
 }
 
@@ -803,6 +815,124 @@ span.material-symbols-rounded {
   padding: 8px;
   width: 80%;
 }
+
+
+/*Profile*/
+
+/* General styling for the profile page */
+
+.profile-container {
+  font-family: "DragonHunter", sans-serif;
+  margin: 0 auto;
+  margin-top:10%;
+  padding: 20px;
+  max-width: 600px;
+  background: linear-gradient(to bottom, #3e1d0d, #1c0c04); /* Dark fantasy gradient */
+  border: 3px solid #a52a2a; /* Red-brown border */
+  border-radius: 15px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.7);
+  color: #f4d03f; /* Gold text color for a medieval look */
+  text-align: center;
+}
+
+/* Styling for the profile header */
+.profile-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #ffcc00; /* Bright gold */
+  text-shadow: 2px 2px 5px #000; /* Dramatic text shadow for depth */
+  border-bottom: 2px solid #ffcc00;
+  display: block; /* Ensures it's on its own line */
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+/* Styling for the user information */
+.profile-container p {
+  font-size: 1.2rem;
+  margin: 15px 0;
+  color: #fff5e6; /* Off-white for better readability on dark backgrounds */
+  text-shadow: 1px 1px 3px #000; /* Subtle shadow for depth */
+  line-height: 1.8;
+}
+
+/* Loading/Error message styling */
+.loading,
+.error {
+  font-size: 1.2rem;
+  margin-top: 20px;
+  font-style: italic;
+  color: #d9534f; /* Red for errors or warnings */
+  text-shadow: 1px 1px 3px #000;
+}
+
+/* Add some flair to the error */
+.error {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Button-like decorative flair for page details */
+.decorative-flair {
+  margin: 20px auto; /* Centers the element */
+  display: block; /* Forces it to a new line */
+  background-color: #a52a2a; /* Dark red-brown */
+  color: #fff5e6;
+  padding: 5px 10px;
+  border: 2px solid #ffcc00;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px #000;
+  text-align: center; /* Centers text inside the element */
+}
+
+.play-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #a72828; /* Green */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.play-button:hover {
+  background-color: #681317; /* Darker green */
+}
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 15px;
+  }
+
+  .profile-container h1 {
+    font-size: 2rem;
+  }
+
+  .profile-container p {
+    font-size: 1rem;
+  }
+
+  .decorative-flair {
+    font-size: 0.9rem;
+  }
+}
+
+
 .container {
   overflow: hidden;
   margin-bottom: 20px;
@@ -903,7 +1033,9 @@ span.material-symbols-rounded {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
+
 }
+<<<<<<< HEAD
 .players_display {
   display: flex;
   flex-direction: row;
@@ -945,3 +1077,99 @@ span.material-symbols-rounded {
   border-radius: 50%; /* Optional: Make the image circular */
   margin-bottom: 10px; /* Space below the image */
 }
+=======
+
+/*SetUsername*/
+
+/* Ensure the custom font is applied globally or specifically to the component */
+
+.setusername-wrapper {
+   /* Dark background for a fantasy vibe */
+  color: #f5e6d7; /* Soft parchment-like text color */
+  font-family: "DragonHunter", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+.setusername-container {
+  background-color: #2c2c2c; /* Slightly lighter than the background */
+  border: 3px solid #a0522d; /* Bronze/golden borders */
+  border-radius: 10px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0px 0px 15px 5px #a0522d; /* Fantasy glowing effect */
+  text-align: center;
+}
+
+.setusername-container h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #ffcc66; /* Warm, golden title */
+}
+
+.setusername-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setusername-form .form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.setusername-form label {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #e0b084;
+}
+
+.setusername-form input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 2px solid #a0522d;
+  border-radius: 5px;
+  background-color: #1a1a1a;
+  color: #f5e6d7;
+}
+
+.setusername-form input:focus {
+  outline: none;
+  border-color: #ffcc66;
+  box-shadow: 0 0 5px #ffcc66;
+}
+
+.setusername-button {
+  padding: 12px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff6600;
+  color: #1a1a1a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.setusername-button:hover {
+  background-color: #e65c00;
+}
+
+.setusername-button:disabled {
+  background-color: #7f7f7f;
+  cursor: not-allowed;
+}
+
+.setusername-error {
+  margin-top: 15px;
+  color: #ff4d4d; /* Error messages in red */
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+>>>>>>> c9c40e89a0a7f0237f3d07c85914cb76be782466
