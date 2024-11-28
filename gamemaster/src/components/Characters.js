@@ -60,14 +60,7 @@ const Characters = () => {
             overflow: "hidden",
             transition: "max-height 0.3s ease",
           }}
-        >
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae ad ex
-            illum, dolores fugiat unde asperiores excepturi suscipit
-            repellendus, facilis voluptate, natus necessitatibus explicabo
-            fugit! Ullam quae odio velit voluptatum!
-          </p>
-        </div>
+        ></div>
       </div>
     </div>
   );

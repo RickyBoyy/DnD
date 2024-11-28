@@ -43,7 +43,6 @@ const Layout = () => {
 
   return (
     <>
-      {showHeader && <Header />}
       <Routes>
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/login" element={<LoginPage />} />

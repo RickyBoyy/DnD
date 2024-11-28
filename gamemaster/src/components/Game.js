@@ -24,6 +24,20 @@ const Game = () => {
         </Helmet>
 
         <div id="GameId">
+          <div className="players_display">
+            <div className="side_nav">
+              <span>Players</span>
+
+              <div className="players_icons">
+                <img
+                  src=""
+                  alt="player_icon"
+                  style={{ width: "150px", height: "150px" }}
+                />
+                <h3>Player Name</h3>
+              </div>
+            </div>
+          </div>
           <div className="chat-container"></div>
 
           <div className="typing-container">
