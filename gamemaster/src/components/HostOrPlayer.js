@@ -9,10 +9,14 @@ const HostOrPlayer = () => {
   const navigate = useNavigate();
 
   const handleHostClick = () => {
-    socket.emit("createLobby", (gameCode) => {
+    const token = localStorage.getItem("token");
+    const username = JSON.parse(atob(token.split('.')[1])).username; // Decode username from token
+  
+    socket.emit("createLobby", { username }, (gameCode) => {
       navigate(`/lobby/${gameCode}`);
     });
   };
+  
 
   const handlePlayerClick = () => {
     setShowCodeInput(true);
@@ -20,9 +24,14 @@ const HostOrPlayer = () => {
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
+  
+    const token = localStorage.getItem("token");
+    const username = JSON.parse(atob(token.split('.')[1])).username;
+  
+    socket.emit("joinLobbyRoom", { gameCode: playerCode, username });
     navigate(`/lobby/${playerCode}`);
-    setShowCodeInput(false);
   };
+  
 
   return (
     <div id="HostOrPlayer">
@@ -34,13 +43,13 @@ const HostOrPlayer = () => {
           <div className="left_choice">
             <div className="card_host" onClick={handleHostClick}>
               <h2>Host</h2>
-              <p>Host a Dungeons and Dragons game...</p>
+              <p>As a Host, you'll create a new Dungeons & Dragons game and invite others to join. You'll take on the role of the Dungeon Master, guiding the story, setting up challenges, and controlling the adventure for the players.</p>
             </div>
           </div>
           <div className="right_choice">
             <div className="card_player" onClick={handlePlayerClick}>
               <h2>Player</h2>
-              <p>Join a Dungeons and Dragons game...</p>
+              <p>As a Player, you can join an existing Dungeons & Dragons game by entering a code provided by the Host. Once in, you’ll embark on an adventure, collaborate with other players, and face challenges together.</p>
             </div>
           </div>
         </div>

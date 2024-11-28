@@ -1,9 +1,10 @@
-// src/socket.js
 import { io } from "socket.io-client";
 
-// Initialize socket instance only once
+const token = localStorage.getItem("token");
 const socket = io("http://localhost:3000", {
-  autoConnect: false, // Optional: Prevents auto-connection on import
+  auth: {
+    token,
+  },
 });
 
 export default socket;

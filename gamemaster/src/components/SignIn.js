@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../App.css';
-import logoImage from "../assets/logo.png"; 
-
+import logoImage from "../assets/logo.png";
+import { useNavigate } from 'react-router-dom'; 
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -10,27 +10,56 @@ const SignIn = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [country, setCountry] = useState('');
   const [error, setError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+      return `Password must be at least ${minLength} characters long.`;
+    }
+    if (!hasNumber && !hasSpecialChar) {
+      return "Password must contain at least one number or one special character.";
+    }
+    
+    return null;
+  };
+
+  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-  
+
+    const passwordValidationError = validatePassword(password);
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-  
+
+    if (!country) {
+      setError("Please select a country");
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:3000/register', { 
         email, password, country 
       });
-  
+
       setError(null);
       alert("Registration successful!");
+      navigate('/login');
     } catch (err) {
       setError("Error registering user. Please try again.");
     }
   };
-  
 
   return (
     <div className="signin-wrapper">
@@ -38,8 +67,9 @@ const SignIn = () => {
       <div className="signin-container">
         <form onSubmit={handleSignUp}>
           <div className="form-group">
-            <label>Email address</label>
+            <label htmlFor="email">Email address</label>
             <input 
+              id="email"
               type="email" 
               placeholder="you@example.com" 
               value={email} 
@@ -48,18 +78,21 @@ const SignIn = () => {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <input 
+              id="password"
               type="password" 
               placeholder="Password" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
             />
+            {passwordError && <div className="error">{passwordError}</div>}
           </div>
           <div className="form-group">
-            <label>Confirm Password</label>
+            <label htmlFor="confirmPassword">Confirm Password</label>
             <input 
+              id="confirmPassword"
               type="password" 
               placeholder="Confirm Password" 
               value={confirmPassword} 
@@ -68,8 +101,9 @@ const SignIn = () => {
             />
           </div>
           <div className="form-group">
-            <label>Country</label>
+            <label htmlFor="country">Country</label>
             <select 
+              id="country"
               value={country} 
               onChange={(e) => setCountry(e.target.value)} 
               required 
@@ -84,7 +118,7 @@ const SignIn = () => {
             </select>
           </div>
           {error && <div className="error">{error}</div>}
-          <button type="submit" className="signin-button">Sign in</button>
+          <button type="submit" className="signin-button">Sign Up</button>
         </form>
       </div>
     </div>

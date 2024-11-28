@@ -9,6 +9,7 @@ const authController = require("./authController");
 
 const app = express();
 const server = http.createServer(app);
+const MAX_PLAYERS = 6;
 const io = socketIo(server, {
   cors: {
     origin: "http://localhost:3001",
@@ -20,62 +21,100 @@ app.use(cors({ origin: "http://localhost:3001", methods: ["GET", "POST"], creden
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "build")));
 
+const jwt = require("jsonwebtoken");
+
+const authenticate = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // "Bearer <token>"
+  
+  if (!token) {
+    return res.status(401).json({ message: "No token found" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
+    req.user = decoded; // Attach decoded user info to the request
+    next(); // Proceed to the route handler
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+
+
 // Store lobby data
 const lobbies = {};
 
 // Socket.IO connection handling
 io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  socket.on("createLobby", (callback) => {
+  const token = socket.handshake.auth.token; // Send token in auth query
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.username = decoded.username; // Attach username to the socket
+    } catch (err) {
+      console.error("Invalid token:", err.message);
+    }
+  }
+  socket.on("createLobby", (data, callback) => {
+    const username = socket.username || "Unknown Host"; // Fallback if undefined
     const gameCode = generateGameCode();
-    // Initialize the lobby with no players; only store the host's socket ID for reference
-    lobbies[gameCode] = { players: [], hostId: socket.id };
-    console.log("Lobby created with game code:", gameCode);
+  
+    lobbies[gameCode] = {
+      players: [{ id: socket.id, name: socket.username }], // Add host with username
+      hostId: socket.id,
+    };
     
-    // Host joins their own lobby after creation
+  
+    console.log(`Lobby created with game code: ${gameCode} by ${username}`);
+  
     socket.join(gameCode);
     callback(gameCode);
   });
   
-  socket.on("joinLobbyRoom", (gameCode) => {
-    if (!lobbies[gameCode]) {
-      console.log("Lobby does not exist:", gameCode);
-      socket.emit("lobbyError", "Lobby does not exist.");
-      return;
-    }
+  
+  
+  
+  
+  socket.on("joinLobbyRoom", ({ gameCode, username }) => {
+    console.log("Received joinLobbyRoom event with:", { gameCode, username });
   
     const lobby = lobbies[gameCode];
   
-    // Check if the player is already in the lobby or if the lobby is full
-    const isPlayerInLobby = lobby.players.some((player) => player.id === socket.id);
-    if (isPlayerInLobby) {
-    
-      return;
-    } else if (lobby.players.length >= 6) {
-      console.log("Lobby is full:", gameCode);
-      socket.emit("lobbyError", "Lobby is full.");
-      return;
+    if (!lobby) {
+      return socket.emit("lobbyError", "Lobby not found.");
     }
   
-    // Add the player to the lobby
-    const playerName = socket.id === lobby.hostId ? "Host" : `Player ${lobby.players.length + 1}`;
-    const newPlayer = { id: socket.id, name: playerName };
-    lobby.players.push(newPlayer);
+    if (!username) {
+      console.error("Username is missing for socket ID:", socket.id);
+      return socket.emit("lobbyError", "Username is required to join the lobby.");
+    }
+  
+    if (lobby.players.length >= MAX_PLAYERS) {
+      return socket.emit("lobbyError", "Lobby is full.");
+    }
+  
+    if (!lobby.players.some((player) => player.id === socket.id)) {
+      lobby.players.push({ id: socket.id, name: username });
+      console.log(`${username} joined lobby ${gameCode}`);
+    }
+  
     socket.join(gameCode);
   
-    // Send the full list of players to the joining client only
-    socket.emit("playerJoined", lobby.players);
+    console.log("Current players in lobby:", lobby.players);
   
-    // Broadcast updated player list to everyone else in the room
-    socket.to(gameCode).emit("playerJoined", lobby.players);
+    io.to(gameCode).emit("playerJoined", lobby.players);
+
   });
   
   
   
   
+  
+  
 
-  socket.on("disconnect", () => {
+  
+  
+   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
   
     // Remove the player from all lobbies they are in
@@ -105,7 +144,16 @@ function generateGameCode() {
 
 // API routes
 app.post("/register", authController.register);
+
 app.post("/login", authController.login);
+
+app.post("/set-username", authController.setUsername);
+app.get("/profile", authenticate, authController.getProfile);
+
+
+
+
+app.post("/createCharacter", authController.createCharacter);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));

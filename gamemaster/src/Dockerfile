@@ -1,22 +1,22 @@
-# Frontend build from Node.js base image
+# Etapa de build
 FROM node:16 AS build-stage
 
 WORKDIR /app
 
-# Copy the frontend package files and install dependencies
+# Copiar o arquivo de pacotes da raiz
 COPY package*.json ./
-RUN npm install
 
-# Copy frontend source code
-COPY ./src ./
+# Instalar apenas as dependências do frontend
+RUN npm install --only=prod
 
-# Build the React app
+# Copiar o código-fonte do frontend
+COPY ./src
+
+# Build da aplicação React
 RUN npm run build
 
-# Use NGINX to serve the app
+# Etapa para usar NGINX para servir os arquivos estáticos
 FROM nginx:alpine
-
-# Copy the build folder from the previous stage
 COPY --from=build-stage /app/build /usr/share/nginx/html
 
 EXPOSE 80
