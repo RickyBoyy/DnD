@@ -7,9 +7,10 @@ const Game = () => {
     script.src = "/scripts/chat.js";
     script.defer = true;
     document.body.appendChild(script);
-
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.removeChild(script);
+      document.body.style.overflow = "auto";
     };
   }, []);
 

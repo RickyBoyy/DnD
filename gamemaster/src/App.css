@@ -204,8 +204,6 @@ select:focus {
   }
 }
 
-
-
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -301,7 +299,7 @@ select:focus {
 .card_player h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color:black;
+  color: black;
 }
 
 .card_host p,
@@ -474,13 +472,13 @@ button.submit-btn:hover {
 
 .lobby-title {
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
   color: darkred;
   font-family: "DragonHunter", sans-serif;
   font-size: 2rem;
-  text-align: center; 
-  margin-bottom: 30px; 
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 .main_choice_appearance {
@@ -542,8 +540,8 @@ button.submit-btn:hover {
 .game-code {
   font-size: 2rem;
   font-weight: bold;
-  margin: 20px 0; 
-  text-align: center; 
+  margin: 20px 0;
+  text-align: center;
 }
 
 .player-slots {
@@ -578,8 +576,8 @@ button.submit-btn:hover {
   cursor: pointer;
   margin-top: 30px;
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
   margin-left: auto;
   margin-right: auto;
 }
@@ -816,7 +814,6 @@ span.material-symbols-rounded {
   width: 80%;
 }
 
-
 /*Profile*/
 
 /* General styling for the profile page */
@@ -824,10 +821,14 @@ span.material-symbols-rounded {
 .profile-container {
   font-family: "DragonHunter", sans-serif;
   margin: 0 auto;
-  margin-top:10%;
+  margin-top: 10%;
   padding: 20px;
   max-width: 600px;
-  background: linear-gradient(to bottom, #3e1d0d, #1c0c04); /* Dark fantasy gradient */
+  background: linear-gradient(
+    to bottom,
+    #3e1d0d,
+    #1c0c04
+  ); /* Dark fantasy gradient */
   border: 3px solid #a52a2a; /* Red-brown border */
   border-radius: 15px;
   box-shadow: 0 8px 10px rgba(0, 0, 0, 0.7);
@@ -912,7 +913,6 @@ span.material-symbols-rounded {
   background-color: #681317; /* Darker green */
 }
 
-
 /* Responsive design */
 @media (max-width: 768px) {
   .profile-container {
@@ -931,7 +931,6 @@ span.material-symbols-rounded {
     font-size: 0.9rem;
   }
 }
-
 
 .container {
   overflow: hidden;
@@ -1025,6 +1024,7 @@ span.material-symbols-rounded {
 }
 .collapsible_content {
   padding: 0 18px;
+
   background-image: linear-gradient(
       rgba(181, 163, 163, 0.6),
       rgba(104, 91, 91, 0.6)
@@ -1032,10 +1032,28 @@ span.material-symbols-rounded {
     url("./assets/wooden_background.jpeg");
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.2s ease-out;
-
+  display: flex;
+  transition: max-height 0.2s;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
 }
-<<<<<<< HEAD
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem 10rem;
+  padding: 1rem;
+}
+.stat {
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
 .players_display {
   display: flex;
   flex-direction: row;
@@ -1045,7 +1063,7 @@ span.material-symbols-rounded {
 
 .side_nav {
   width: 250px;
-  height: 100vh;
+  height: 100%;
   background-color: rgb(81, 5, 5);
   padding: 20px 10px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -1077,14 +1095,13 @@ span.material-symbols-rounded {
   border-radius: 50%; /* Optional: Make the image circular */
   margin-bottom: 10px; /* Space below the image */
 }
-=======
 
 /*SetUsername*/
 
 /* Ensure the custom font is applied globally or specifically to the component */
 
 .setusername-wrapper {
-   /* Dark background for a fantasy vibe */
+  /* Dark background for a fantasy vibe */
   color: #f5e6d7; /* Soft parchment-like text color */
   font-family: "DragonHunter", sans-serif;
   display: flex;
@@ -1171,5 +1188,3 @@ span.material-symbols-rounded {
   font-size: 0.9rem;
   font-style: italic;
 }
-
->>>>>>> c9c40e89a0a7f0237f3d07c85914cb76be782466

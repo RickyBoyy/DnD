@@ -60,7 +60,16 @@ const Characters = () => {
             overflow: "hidden",
             transition: "max-height 0.3s ease",
           }}
-        ></div>
+        >
+          <div className="stats-container">
+            <div className="stat">Strenght:</div>
+            <div className="stat">Dexterity:</div>
+            <div className="stat">Constitution:</div>
+            <div className="stat">Intelligence:</div>
+            <div className="stat">Wisdom:</div>
+            <div className="stat">Charisma:</div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -90,19 +90,16 @@ const CreateCharacter = () => {
   const handleAbilityChange = (ability, value) => {
     if (value < 9 || value > 14) return;
 
-    // Calculate cost changes
     const costBefore = abilityCost[abilities[ability]] || 0;
     const costAfter = abilityCost[value];
     const newPointsRemaining = pointsRemaining - costAfter + costBefore;
 
-    // Check if the points remaining allow this change
     if (newPointsRemaining >= 0) {
       setAbilities((prevAbilities) => ({
         ...prevAbilities,
         [ability]: value,
       }));
       setUsedScores((prevUsedScores) => {
-        // Remove old value and add new value to usedScores
         const newUsedScores = prevUsedScores.filter(
           (score) => score !== abilities[ability]
         );
