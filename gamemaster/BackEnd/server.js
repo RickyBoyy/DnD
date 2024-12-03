@@ -39,103 +39,85 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-
-
 // Store lobby data
-const lobbies = {};
+const lobbies = {}; // Store game lobbies in memory (should be persisted for production)
 
 // Socket.IO connection handling
 io.on("connection", (socket) => {
-  const token = socket.handshake.auth.token; // Send token in auth query
+  console.log("Client connected:", socket.id);
+
+  const token = socket.handshake.auth.token; // Token sent in auth query
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.username = decoded.username; // Attach username to the socket
+      socket.username = decoded.username; // Attach username to the socket object
+      console.log(`User authenticated: ${socket.username}`);
     } catch (err) {
       console.error("Invalid token:", err.message);
     }
   }
-  socket.on("createLobby", (data, callback) => {
-    const username = socket.username || "Unknown Host"; // Fallback if undefined
-    const gameCode = generateGameCode();
-  
-    lobbies[gameCode] = {
-      players: [{ id: socket.id, name: socket.username }], // Add host with username
-      hostId: socket.id,
+
+  // Handle creating a new lobby
+  socket.on("createLobby", ({ username }, callback) => {
+    const gameCode = generateGameCode(); // Function to generate a random game code
+    const newLobby = {
+      gameCode,
+      players: [{ id: socket.id, name: username }],
     };
-    
-  
+
+    lobbies[gameCode] = newLobby; // Store lobby in memory
     console.log(`Lobby created with game code: ${gameCode} by ${username}`);
-  
-    socket.join(gameCode);
-    callback(gameCode);
+    callback(gameCode); // Return game code to the host
   });
-  
-  
-  
-  
-  
+
+  // Handle joining an existing lobby
   socket.on("joinLobbyRoom", ({ gameCode, username }) => {
     console.log("Received joinLobbyRoom event with:", { gameCode, username });
-  
+
+    if (!username) {
+      username = socket.username; // Fallback to the username attached to the socket
+    }
+
     const lobby = lobbies[gameCode];
-  
+
     if (!lobby) {
       return socket.emit("lobbyError", "Lobby not found.");
     }
-  
-    if (!username) {
-      console.error("Username is missing for socket ID:", socket.id);
-      return socket.emit("lobbyError", "Username is required to join the lobby.");
-    }
-  
+
     if (lobby.players.length >= MAX_PLAYERS) {
       return socket.emit("lobbyError", "Lobby is full.");
     }
-  
+
+    // Add player to the lobby
     if (!lobby.players.some((player) => player.id === socket.id)) {
       lobby.players.push({ id: socket.id, name: username });
       console.log(`${username} joined lobby ${gameCode}`);
     }
-  
+
     socket.join(gameCode);
-  
-    console.log("Current players in lobby:", lobby.players);
-  
     io.to(gameCode).emit("playerJoined", lobby.players);
-
   });
-  
-  
-  
-  
-  
-  
 
-  
-  
-   socket.on("disconnect", () => {
+  // Handle disconnecting player
+  socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
-  
-    // Remove the player from all lobbies they are in
+
     for (const gameCode in lobbies) {
       const lobby = lobbies[gameCode];
       const playerIndex = lobby.players.findIndex((player) => player.id === socket.id);
-      
+
       if (playerIndex !== -1) {
         lobby.players.splice(playerIndex, 1); // Remove player
-  
-        // Notify others in the lobby
-        io.to(gameCode).emit("playerJoined", lobby.players);
-        
-        // If no players remain, delete the lobby
+        io.to(gameCode).emit("playerLeft", lobby.players);
+
         if (lobby.players.length === 0) {
-          delete lobbies[gameCode];
+          delete lobbies[gameCode]; // Delete the lobby if no players are left
         }
       }
     }
   });
 });
+
 
 // Helper function to generate a unique code
 function generateGameCode() {
@@ -144,15 +126,9 @@ function generateGameCode() {
 
 // API routes
 app.post("/register", authController.register);
-
 app.post("/login", authController.login);
-
 app.post("/set-username", authController.setUsername);
 app.get("/profile", authenticate, authController.getProfile);
-
-
-
-
 app.post("/createCharacter", authController.createCharacter);
 
 app.get("*", (req, res) => {
