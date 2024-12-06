@@ -21,8 +21,8 @@ body {
 }
 
 .login-logo {
-  width: 230px;
-  height: 100px;
+  width: 250px;
+  height: 120px;
   margin-bottom: 20px;
 }
 
@@ -67,7 +67,7 @@ body {
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background-color: #2ea44f;
+  background-color: #9f1d14;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -75,11 +75,11 @@ body {
 }
 
 .login-button:hover {
-  background-color: #2c974b;
+  background-color: #6e0700;
 }
 
 .error-message {
-  color: #d73a49;
+  color: #9f1d14;
   font-size: 14px;
   margin-top: 10px;
 }
@@ -172,7 +172,7 @@ select:focus {
   padding: 10px;
   font-size: 14px;
   color: #fff;
-  background-color: #ff2600;
+  background-color: #9f1d14;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -181,7 +181,7 @@ select:focus {
 }
 
 .signin-button:hover {
-  background-color: #218838;
+  background-color: #6e0700;
 }
 
 .signin-footer {
@@ -814,48 +814,6 @@ span.material-symbols-rounded {
   width: 80%;
 }
 
-/*Profile*/
-
-/* General styling for the profile page */
-
-.profile-container {
-  font-family: "DragonHunter", sans-serif;
-  margin: 0 auto;
-  margin-top: 10%;
-  padding: 20px;
-  max-width: 600px;
-  background: linear-gradient(
-    to bottom,
-    #3e1d0d,
-    #1c0c04
-  ); /* Dark fantasy gradient */
-  border: 3px solid #a52a2a; /* Red-brown border */
-  border-radius: 15px;
-  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.7);
-  color: #f4d03f; /* Gold text color for a medieval look */
-  text-align: center;
-}
-
-/* Styling for the profile header */
-.profile-container h1 {
-  font-size: 2.5rem;
-  margin-bottom: 15px;
-  color: #ffcc00; /* Bright gold */
-  text-shadow: 2px 2px 5px #000; /* Dramatic text shadow for depth */
-  border-bottom: 2px solid #ffcc00;
-  display: block; /* Ensures it's on its own line */
-  padding-bottom: 5px;
-  text-align: center;
-}
-
-/* Styling for the user information */
-.profile-container p {
-  font-size: 1.2rem;
-  margin: 15px 0;
-  color: #fff5e6; /* Off-white for better readability on dark backgrounds */
-  text-shadow: 1px 1px 3px #000; /* Subtle shadow for depth */
-  line-height: 1.8;
-}
 
 /* Loading/Error message styling */
 .loading,
