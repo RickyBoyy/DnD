@@ -1,22 +1,20 @@
-# Etapa de build
-FROM node:16 AS build-stage
+# Use a Node.js base image
+FROM node:16-alpine
 
+# Set the working directory
 WORKDIR /app
 
-# Copiar o arquivo de pacotes da raiz
-COPY package*.json ./
+# Copy the shared package.json from the root directory
+COPY ./package.json ./ 
 
-# Instalar apenas as dependências do frontend
-RUN npm install --only=prod
+# Copy the frontend-specific files from ./src
+COPY ./src/ ./
 
-# Copiar o código-fonte do frontend
-COPY ./src
+# Install dependencies
+RUN npm install
 
-# Build da aplicação React
-RUN npm run build
+# Expose the application port
+EXPOSE 3000
 
-# Etapa para usar NGINX para servir os arquivos estáticos
-FROM nginx:alpine
-COPY --from=build-stage /app/build /usr/share/nginx/html
-
-EXPOSE 80
+# Start the application
+CMD ["npm", "start"]

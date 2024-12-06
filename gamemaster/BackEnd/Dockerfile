@@ -1,16 +1,20 @@
-FROM node:16
+# Use the base image
+FROM node:16-alpine
 
+# Set the working directory
 WORKDIR /app
 
-# Copiar o arquivo de pacotes da raiz
-COPY package*.json ./
+# Copy package.json from the root
+COPY ./package.json ./ 
 
-# Instalar apenas as dependências do backend
-RUN npm install --only=prod
+# Copy the backend-specific files
+COPY ./BackEnd/. ./
 
-# Copiar o código do backend
-COPY ./BackEnd ./
+# Install dependencies
+RUN npm install
 
-# Expor a porta e iniciar a aplicação
+# Expose port
 EXPOSE 5000
+
+# Start the application
 CMD ["npm", "start"]
