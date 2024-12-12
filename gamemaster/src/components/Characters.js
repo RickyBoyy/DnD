@@ -1,15 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import dwarfImage from "../assets/dwarf_bard.jpeg";
+import "../App.css";
 
 const Characters = () => {
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleCollapsible = () => {
     setIsCollapsibleOpen(!isCollapsibleOpen);
   };
 
+  const navigateToCreateCharacter = () => {
+    navigate("/createcharacter"); // Navegar para CreateCharactersPage
+  };
+
   return (
     <div className="container">
+      {/* Botão no canto superior direito */}
+      <button className="create-character-button" onClick={navigateToCreateCharacter}>
+        Create Character
+      </button>
+
       <div className="title_characters">
         <span>Characters</span>
       </div>
@@ -35,13 +47,6 @@ const Characters = () => {
                 facere aperiam eligendi praesentium asperiores ipsum
                 perspiciatis nulla iste, aliquam ut cumque quisquam obcaecati?
                 Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Veritatis nemo numquam quae laudantium, aperiam laborum
-                molestias eveniet ullam nostrum magni beatae blanditiis
-                repellendus. Recusandae iure ipsam totam, necessitatibus
-                mollitia aut. Lorem, ipsum dolor sit amet consectetur
-                adipisicing elit. Praesentium sed maiores velit! Possimus omnis,
-                nam nemo esse doloremque debitis provident quae soluta
-                cupiditate magnam ab dolor similique modi temporibus! Quia.
               </p>
             </div>
           </div>
@@ -62,7 +67,7 @@ const Characters = () => {
           }}
         >
           <div className="stats-container">
-            <div className="stat">Strenght:</div>
+            <div className="stat">Strength:</div>
             <div className="stat">Dexterity:</div>
             <div className="stat">Constitution:</div>
             <div className="stat">Intelligence:</div>

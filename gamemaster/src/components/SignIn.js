@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import '../App.css';
+import React, { useState } from "react";
+import axios from "axios";
+import "../App.css";
 import logoImage from "../assets/logo.png";
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate, Link } from "react-router-dom";
 
 const SignIn = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [country, setCountry] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [country, setCountry] = useState("");
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
 
@@ -23,7 +23,7 @@ const SignIn = () => {
     if (!hasNumber && !hasSpecialChar) {
       return "Password must contain at least one number or one special character.";
     }
-    
+
     return null;
   };
 
@@ -49,13 +49,15 @@ const SignIn = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/register', { 
-        email, password, country 
+      const response = await axios.post("http://localhost:3000/register", {
+        email,
+        password,
+        country,
       });
 
       setError(null);
       alert("Registration successful!");
-      navigate('/login');
+      navigate("/login");
     } catch (err) {
       setError("Error registering user. Please try again.");
     }
@@ -63,52 +65,54 @@ const SignIn = () => {
 
   return (
     <div className="signin-wrapper">
-      <img src={logoImage} alt="Logo" className="signin-logo" /> 
+      <img src={logoImage} alt="Logo" className="signin-logo" />
       <div className="signin-container">
         <form onSubmit={handleSignUp}>
           <div className="form-group">
             <label htmlFor="email">Email address</label>
-            <input 
+            <input
               id="email"
-              type="email" 
-              placeholder="you@example.com" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input 
+            <input
               id="password"
-              type="password" 
-              placeholder="Password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
             {passwordError && <div className="error">{passwordError}</div>}
           </div>
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            <input 
+            <input
               id="confirmPassword"
-              type="password" 
-              placeholder="Confirm Password" 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              required 
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
             />
           </div>
           <div className="form-group">
             <label htmlFor="country">Country</label>
-            <select 
+            <select
               id="country"
-              value={country} 
-              onChange={(e) => setCountry(e.target.value)} 
-              required 
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
             >
-              <option value="" disabled>Select your country</option>
+              <option value="" disabled>
+                Select your country
+              </option>
               <option value="BR">Brazil</option>
               <option value="US">United States</option>
               <option value="PT">Portugal</option>
@@ -118,8 +122,13 @@ const SignIn = () => {
             </select>
           </div>
           {error && <div className="error">{error}</div>}
-          <button type="submit" className="signin-button">Sign Up</button>
+          <button type="submit" className="signin-button">
+            Sign Up
+          </button>
         </form>
+        <p className="login-link">
+          Already have an account? <Link to="/login">Log in here</Link>
+        </p>
       </div>
     </div>
   );

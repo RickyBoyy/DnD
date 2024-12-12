@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Import Link from react-router-dom
 import "../App.css";
 
-
-
 import logoImage from "../assets/logo.png";
-
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,13 +15,13 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:3000/login", { email, password });
-  
+
       // Save the token to localStorage
-      localStorage.setItem('token', response.data.token);
-  
+      localStorage.setItem("token", response.data.token);
+
       alert("Login successful!");
       setError(null);
-  
+
       // Check if the user has a username
       if (!response.data.hasUsername) {
         navigate("/set-username", { state: { email } }); // Pass email to SetUsername page
@@ -36,13 +33,10 @@ const Login = () => {
       setError("Invalid email or password");
     }
   };
-  
-  
 
   return (
     <div className="login-wrapper">
-
-      <img src={logoImage} alt="Logo" className="login-logo"  />
+      <img src={logoImage} alt="Logo" className="login-logo" />
       <div className="login-container">
         <form onSubmit={handleLogin}>
           <div className="form-group">
@@ -70,6 +64,10 @@ const Login = () => {
           </button>
           {error && <div className="error-message">{error}</div>}
         </form>
+        <p className="register-link">
+          Don’t have an account?{" "}
+          <Link to="/signin">Sign up here</Link>
+        </p>
       </div>
     </div>
   );

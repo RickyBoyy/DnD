@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import socket from "../socket";
 import "../App.css";
 
 const Lobby = () => {
   const { gameCode } = useParams();
+  const navigate = useNavigate(); // React Router's navigation hook
   const [players, setPlayers] = useState([{ id: "hostId", name: "Host" }]);
   const [username, setUsername] = useState("");
   const maxPlayers = 6;
@@ -19,7 +20,6 @@ const Lobby = () => {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload
-      console.log("Decoded token payload:", payload);
       setUsername(payload.username);
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -30,27 +30,30 @@ const Lobby = () => {
 
     // Handle playerJoined event to update the player list
     socket.on("playerJoined", (updatedPlayers) => {
-      console.log("Updated players received:", updatedPlayers); // Debugging
       setPlayers(updatedPlayers); // Update the players state
     });
 
     // Handle playerLeft event to update the player list when a player leaves
     socket.on("playerLeft", (updatedPlayers) => {
-      console.log("Updated players after a player left:", updatedPlayers); // Debugging
       setPlayers(updatedPlayers); // Update the players state
+    });
+
+    // Listen for the gameStarted event to navigate all players to the game page
+    socket.on("gameStarted", ({ gameCode }) => {
+      navigate(`/game/${gameCode}`); // Navigate to the game page
     });
 
     // Clean up socket listeners when component is unmounted
     return () => {
       socket.off("playerJoined");
       socket.off("playerLeft");
+      socket.off("gameStarted");
     };
-  }, [gameCode, username]);
+  }, [gameCode, username, navigate]);
 
   const startGame = () => {
     if (players.length > 1) {
-      alert("Game Started!");
-      socket.emit("startGame", gameCode);
+      socket.emit("startGame", gameCode); // Notify server to start the game
     } else {
       alert("At least 2 players are needed to start.");
     }
@@ -75,7 +78,9 @@ const Lobby = () => {
           ))}
         </div>
 
-        <button className="start-game-btn" onClick={startGame}>Start Game</button>
+        <button className="start-game-btn" onClick={startGame}>
+          Start Game
+        </button>
       </div>
     </div>
   );

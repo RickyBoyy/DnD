@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import '../App.css';
+import "../App.css";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -37,6 +37,10 @@ const Profile = () => {
     navigate("/hostorplayer"); // Navigate to HostOrPlayer page
   };
 
+  const handleNavigateCharacter = () => {
+    navigate("/characters"); // Navigate to Character page
+  };
+
   if (error) {
     return <div>{error}</div>;
   }
@@ -47,7 +51,7 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <h1>Adventurer's Profile</h1>
+      <h1 className="dnd-title">Adventurer's Profile</h1>
       <div className="decorative-flair">Heroic Stats</div>
       <p>Username: {profile.username}</p>
       <p>Email: {profile.email}</p>
@@ -56,6 +60,11 @@ const Profile = () => {
       {/* Floating Play Button */}
       <button className="play-button" onClick={handlePlayButtonClick}>
         Play
+      </button>
+
+      {/* Navigate Home Button */}
+      <button className="character-button" onClick={handleNavigateCharacter}>
+        Your Character's
       </button>
     </div>
   );

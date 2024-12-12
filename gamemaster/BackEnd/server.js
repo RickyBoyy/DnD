@@ -98,6 +98,23 @@ io.on("connection", (socket) => {
     io.to(gameCode).emit("playerJoined", lobby.players);
   });
 
+  // Handle starting the game
+socket.on("startGame", (gameCode) => {
+  const lobby = lobbies[gameCode];
+
+  if (!lobby) {
+    return socket.emit("lobbyError", "Lobby not found.");
+  }
+
+  if (lobby.players.length < 2) {
+    return socket.emit("lobbyError", "At least 2 players are required to start the game.");
+  }
+
+  console.log(`Game started for lobby ${gameCode}`);
+  io.to(gameCode).emit("gameStarted", { gameCode }); // Notify all players in the lobby
+});
+
+
   // Handle disconnecting player
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);

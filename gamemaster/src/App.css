@@ -99,6 +99,22 @@ body {
   text-decoration: underline;
 }
 
+.register-link {
+  margin-top: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.register-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+
 /*SignIn*/
 
 * {
@@ -197,6 +213,22 @@ select:focus {
 .signin-footer a:hover {
   text-decoration: underline;
 }
+
+.login-link {
+  margin-top: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.login-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -913,6 +945,25 @@ span.material-symbols-rounded {
   background-color: #681317; /* Darker green */
 }
 
+.character-button {
+  background: #2d2d2d;
+  color: #fff;
+  font-size: 1rem;
+  border: 2px solid #b22222;
+  border-radius: 8px;
+  padding: 10px 15px;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.character-button:hover {
+  background: #8b0000;
+  color: #ffd700;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .profile-container {
@@ -1094,6 +1145,26 @@ span.material-symbols-rounded {
 .players_icons img {
   border-radius: 50%; /* Optional: Make the image circular */
   margin-bottom: 10px; /* Space below the image */
+}
+
+.create-character-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #8b0000;
+  color: #fff;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.create-character-button:hover {
+  background: #b22222;
+  transform: scale(1.1);
 }
 
 /*SetUsername*/
