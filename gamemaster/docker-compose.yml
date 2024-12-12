@@ -1,3 +1,5 @@
+
+
 services:
   frontend:
     build:
@@ -5,9 +7,9 @@ services:
       dockerfile: ./src/Dockerfile
     ports:
       - "3000:3000"
-    depends_on:
-      - backend1
-      - backend2
+    volumes:
+      - ./public:/app/public  # Mount `public` directly
+      - .:/app            # Map `src` dynamically
     environment:
       - REACT_APP_API_URL=http://localhost/api
 
@@ -17,10 +19,11 @@ services:
       dockerfile: ./BackEnd/Dockerfile
     ports:
       - "5001:5000"
+    volumes:
+      - ./public:/app/public  # Mount `public` dynamically
+      - .:/app        # Map backend code dynamically
     environment:
       - DB_HOST=database1
-    depends_on:
-      - database1
 
   backend2:
     build:
@@ -41,9 +44,10 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - db1_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d  # Mount init scripts
 
   database2:
     image: mysql:8
@@ -56,13 +60,14 @@ services:
       - "3307:3306"
     volumes:
       - db2_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d  # Mount init scripts
 
   revproxy:
     image: nginx:latest
     ports:
       - "80:80"
     volumes:
-      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - frontend
       - backend1
