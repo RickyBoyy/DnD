@@ -4,10 +4,10 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="M0ssaXphybHZ1SHobrus-79" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+        <mxCell id="M0ssaXphybHZ1SHobrus-79" value="" style="whiteSpace=wrap;html=1;aspect=fixed;verticalAlign=bottom;" vertex="1" parent="1">
           <mxGeometry x="210" y="70" width="850" height="850" as="geometry" />
         </mxCell>
-        <mxCell id="M0ssaXphybHZ1SHobrus-44" value="Cliente" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+        <mxCell id="M0ssaXphybHZ1SHobrus-44" value="Utilizador" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
           <mxGeometry x="70" y="368" width="40" height="90" as="geometry" />
         </mxCell>
         <mxCell id="M0ssaXphybHZ1SHobrus-46" value="IA" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
