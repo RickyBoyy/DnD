@@ -1,62 +1,78 @@
+
+
 services:
-  reverse_proxy:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./src/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./public:/app/public  # Mount `public` directly
+      - .:/app            # Map `src` dynamically
+    environment:
+      - REACT_APP_API_URL=http://localhost/api
+
+  backend1:
+    build:
+      context: .
+      dockerfile: ./BackEnd/Dockerfile
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./public:/app/public  # Mount `public` dynamically
+      - .:/app        # Map backend code dynamically
+    environment:
+      - DB_HOST=database1
+
+  backend2:
+    build:
+      context: .
+      dockerfile: ./BackEnd/Dockerfile
+    ports:
+      - "5002:5000"
+    environment:
+      - DB_HOST=database2
+    depends_on:
+      - database2
+
+  database1:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app_db1
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - db1_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d  # Mount init scripts
+
+  database2:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app_db2
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - db2_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d  # Mount init scripts
+
+  revproxy:
     image: nginx:latest
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      - frontend
       - backend1
       - backend2
 
-  backend1:
-    build:
-      context: ./BackEnd
-      dockerfile: Dockerfile
-    environment:
-      - DATABASE_HOST=primary_db
-      - NODE_ENV=production
-    ports:
-      - "5001:5000"  # Map a unique port for each backend
-    depends_on:
-      - primary_db
-
-  backend2:
-    build:
-      context: ./BackEnd
-      dockerfile: Dockerfile
-    environment:
-      - DATABASE_HOST=replica_db
-      - NODE_ENV=production
-    ports:
-      - "5002:5000"
-    depends_on:
-      - replica_db
-
-  primary_db:
-    image: mysql:latest
-    environment:
-      - MYSQL_ROOT_PASSWORD=YourSecurePassword123!
-      - MYSQL_DATABASE=dnd
-    volumes:
-      - primary_data:/var/lib/mysql
-
-  replica_db:
-    image: mysql:latest
-    environment:
-      - MYSQL_ROOT_PASSWORD=YourSecurePassword123!
-      - MYSQL_DATABASE=dnd
-      - PRIMARY_DB_HOST=primary_db
-    volumes:
-      - replica_data:/var/lib/mysql
-
-  frontend:
-    build:
-      context: ./src
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"  # Serve the frontend on port 3000
-
 volumes:
-  primary_data:
-  replica_data:
+  db1_data:
+  db2_data:

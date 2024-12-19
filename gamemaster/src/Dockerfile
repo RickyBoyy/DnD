@@ -1,22 +1,18 @@
-# Etapa de build
-FROM node:16 AS build-stage
+# Example Frontend Dockerfile
+FROM node:16-alpine
 
 WORKDIR /app
 
-# Copiar o arquivo de pacotes da raiz
+# Copy package.json and install dependencies
 COPY package*.json ./
+RUN npm install
 
-# Instalar apenas as dependências do frontend
-RUN npm install --only=prod
+# Copy the entire project root to the container
+COPY ./ ./
 
-# Copiar o código-fonte do frontend
-COPY ./src
 
-# Build da aplicação React
+
+# Build the frontend (if using React or similar)
 RUN npm run build
 
-# Etapa para usar NGINX para servir os arquivos estáticos
-FROM nginx:alpine
-COPY --from=build-stage /app/build /usr/share/nginx/html
-
-EXPOSE 80
+CMD ["npm", "start"]

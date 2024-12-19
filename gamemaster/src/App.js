@@ -37,16 +37,16 @@ const Layout = () => {
   return (
     <>
       {/* Conditionally render the Header */}
-      {showHeader && <Header />}
+      
       {/* Define all the routes */}
       <Routes>
-        <Route path="/" element={<SignInPage />} />
+        <Route path="/" element={<LoginPage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/hostorplayer" element={<HostOrPlayerPage />} />
         <Route path="/lobby/:gameCode" element={<LobbyPage />} />
         <Route path="/createcharacter" element={<CreateCharacterPage />} />
-        <Route path="/game" element={<GamePage />} />
+        <Route path="/game/:gameCode" element={<GamePage />} />
         <Route path="/characters" element={<CharactersPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/set-username" element={<SetUsernamePage />} />

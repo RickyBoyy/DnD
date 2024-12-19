@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../socket"; // Use common socket instance
 import "../App.css";
@@ -6,17 +6,46 @@ import "../App.css";
 const HostOrPlayer = () => {
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [playerCode, setPlayerCode] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // State to store error message
   const navigate = useNavigate();
+
+  // Listen for 'lobbyError' event and set the error message
+  useEffect(() => {
+    // Listen for errors when joining the lobby
+    socket.on("lobbyError", (message) => {
+      setErrorMessage(message); // Update error message state
+    });
+  
+    // Listen for successful player joining the lobby
+    socket.on("playerJoined", (players) => {
+      // Navigate to the lobby page after the player successfully joins
+      navigate(`/lobby/${playerCode}`);
+    });
+  
+    return () => {
+      // Clean up socket listeners
+      socket.off("lobbyError");
+      socket.off("playerJoined");
+    };
+  }, [playerCode]); // playerCode needs to be in dependencies so it captures the correct code when joining
+  
 
   const handleHostClick = () => {
     const token = localStorage.getItem("token");
-    const username = JSON.parse(atob(token.split('.')[1])).username; // Decode username from token
-  
-    socket.emit("createLobby", { username }, (gameCode) => {
-      navigate(`/lobby/${gameCode}`);
-    });
+    if (!token) {
+      console.error("Token is missing!");
+      return;
+    }
+
+    try {
+      const username = JSON.parse(atob(token.split('.')[1])).username;
+      socket.emit("createLobby", { username }, (gameCode) => {
+        navigate(`/lobby/${gameCode}`);
+      });
+    } catch (error) {
+      console.error("Error decoding token or extracting username:", error);
+    }
   };
-  
 
   const handlePlayerClick = () => {
     setShowCodeInput(true);
@@ -24,14 +53,21 @@ const HostOrPlayer = () => {
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
-  
+
     const token = localStorage.getItem("token");
-    const username = JSON.parse(atob(token.split('.')[1])).username;
-  
-    socket.emit("joinLobbyRoom", { gameCode: playerCode, username });
-    navigate(`/lobby/${playerCode}`);
+    if (!token) {
+      console.error("Token is missing!");
+      return;
+    }
+
+    try {
+      const username = JSON.parse(atob(token.split('.')[1])).username;
+      socket.emit("joinLobbyRoom", { gameCode: playerCode, username });
+      // Don't navigate yet, we'll wait for the server response
+    } catch (error) {
+      console.error("Error decoding token or extracting username:", error);
+    }
   };
-  
 
   return (
     <div id="HostOrPlayer">
@@ -71,6 +107,7 @@ const HostOrPlayer = () => {
                 Cancel
               </button>
             </form>
+            {errorMessage && <div className="error_message">{errorMessage}</div>} {/* Display error message */}
           </div>
         </div>
       )}
