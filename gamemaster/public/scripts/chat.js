@@ -5,6 +5,10 @@
   const sendButton = document.querySelector("#send_btn");
   let typingChatDiv = null;
 
+  const socket = io("http://localhost:3000", {
+    transports: ["websocket"],
+  });
+
   const createChatElement = (message, className) => {
     const chatDiv = document.createElement("div");
     chatDiv.classList.add("chat", className);
@@ -51,9 +55,31 @@
       createChatElement(userText, "outgoing");
       chatInput.value = "";
       showTypingAnimation();
-      getChatResponse(userText);
+
+      const actionData = {
+        action: "attack",
+        player: "Elven Mage",
+        target: "Orc",
+      };
+
+      // Send action data to the server
+      socket.emit("gameAction", actionData, (response) => {
+        console.log("Event received:", data);
+        hideTypingAnimation();
+        if (response.success) {
+          const { response: message, game_state } = response.response;
+          createChatElement(message, "incoming");
+
+          // Optionally, log or display updated game state
+          console.log("Updated Game State:", game_state);
+        } else {
+          createChatElement("Error: " + response.error, "incoming");
+        }
+      });
     }
   };
+
+  // Function to handle copying chat response
   const copyResponse = (copyBtn) => {
     const responseTextElement = copyBtn.parentElement.querySelector("p");
     if (responseTextElement) {
@@ -72,6 +98,7 @@
     }
   };
 
+  // Function to show the typing animation
   const showTypingAnimation = () => {
     if (typingChatDiv) return;
 
@@ -107,6 +134,7 @@
     chatContainer.appendChild(typingChatDiv);
   };
 
+  // Function to hide the typing animation
   const hideTypingAnimation = () => {
     if (typingChatDiv) {
       typingChatDiv.remove();
@@ -114,5 +142,14 @@
     }
   };
 
-  sendButton.addEventListener("click", handleOutgoingChat);
+  // Event listener for the send button
+  sendButton.addEventListener("click", () => {
+    const userText = chatInput.value.trim();
+    if (userText) {
+      console.log("Sending command to server:", userText); // Debug log
+      socket.emit("playerAction", { action: userText, player: "Player Name" });
+      chatInput.value = "";
+      showTypingAnimation();
+    }
+  });
 })();

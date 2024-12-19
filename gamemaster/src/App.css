@@ -523,7 +523,6 @@ button.submit-btn:hover {
   right: -15px;
 }
 
-/* Remaining styling for player slots, game code, and button */
 .game-code-section {
   display: flex;
   justify-content: center;
@@ -1038,6 +1037,8 @@ span.material-symbols-rounded {
   align-items: center;
   height: 100%;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
 }
 .stats-container {
   display: grid;
