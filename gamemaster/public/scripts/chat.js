@@ -4,9 +4,26 @@
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
   let typingChatDiv = null;
-
+  const token = localStorage.getItem("token");
   const socket = io("http://localhost:3000", {
-    transports: ["websocket"],
+    transports: ["websocket", "polling"],
+    auth: {
+      token: token,
+    },
+
+    withCredentials: true,
+  });
+
+  socket.on("connect", () => {
+    console.log("Successfully connected to the server");
+  });
+
+  socket.on("connect_error", (error) => {
+    console.error("Connection failed:", error);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log("Disconnected from the server:", reason);
   });
 
   const createChatElement = (message, className) => {
@@ -63,9 +80,10 @@
       };
 
       // Send action data to the server
-      socket.emit("gameAction", actionData, (response) => {
-        console.log("Event received:", data);
-        hideTypingAnimation();
+      socket.emit("playerAction", actionData, (response) => {
+        console.log("Event received:", response);
+        hideTypingAnimation(); // Hide typing animation
+
         if (response.success) {
           const { response: message, game_state } = response.response;
           createChatElement(message, "incoming");

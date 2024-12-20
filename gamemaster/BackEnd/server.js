@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const http = require("http");
-const socketIo = require("socket.io");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -11,7 +10,7 @@ const authController = require("./authController");
 const app = express();
 const server = http.createServer(app);
 const MAX_PLAYERS = 6;
-const io = socketIo(server, {
+const io = require("socket.io")(server, {
   cors: {
     origin: "http://localhost:3001",
     methods: ["GET", "POST"],
@@ -33,29 +32,46 @@ const jwt = require("jsonwebtoken");
 
 const authenticate = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) throw new Error("No token provided");
+    // Log the incoming request for debugging
+    console.log("Incoming request:", {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+    });
 
+    // Check for the Authorization header and extract the token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      console.error("No token provided in the Authorization header");
+      throw new Error("No token provided");
+    }
+
+    console.log("Token extracted:", token);
+
+    // Verify the token
     req.user = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Token verified. Decoded user info:", req.user);
+
+    // Proceed to the next middleware or route
     next();
   } catch (err) {
+    console.error("Authentication error:", err.message || "Unauthorized");
     return res.status(401).json({ message: err.message || "Unauthorized" });
   }
 };
 
-// Store lobby data
-const lobbies = {}; // Store game lobbies in memory (should be persisted for production)
+const lobbies = {};
 
-// Socket.IO connection handling
 io.on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
   const token = socket.handshake.auth?.token;
+  console.log("Received token:", token);
+
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.username = decoded.username;
-      console.log("Token verified. Username:", socket.username);
+      console.log("Token verified. Username:", decoded.username);
     } catch (err) {
       console.error("Invalid token:", err.message);
       socket.disconnect();
@@ -67,26 +83,43 @@ io.on("connection", (socket) => {
     return;
   }
 
-  // Handle player actions
   socket.on("playerAction", (data, callback) => {
     console.log("Received playerAction:", data);
+    console.log("Callback function:", callback);
+
+    if (typeof callback !== "function") {
+      console.error("Callback is not a function");
+      return;
+    }
+
     if (data && data.action) {
-      callback({
+      const successMessage = `Action '${data.action}' processed for user '${socket.username}'`;
+
+      const response = {
         success: true,
-        message: `Action '${data.action}' processed for user '${socket.username}'`,
-      });
+        response: successMessage,
+        game_state: {
+          /* Updated game state data */
+        },
+      };
+
+      callback(response);
     } else {
-      callback({ success: false, message: "Invalid action data" });
+      const errorResponse = {
+        success: false,
+        error: "Invalid action data",
+      };
+
+      callback(errorResponse);
     }
   });
 
-  // Handle creating a new lobby
   socket.on("createLobby", (data, callback) => {
-    const username = socket.username || "Unknown Host"; // Fallback if undefined
+    const username = socket.username || "Unknown Host";
     const gameCode = generateGameCode();
 
     lobbies[gameCode] = {
-      players: [{ id: socket.id, name: socket.username }], // Add host with username
+      players: [{ id: socket.id, name: socket.username }],
       hostId: socket.id,
     };
 
@@ -95,7 +128,6 @@ io.on("connection", (socket) => {
     callback(gameCode);
   });
 
-  // Handle joining an existing lobby
   socket.on("joinLobbyRoom", ({ gameCode, username }) => {
     console.log("Received joinLobbyRoom event with:", { gameCode, username });
 
@@ -127,15 +159,20 @@ io.on("connection", (socket) => {
     io.to(gameCode).emit("playerJoined", lobby.players);
   });
 
-  // Handle game actions
   socket.on("gameAction", (data, callback) => {
     const { action, player, target } = data;
+
+    if (!action || !player) {
+      return callback({
+        success: false,
+        message: "Invalid action or player data",
+      });
+    }
 
     console.log(
       `Received game action: ${action} by ${player} targeting ${target}`
     );
 
-    // Spawn Python process
     const pythonProcess = spawn("python", [
       "./gamemaster/Backend/GameMaster.py",
     ]);
@@ -153,8 +190,13 @@ io.on("connection", (socket) => {
 
     pythonProcess.on("close", () => {
       try {
-        const response = JSON.parse(result); // Parse the response from Python
+        const response = JSON.parse(result);
         console.log("Python Response:", response);
+
+        if (response.error) {
+          return callback({ success: false, message: response.error });
+        }
+
         callback({ success: true, response });
       } catch (error) {
         console.error("Error parsing Python response:", error);
@@ -165,12 +207,10 @@ io.on("connection", (socket) => {
       }
     });
 
-    // Send data to Python
     pythonProcess.stdin.write(input);
     pythonProcess.stdin.end();
   });
 
-  // Handle starting the game
   socket.on("startGame", (gameCode) => {
     const lobby = lobbies[gameCode];
 
@@ -186,14 +226,12 @@ io.on("connection", (socket) => {
     }
 
     console.log(`Game started for lobby ${gameCode}`);
-    io.to(gameCode).emit("gameStarted", { gameCode }); // Notify all players in the lobby
+    io.to(gameCode).emit("gameStarted", { gameCode });
   });
 
-  // Handle disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
 
-    // Remove the player from all lobbies they are in
     for (const gameCode in lobbies) {
       const lobby = lobbies[gameCode];
       const playerIndex = lobby.players.findIndex(
@@ -201,10 +239,9 @@ io.on("connection", (socket) => {
       );
 
       if (playerIndex !== -1) {
-        lobby.players.splice(playerIndex, 1); // Remove player
+        lobby.players.splice(playerIndex, 1);
         io.to(gameCode).emit("playerLeft", lobby.players);
 
-        // If no players remain, delete the lobby
         if (lobby.players.length === 0) {
           delete lobbies[gameCode];
         }
@@ -213,12 +250,10 @@ io.on("connection", (socket) => {
   });
 });
 
-// Helper function to generate a unique code
 function generateGameCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-// API routes
 app.post("/register", authController.register);
 app.post("/login", authController.login);
 app.post("/set-username", authController.setUsername);
