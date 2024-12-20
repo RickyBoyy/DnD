@@ -11,7 +11,6 @@ COPY package*.json ./
 RUN npm install
 
 # Now copy the rest of the app
-COPY ./ ./  # Copy the entire project into the container
-
+COPY ./ ./  
 
 CMD ["npm", "start"]

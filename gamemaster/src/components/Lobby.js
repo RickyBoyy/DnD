@@ -6,8 +6,9 @@ import "../App.css";
 const Lobby = () => {
   const { gameCode } = useParams();
   const navigate = useNavigate(); // React Router's navigation hook
-  const [players, setPlayers] = useState([{ id: "hostId", name: "Host" }]);
+  const [players, setPlayers] = useState([]);
   const [username, setUsername] = useState("");
+  const [isHost, setIsHost] = useState(false);
   const maxPlayers = 6;
 
   useEffect(() => {
@@ -31,11 +32,19 @@ const Lobby = () => {
     // Handle playerJoined event to update the player list
     socket.on("playerJoined", (updatedPlayers) => {
       setPlayers(updatedPlayers); // Update the players state
+      if (updatedPlayers[0]?.name === username) {
+        setIsHost(true); // First player in the list is the host
+      }
     });
 
     // Handle playerLeft event to update the player list when a player leaves
     socket.on("playerLeft", (updatedPlayers) => {
       setPlayers(updatedPlayers); // Update the players state
+      if (updatedPlayers[0]?.name === username) {
+        setIsHost(true); // Reassign host if the previous host left
+      } else {
+        setIsHost(false);
+      }
     });
 
     // Listen for the gameStarted event to navigate all players to the game page
@@ -78,9 +87,11 @@ const Lobby = () => {
           ))}
         </div>
 
-        <button className="start-game-btn" onClick={startGame}>
-          Start Game
-        </button>
+        {isHost && (
+          <button className="start-game-btn" onClick={startGame}>
+            Start Game
+          </button>
+        )}
       </div>
     </div>
   );
