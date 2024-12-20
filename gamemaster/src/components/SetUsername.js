@@ -25,7 +25,7 @@ const SetUsername = () => {
     setError(null);
 
     try {
-      const response = await axios.post('http://localhost:3000/set-username', {
+      const response = await axios.post('http://localhost:3001/set-username', {
         email,
         username,
       });

@@ -12,11 +12,8 @@ COPY package*.json ./
 # Install only production dependencies (you can adjust this if you need development dependencies)
 RUN npm install --only=prod
 
-# Copy the rest of the application code into the container
-COPY ./BackEnd ./ 
-
-# Expose port 5000 for the application
-EXPOSE 5000
+# Now copy the rest of the app
+COPY ./ ./  
 
 # Command to run your application
 CMD ["npm", "start"]

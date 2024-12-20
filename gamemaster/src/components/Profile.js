@@ -17,7 +17,7 @@ const Profile = () => {
           throw new Error("No token found");
         }
 
-        const response = await axios.get("http://localhost:3000/profile", {
+        const response = await axios.get("http://localhost:3001/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -26,7 +26,7 @@ const Profile = () => {
         setProfile(response.data);
       } catch (error) {
         console.error("Error fetching profile", error);
-        setError("Error fetching profile");
+        setError(error.response?.data?.message || "Error fetching profile");
       }
     };
 
@@ -34,11 +34,11 @@ const Profile = () => {
   }, []);
 
   const handlePlayButtonClick = () => {
-    navigate("/hostorplayer"); // Navigate to HostOrPlayer page
+    navigate("/hostorplayer");
   };
 
   const handleNavigateCharacter = () => {
-    navigate("/characters"); // Navigate to Character page
+    navigate("/characters");
   };
 
   if (error) {
@@ -64,7 +64,7 @@ const Profile = () => {
 
       {/* Navigate Home Button */}
       <button className="character-button" onClick={handleNavigateCharacter}>
-        Your Character's
+        Your Characters
       </button>
     </div>
   );
