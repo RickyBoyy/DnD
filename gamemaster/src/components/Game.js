@@ -3,13 +3,29 @@ import { HelmetProvider, Helmet } from "react-helmet-async";
 
 const Game = () => {
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "/scripts/chat.js";
-    script.defer = true;
-    document.body.appendChild(script);
+    const loadScript = (src, onLoad) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.defer = true;
+      script.onload = onLoad;
+      document.body.appendChild(script);
+      return script;
+    };
+
+    const socketIoScript = loadScript(
+      "https://cdn.socket.io/4.7.2/socket.io.min.js",
+      () => {
+        console.log("Socket.IO script loaded");
+
+        loadScript("/scripts/chat.js", () => console.log("chat.js loaded"));
+      }
+    );
+
     document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.removeChild(script);
+      // Cleanup scripts and styles
+      document.body.removeChild(socketIoScript);
       document.body.style.overflow = "auto";
     };
   }, []);
