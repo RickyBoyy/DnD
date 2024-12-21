@@ -4,7 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const authController = require("./authController");
-const { authenticate } = require("../middleware/authenticate");
+const { authenticate } = require("../../middleware/authenticate");
 
 const app = express();
 
