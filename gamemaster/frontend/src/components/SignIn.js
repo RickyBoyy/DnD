@@ -49,11 +49,16 @@ const SignIn = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3001/register", {
+      // Get API URL from environment variable
+      const apiUrl = "http://localhost:5000"; // Default fallback if the env variable is not set
+
+      // Use the environment variable for the API URL
+      const response = await axios.post("http://localhost:5000/register", {
         email,
         password,
         country,
       });
+      
 
       setError(null);
       alert("Registration successful!");

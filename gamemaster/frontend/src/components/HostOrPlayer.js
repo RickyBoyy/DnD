@@ -17,11 +17,13 @@ const HostOrPlayer = () => {
     } else {
       console.log("Socket connected:", socket.id);
     }
+
     socket.on("lobbyError", (message) => {
       setErrorMessage(message);
     });
 
     socket.on("playerJoined", (players) => {
+      // Wait until player joins, then navigate
       navigate(`/lobby/${playerCode}`);
     });
 
@@ -29,7 +31,7 @@ const HostOrPlayer = () => {
       socket.off("lobbyError");
       socket.off("playerJoined");
     };
-  }, [playerCode]);
+  }, [playerCode, navigate]);  // Ensure navigate is in the dependency list
 
   const getUsernameFromToken = () => {
     const token = localStorage.getItem("token");
@@ -50,19 +52,19 @@ const HostOrPlayer = () => {
   const handleHostClick = () => {
     const username = getUsernameFromToken();
     if (!username) return;
-  
+
     console.log("Creating lobby with username:", username);
-  
+
     socket.emit("createLobby", { username }, (gameCode) => {
       if (gameCode) {
         console.log("Lobby created with game code:", gameCode);
-        navigate(`/lobby/${gameCode}`);
+        setPlayerCode(gameCode);  // Set the player code here
+        socket.emit("joinLobbyRoom", { gameCode, username });  // Emit the event to join the lobby
       } else {
         console.error("Failed to create a lobby. No game code received.");
       }
     });
   };
-  
 
   const handlePlayerClick = () => {
     setShowCodeInput(true);
@@ -70,12 +72,15 @@ const HostOrPlayer = () => {
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
-
+  
     const username = getUsernameFromToken();
     if (!username) return;
-
+  
+    console.log("Joining lobby with code:", playerCode); // Add this line to check the player code
+  
     socket.emit("joinLobbyRoom", { gameCode: playerCode, username });
   };
+  
 
   return (
     <div id="HostOrPlayer">

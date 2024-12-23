@@ -1,17 +1,20 @@
-# Example Dockerfile for Auth Server
-FROM node:16-alpine
+# Use the official Node.js image
+FROM node:20
 
-# Set the working directory in the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the root-level package.json and package-lock.json to the working directory
-COPY ../../package.json ../../package-lock.json ./
+# Copy the package.json and package-lock.json files
+COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --omit=dev
+# Install dependencies
+RUN npm install
 
-# Copy only the authServer code into the container
-COPY ./ ./
+# Copy the rest of the application code
+COPY . .
 
-# Command to start the application
+# Expose the port that the server will use (adjust to port 5000 if that's what the app is using)
+EXPOSE 5000  
+
+# Command to start the server
 CMD ["node", "authServer.js"]

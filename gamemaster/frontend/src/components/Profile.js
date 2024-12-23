@@ -17,7 +17,7 @@ const Profile = () => {
           throw new Error("No token found");
         }
 
-        const response = await axios.get("http://localhost:3001/profile", {
+        const response = await axios.get("http://localhost:5000/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

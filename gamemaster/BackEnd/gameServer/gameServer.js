@@ -5,12 +5,18 @@ const jwt = require("jsonwebtoken");
 
 const MAX_PLAYERS = 6;
 
-const server = http.createServer();
+// Directly create an HTTP server without using 'app'
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Game server is running');
+});
+
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Update this if your frontend runs elsewhere
+    origin: '*',
     methods: ["GET", "POST"],
   },
+  transports: ['websocket'], 
 });
 
 const lobbies = {}; // Store lobbies in memory
@@ -20,22 +26,23 @@ io.on("connection", (socket) => {
 
   socket.username = null; // Initialize to ensure no stale username is attached
 
-  const token = socket.handshake.auth.token;
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.username = decoded.username;
-      console.log(`User authenticated: ${socket.username}`);
-    } catch (err) {
-      console.error("Invalid token:", err.message);
-      socket.emit("lobbyError", "Authentication failed. Invalid token.");
-      return socket.disconnect(true);
-    }
-  } else {
-    console.error("Token missing in socket handshake.");
-    socket.emit("lobbyError", "Authentication failed. Token missing.");
+const token = socket.handshake.auth.token;
+if (token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.username = decoded.username;
+    console.log(`User authenticated: ${socket.username}`);
+  } catch (err) {
+    console.error("Invalid token:", err.message);
+    socket.emit("lobbyError", "Authentication failed. Invalid token.");
     return socket.disconnect(true);
   }
+} else {
+  console.error("Token missing in socket handshake.");
+  socket.emit("lobbyError", "Authentication failed. Token missing.");
+  return socket.disconnect(true);
+}
+
 
   // Lobby management
   socket.on("createLobby", ({ username }, callback) => {
@@ -110,87 +117,92 @@ io.on("connection", (socket) => {
       }
     }
   });
-});
-socket.on("playerAction", (data, callback) => {
-  console.log("Received playerAction:", data);
-  console.log("Callback function:", callback);
 
-  if (typeof callback !== "function") {
-    console.error("Callback is not a function");
-    return;
-  }
+  // Function for player actions
+  socket.on("playerAction", (data, callback) => {
+    console.log("Received playerAction:", data);
+    console.log("Callback function:", callback);
 
-  if (data && data.action) {
-    const successMessage = `Action '${data.action}' processed for user '${socket.username}'`;
+    if (typeof callback !== "function") {
+      console.error("Callback is not a function");
+      return;
+    }
 
-    const response = {
-      success: true,
-      response: successMessage,
-      game_state: {
-        /* Updated game state data */
-      },
-    };
+    if (data && data.action) {
+      const successMessage = `Action '${data.action}' processed for user '${socket.username}'`;
 
-    callback(response);
-  } else {
-    const errorResponse = {
-      success: false,
-      error: "Invalid action data",
-    };
+      const response = {
+        success: true,
+        response: successMessage,
+        game_state: {
+          /* Updated game state data */
+        },
+      };
 
-    callback(errorResponse);
-  }
-});
-socket.on("gameAction", (data, callback) => {
-  const { action, player, target } = data;
-
-  if (!action || !player) {
-    return callback({
-      success: false,
-      message: "Invalid action or player data",
-    });
-  }
-
-  console.log(
-    `Received game action: ${action} by ${player} targeting ${target}`
-  );
-
-  const pythonProcess = spawn("python", ["./gamemaster/Backend/GameMaster.py"]);
-
-  const input = JSON.stringify({ action, player, target });
-  let result = "";
-
-  pythonProcess.stdout.on("data", (data) => {
-    result += data.toString();
-  });
-
-  pythonProcess.stderr.on("data", (error) => {
-    console.error("Python Error:", error.toString());
-  });
-
-  pythonProcess.on("close", () => {
-    try {
-      const response = JSON.parse(result);
-      console.log("Python Response:", response);
-
-      if (response.error) {
-        return callback({ success: false, message: response.error });
-      }
-
-      callback({ success: true, response });
-    } catch (error) {
-      console.error("Error parsing Python response:", error);
-      callback({
+      callback(response);
+    } else {
+      const errorResponse = {
         success: false,
-        error: "Invalid response from GameMaster.py",
-      });
+        error: "Invalid action data",
+      };
+
+      callback(errorResponse);
     }
   });
 
-  pythonProcess.stdin.write(input);
-  pythonProcess.stdin.end();
+  // Function for game actions
+  socket.on("gameAction", (data, callback) => {
+    const { action, player, target } = data;
+
+    if (!action || !player) {
+      return callback({
+        success: false,
+        message: "Invalid action or player data",
+      });
+    }
+
+    console.log(
+      `Received game action: ${action} by ${player} targeting ${target}`
+    );
+
+    const pythonProcess = spawn("python", ["./gamemaster/Backend/GameMaster.py"]);
+
+    const input = JSON.stringify({ action, player, target });
+    let result = "";
+
+    pythonProcess.stdout.on("data", (data) => {
+      result += data.toString();
+    });
+
+    pythonProcess.stderr.on("data", (error) => {
+      console.error("Python Error:", error.toString());
+    });
+
+    pythonProcess.on("close", () => {
+      try {
+        const response = JSON.parse(result);
+        console.log("Python Response:", response);
+
+        if (response.error) {
+          return callback({ success: false, message: response.error });
+        }
+
+        callback({ success: true, response });
+      } catch (error) {
+        console.error("Error parsing Python response:", error);
+        callback({
+          success: false,
+          error: "Invalid response from GameMaster.py",
+        });
+      }
+    });
+
+    pythonProcess.stdin.write(input);
+    pythonProcess.stdin.end();
+  });
 });
 
+// Function to generate a game code
 function generateGameCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
