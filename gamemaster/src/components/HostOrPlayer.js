@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import socket from "../socket"; // Ensure this points to the correct socket instance
 import "../App.css";
+import { io } from "socket.io-client";
 
 const HostOrPlayer = () => {
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -11,12 +12,26 @@ const HostOrPlayer = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!socket.connected) {
-      console.log("Socket not connected, attempting to reconnect...");
-      socket.connect();
-    } else {
-      console.log("Socket connected:", socket.id);
-    }
+    const socket = io("http://localhost:3002", {
+      auth: {
+        token: localStorage.getItem("token"), // Send the token for authentication if needed
+      },
+      withCredentials: true, // Ensure credentials (cookies) are sent if necessary
+    });
+    socket.on("connect", () => {
+      console.log("Socket connected successfully with ID:", socket.id);
+    });
+
+    // Log when the socket encounters an error
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    // Handle socket events
     socket.on("lobbyError", (message) => {
       setErrorMessage(message);
     });
@@ -25,6 +40,7 @@ const HostOrPlayer = () => {
       navigate(`/lobby/${playerCode}`);
     });
 
+    // Cleanup
     return () => {
       socket.off("lobbyError");
       socket.off("playerJoined");
@@ -48,22 +64,23 @@ const HostOrPlayer = () => {
   };
 
   const handleHostClick = () => {
-    const username = getUsernameFromToken();
+    console.log("Host button clicked");
+    const username = getUsernameFromToken(); // Get the username from the token
     if (!username) return;
-  
+
     console.log("Creating lobby with username:", username);
-  
+
+    // Emit the 'createLobby' event with username and a callback
     socket.emit("createLobby", { username }, (gameCode) => {
+      console.log("Frontend callback triggered with game code:", gameCode);
       if (gameCode) {
-        console.log("Lobby created with game code:", gameCode);
+        console.log("Navigating to:", `/lobby/${gameCode}`);
         navigate(`/lobby/${gameCode}`);
       } else {
         console.error("Failed to create a lobby. No game code received.");
       }
     });
   };
-  
-
   const handlePlayerClick = () => {
     setShowCodeInput(true);
   };
@@ -87,13 +104,23 @@ const HostOrPlayer = () => {
           <div className="left_choice">
             <div className="card_host" onClick={handleHostClick}>
               <h2>Host</h2>
-              <p>As a Host, you'll create a new Dungeons & Dragons game and invite others to join. You'll take on the role of the Dungeon Master, guiding the story, setting up challenges, and controlling the adventure for the players.</p>
+              <p>
+                As a Host, you'll create a new Dungeons & Dragons game and
+                invite others to join. You'll take on the role of the Dungeon
+                Master, guiding the story, setting up challenges, and
+                controlling the adventure for the players.
+              </p>
             </div>
           </div>
           <div className="right_choice">
             <div className="card_player" onClick={handlePlayerClick}>
               <h2>Player</h2>
-              <p>As a Player, you can join an existing Dungeons & Dragons game by entering a code provided by the Host. Once in, you’ll embark on an adventure, collaborate with other players, and face challenges together.</p>
+              <p>
+                As a Player, you can join an existing Dungeons & Dragons game by
+                entering a code provided by the Host. Once in, you’ll embark on
+                an adventure, collaborate with other players, and face
+                challenges together.
+              </p>
             </div>
           </div>
         </div>
@@ -115,7 +142,9 @@ const HostOrPlayer = () => {
                 Cancel
               </button>
             </form>
-            {errorMessage && <div className="error_message">{errorMessage}</div>}
+            {errorMessage && (
+              <div className="error_message">{errorMessage}</div>
+            )}
           </div>
         </div>
       )}

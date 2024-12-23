@@ -114,7 +114,6 @@ body {
   text-decoration: underline;
 }
 
-
 /*SignIn*/
 
 * {
@@ -228,7 +227,6 @@ select:focus {
 .login-link a:hover {
   text-decoration: underline;
 }
-
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -664,21 +662,13 @@ button.submit-btn:hover {
 }
 
 .chat-container {
-  max-height: 100vh;
+  height: 100%;
   padding-bottom: 150px;
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
-:where(.chat-container, textarea)::-webkit-scrollbar {
-  width: 6px;
-}
-:where(.chat-container, textarea)::-webkit-scrollbar-track {
-  background-color: var(--incoming-chat-bg);
-  border-radius: 25px;
-}
-:where(.chat-container, textarea)::-webkit-scrollbar-thumb {
-  background: var(--icon-color);
-  border-radius: 25px;
-}
+
 .chat-container .chat {
   padding: 25px 10px;
   display: flex;
@@ -844,7 +834,6 @@ span.material-symbols-rounded {
   padding: 8px;
   width: 80%;
 }
-
 
 /* Loading/Error message styling */
 .loading,

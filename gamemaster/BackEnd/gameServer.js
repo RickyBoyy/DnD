@@ -2,14 +2,18 @@ require("dotenv").config();
 const http = require("http");
 const socketIo = require("socket.io");
 const jwt = require("jsonwebtoken");
+const { spawn } = require("child_process");
+const path = require("path");
 
 const MAX_PLAYERS = 6;
 
 const server = http.createServer();
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Update this if your frontend runs elsewhere
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
+    allowedHeaders: ["Content-type"],
+    credentials: true,
   },
 });
 
@@ -21,6 +25,7 @@ io.on("connection", (socket) => {
   socket.username = null; // Initialize to ensure no stale username is attached
 
   const token = socket.handshake.auth.token;
+  console.log("Received token:", token);
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -39,37 +44,118 @@ io.on("connection", (socket) => {
 
   // Lobby management
   socket.on("createLobby", ({ username }, callback) => {
+    console.log("Received createLobby event for username:", username);
+
     const gameCode = generateGameCode();
-    const newLobby = {
-      gameCode,
-      players: [{ id: socket.id, name: username }],
+    console.log("Generated game code:", gameCode);
+
+    // Save the lobby details
+    lobbies[gameCode] = {
+      players: [{ name: username, position: "Hall" }],
+      enemies: [],
+      map: {},
     };
 
-    lobbies[gameCode] = newLobby; // Ensure this is set
-    callback(gameCode); // Ensure the callback sends the game code
-  });
+    console.log("Lobby created. Current lobbies:", lobbies);
 
-  socket.on("joinLobbyRoom", ({ gameCode, username }) => {
+    // Ensure that the callback is a function before calling it
+    if (typeof callback === "function") {
+      console.log("Triggering callback with game code:", gameCode);
+      callback(gameCode); // Send the game code back to the client
+    } else {
+      console.error("Callback is not a function or is undefined:", callback);
+    }
+  });
+  socket.on("joinLobbyRoom", ({ gameCode, username }, callback) => {
     const lobby = lobbies[gameCode];
 
     if (!lobby) {
-      return socket.emit("lobbyError", "Lobby not found.");
+      return callback({ success: false, message: "Lobby not found." });
     }
+
     if (lobby.players.length >= MAX_PLAYERS) {
-      return socket.emit("lobbyError", "Lobby is full.");
+      return callback({ success: false, message: "Lobby is full." });
     }
 
-    // Check if the player is already in the lobby
-    if (!lobby.players.some((player) => player.id === socket.id)) {
-      lobby.players.push({ id: socket.id, name: username });
-      console.log(`${username} joined lobby ${gameCode}`);
-    }
+    // Prepare data to send to GameMaster.py
+    const pythonProcess = spawn("python", [
+      path.join(__dirname, "GameMaster.py"),
+    ]);
 
-    // Join the socket.io room for the lobby
-    socket.join(gameCode);
+    const actionData = {
+      action: "join",
+      player: username,
+      game_state: lobby.game_state || {},
+      game_state: lobby.game_state || {},
+    };
 
-    // Notify all players in the lobby about the updated player list
-    io.to(gameCode).emit("playerJoined", lobby.players);
+    let result = "";
+
+    // Send action data to Python
+    pythonProcess.stdin.write(JSON.stringify(actionData));
+    pythonProcess.stdin.end();
+
+    pythonProcess.stdout.on("data", (data) => {
+      result += data.toString();
+    });
+
+    pythonProcess.stderr.on("data", (error) => {
+      console.error("Error from Python:", error.toString());
+    });
+
+    pythonProcess.on("close", () => {
+      try {
+        const response = JSON.parse(result); // Parse the response from Python
+
+        // Check for any errors in the Python response
+        if (response.error) {
+          console.error("Error from Python response:", response.error);
+
+          // Safeguard to ensure callback is a function
+          if (typeof callback === "function") {
+            callback({
+              success: false,
+              response: "Error: " + response.error,
+            });
+          } else {
+            console.error(
+              "Callback is not a function. Response: ",
+              response.error
+            );
+          }
+        } else {
+          console.log("GameMaster response:", response);
+
+          // Safeguard to ensure callback is a function
+          if (typeof callback === "function") {
+            callback({
+              success: true,
+              response: response.result, // Send the result from GameMaster.py
+            });
+          } else {
+            console.error(
+              "Callback is not a function. Response: ",
+              response.result
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing Python response:", error);
+
+        // Safeguard to ensure callback is a function
+        if (typeof callback === "function") {
+          callback({
+            success: false,
+            response: "Failed to process the action response.",
+          });
+        } else {
+          console.error(
+            "Callback is not a function. Error processing response:",
+            error
+          );
+        }
+      }
+    });
   });
 
   socket.on("startGame", (gameCode) => {
@@ -110,85 +196,62 @@ io.on("connection", (socket) => {
       }
     }
   });
-});
-socket.on("playerAction", (data, callback) => {
-  console.log("Received playerAction:", data);
-  console.log("Callback function:", callback);
 
-  if (typeof callback !== "function") {
-    console.error("Callback is not a function");
-    return;
-  }
+  socket.on("playerAction", (data, callback) => {
+    console.log("Received action:", data);
 
-  if (data && data.action) {
-    const successMessage = `Action '${data.action}' processed for user '${socket.username}'`;
-
-    const response = {
-      success: true,
-      response: successMessage,
-      game_state: {
-        /* Updated game state data */
-      },
-    };
-
-    callback(response);
-  } else {
-    const errorResponse = {
-      success: false,
-      error: "Invalid action data",
-    };
-
-    callback(errorResponse);
-  }
-});
-socket.on("gameAction", (data, callback) => {
-  const { action, player, target } = data;
-
-  if (!action || !player) {
-    return callback({
-      success: false,
-      message: "Invalid action or player data",
-    });
-  }
-
-  console.log(
-    `Received game action: ${action} by ${player} targeting ${target}`
-  );
-
-  const pythonProcess = spawn("python", ["./gamemaster/Backend/GameMaster.py"]);
-
-  const input = JSON.stringify({ action, player, target });
-  let result = "";
-
-  pythonProcess.stdout.on("data", (data) => {
-    result += data.toString();
-  });
-
-  pythonProcess.stderr.on("data", (error) => {
-    console.error("Python Error:", error.toString());
-  });
-
-  pythonProcess.on("close", () => {
-    try {
-      const response = JSON.parse(result);
-      console.log("Python Response:", response);
-
-      if (response.error) {
-        return callback({ success: false, message: response.error });
-      }
-
-      callback({ success: true, response });
-    } catch (error) {
-      console.error("Error parsing Python response:", error);
-      callback({
-        success: false,
-        error: "Invalid response from GameMaster.py",
-      });
+    console.log("Callback is a function:", typeof callback === "function");
+    if (typeof callback !== "function") {
+      console.error("Callback is not a function:", callback);
+      return;
     }
-  });
 
-  pythonProcess.stdin.write(input);
-  pythonProcess.stdin.end();
+    const pythonProcess = spawn("python", [
+      path.join(__dirname, "GameMaster.py"),
+    ]);
+
+    // Send action data to Python script
+    const inputData = JSON.stringify(data);
+    let result = "";
+
+    pythonProcess.stdin.write(inputData);
+    pythonProcess.stdin.end();
+
+    pythonProcess.stdout.on("data", (data) => {
+      result += data.toString();
+    });
+
+    pythonProcess.stderr.on("data", (error) => {
+      console.error("Error from Python:", error.toString());
+    });
+
+    pythonProcess.on("close", () => {
+      try {
+        const response = JSON.parse(result); // Parse the response from Python
+
+        // Check for any errors in the Python response
+        if (response.error) {
+          console.error("Error from Python response:", response.error);
+          callback({
+            success: false,
+            response: "Error: " + response.error,
+          });
+        } else {
+          console.log("GameMaster response:", response);
+          callback({
+            success: true,
+            response: response.result, // Send the result from GameMaster.py
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing Python response:", error);
+        callback({
+          success: false,
+          response: "Failed to process the action response.",
+        });
+      }
+    });
+  });
 });
 
 function generateGameCode() {
