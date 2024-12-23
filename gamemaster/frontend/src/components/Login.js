@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom"; // Import Link from react-router-dom
+import { useNavigate, Link } from "react-router-dom";
 import "../App.css";
 import logoImage from "../assets/logo.png";
 
@@ -13,10 +13,9 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3001/login", {
-        email,
-        password,
-      });
+      // Use the environment variable for the API URL
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000"; // Fallback to localhost if not set
+      const response = await axios.post(`${apiUrl}/login`, { email, password });
 
       // Save the token to localStorage
       localStorage.setItem("token", response.data.token);

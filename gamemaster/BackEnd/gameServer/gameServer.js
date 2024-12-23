@@ -7,14 +7,21 @@ const path = require("path");
 
 const MAX_PLAYERS = 6;
 
-const server = http.createServer();
+// Directly create an HTTP server without using 'app'
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Game server is running");
+});
+
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
+
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-type"],
     credentials: true,
   },
+  transports: ["websocket"],
 });
 
 const lobbies = {}; // Store lobbies in memory
@@ -39,7 +46,6 @@ io.on("connection", (socket) => {
   } else {
     console.error("Token missing in socket handshake.");
     socket.emit("lobbyError", "Authentication failed. Token missing.");
-    return socket.disconnect(true);
   }
 
   // Lobby management
@@ -197,13 +203,35 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Function for player actions
   socket.on("playerAction", (data, callback) => {
-    console.log("Received action:", data);
+    console.log("Received playerAction:", data);
+    console.log("Callback function:", callback);
 
-    console.log("Callback is a function:", typeof callback === "function");
     if (typeof callback !== "function") {
-      console.error("Callback is not a function:", callback);
+      console.error("Callback is not a function");
       return;
+    }
+
+    if (data && data.action) {
+      const successMessage = `Action '${data.action}' processed for user '${socket.username}'`;
+
+      const response = {
+        success: true,
+        response: successMessage,
+        game_state: {
+          /* Updated game state data */
+        },
+      };
+
+      callback(response);
+    } else {
+      const errorResponse = {
+        success: false,
+        error: "Invalid action data",
+      };
+
+      callback(errorResponse);
     }
 
     const pythonProcess = spawn("python", [
@@ -254,6 +282,7 @@ io.on("connection", (socket) => {
   });
 });
 
+// Function to generate a game code
 function generateGameCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }

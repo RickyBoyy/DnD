@@ -19,8 +19,17 @@
 .env.test.local
 .env.production.local
 
-/BackEnd/.env
-/public/scripts/.env
+# Ignorar todos os package.json
+package.json
+
+# Ignorar todos os package-lock.json
+package-lock.json
+
+# Ignorar todos os arquivos .env
+*.env
+
+**/node_modules/
+
 
 npm-debug.log*
 yarn-debug.log*
