@@ -19,11 +19,6 @@
 .env.test.local
 .env.production.local
 
-# Ignorar todos os package.json
-package.json
-
-# Ignorar todos os package-lock.json
-package-lock.json
 
 # Ignorar todos os arquivos .env
 *.env
