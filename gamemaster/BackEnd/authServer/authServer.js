@@ -25,6 +25,7 @@ app.post("/login", authController.login);
 app.post("/set-username", authController.setUsername);
 app.get("/profile", authenticate, authController.getProfile);
 app.post("/createCharacter", authenticate, authController.createCharacter);
+app.get("/getCharacters", authenticate, authController.getCharacters);
 
 // Serve static files for frontend (if applicable)
 //app.use(express.static(path.join(__dirname, "build")));

@@ -8,6 +8,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  
 });
 
 exports.register = async (req, res) => {
@@ -118,32 +119,37 @@ exports.createCharacter = async (req, res) => {
     race,
     class_cr,
     alignment,
-    strenght,
+    strength,
     dexterity,
-    constituition,
+    constitution,
     intelligence,
     wisdom,
     charisma,
     ch_background,
   } = req.body;
 
-
-  // Extract the token from the Authorization header
   const token = req.headers.authorization?.split(" ")[1];
-
   if (!token) {
     return res.status(401).json({ message: "Authorization token is required" });
   }
 
   try {
-    // Verify and decode the token to get the user ID
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
+
+    // Ensure character name is unique for the user
+    const [existingCharacter] = await pool.execute(
+      `SELECT * FROM character_player WHERE character_name = ? AND character_user_id = ?`,
+      [name, userId]
+    );
+    if (existingCharacter.length > 0) {
+      return res.status(400).json({ message: "Character name already exists for this user" });
+    }
 
     const [result] = await pool.execute(
       `INSERT INTO character_player 
       (character_name, character_race, character_class, character_alignment, character_strength, character_dexterity, 
-      character_constituition, character_intelligence, character_wisdom, character_charisma, 
+      character_constitution, character_intelligence, character_wisdom, character_charisma, 
       character_background, character_user_id) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -151,29 +157,50 @@ exports.createCharacter = async (req, res) => {
         race,
         class_cr,
         alignment,
-        strenght,
+        strength,
         dexterity,
-        constituition,
+        constitution,
         intelligence,
         wisdom,
         charisma,
         ch_background,
-        userId, 
+        userId,
       ]
     );
 
     res.status(201).json({ message: "Character created successfully", characterId: result.insertId });
   } catch (error) {
     console.error("Error during character creation:", error);
-
     if (error.name === "JsonWebTokenError") {
-      res.status(401).json({ message: "Invalid token" });
-    } else {
-      res.status(500).json({ message: "Error creating character", error });
+      return res.status(401).json({ message: "Invalid token" });
     }
-
+    res.status(500).json({ message: "Error creating character", error });
   }
 };
+
+
+exports.getCharacters = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Authorization token is required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const [characters] = await pool.execute(
+      `SELECT * FROM character_player WHERE character_user_id = ?`,
+      [userId]
+    );
+
+    res.status(200).json({ characters });
+  } catch (error) {
+    console.error("Error fetching characters:", error);
+    res.status(500).json({ message: "Error fetching characters", error });
+  }
+};
+
 
 
 
