@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../App.css";
 
 const API_BASE_URL = "https://www.dnd5eapi.co/api";
@@ -33,6 +34,7 @@ const CreateCharacter = () => {
   const [alignment, setAlignment] = useState("");
   const [abilities, setAbilities] = useState({ ...baseAbilityScores });
   const [pointsRemaining, setPointsRemaining] = useState(27);
+  const [background, setBackground] = useState("");
   const [usedScores, setUsedScores] = useState([]);
 
   const alignments = [
@@ -63,15 +65,30 @@ const CreateCharacter = () => {
   }, [abilities]);
 
   useEffect(() => {
+    const abilityMapping = {
+      str: "strength",
+      dex: "dexterity",
+      con: "constitution",
+      int: "intelligence",
+      wis: "wisdom",
+      cha: "charisma",
+    };
+    
     if (selectedRace) {
       fetch(`${API_BASE_URL}/races/${selectedRace.toLowerCase()}`)
         .then((response) => response.json())
         .then((data) => {
           const adjustments = { ...baseAbilityScores };
+          
+          // Map ability bonuses from API to state keys
           data.ability_bonuses.forEach((bonus) => {
-            const abilityKey = bonus.ability_score.index;
-            adjustments[abilityKey] += bonus.bonus;
+            const abilityKey = abilityMapping[bonus.ability_score.index];
+            if (abilityKey) {
+              adjustments[abilityKey] += bonus.bonus;
+            }
           });
+    
+          // Update state with adjusted abilities and remaining points
           setAbilities(adjustments);
           setPointsRemaining(27 - calculateTotalCost(adjustments));
         })
@@ -79,6 +96,7 @@ const CreateCharacter = () => {
           console.error("Error fetching race adjustments:", error)
         );
     }
+    
   }, [selectedRace]);
 
   const calculateTotalCost = (currentAbilities) => {
@@ -110,18 +128,55 @@ const CreateCharacter = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const token = localStorage.getItem("token"); // Replace with your token storage mechanism
+    if (!token) {
+      alert("You need to log in to create a character.");
+      return;
+    }
+  
     const characterData = {
       name: characterName,
       race: selectedRace,
-      class: selectedClass,
+      class_cr: selectedClass,
       alignment: alignment,
-      abilities: abilities,
+      strength: abilities.strength,
+      dexterity: abilities.dexterity,
+      constitution: abilities.constitution,
+      intelligence: abilities.intelligence,
+      wisdom: abilities.wisdom,
+      charisma: abilities.charisma,
+      ch_background: background, // Replace with state variable for background input
     };
-    console.log("Character Created:", characterData);
+  
+    try {
+      const response = await fetch("http://localhost:5000/createCharacter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(characterData),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("Character created successfully!");
+        navigate("/characters");
+        console.log("Character ID:", data.characterId);
+      } else {
+        alert(data.message || "Failed to create character.");
+      }
+    } catch (error) {
+      console.error("Error creating character:", error);
+      alert("An error occurred while creating the character.");
+    }
   };
-
+  
   return (
     <div id="CreateCharacter">
       <div className="player_character_title">
@@ -234,14 +289,22 @@ const CreateCharacter = () => {
         <div className="character_background">
           <label>Character Background</label>
           <textarea
-            name="background"
+            value={background}
+            onChange={(e) => setBackground(e.target.value)}
             placeholder="Your character background"
             rows="5"
             cols="50"
             className="background-textarea"
-          ></textarea>
+          />
+
         </div>
-        <button className="ending_character_button">Create Character</button>
+        <button
+          className="ending_character_button"
+          type="submit"
+          onClick={handleSubmit}
+        >
+          Create Character
+        </button>
       </div>
     </div>
   );

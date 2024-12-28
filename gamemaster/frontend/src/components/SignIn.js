@@ -70,9 +70,16 @@ const SignIn = () => {
 
   return (
     <div className="signin-wrapper">
-      <img src={logoImage} alt="Logo" className="signin-logo" />
+      {/* Lado Esquerdo */}
+      <div className="animation-container">
+        
+      </div>
+
+      {/* Lado Direito */}
       <div className="signin-container">
-        <form onSubmit={handleSignUp}>
+        <form onSubmit={handleSignUp} className="card-signin">
+          <img src={logoImage} alt="Logo" className="signin-logo" />
+          
           <div className="form-group">
             <label htmlFor="email">Email address</label>
             <input
@@ -115,9 +122,7 @@ const SignIn = () => {
               onChange={(e) => setCountry(e.target.value)}
               required
             >
-              <option value="" disabled>
-                Select your country
-              </option>
+              <option value="" disabled>Select your country</option>
               <option value="BR">Brazil</option>
               <option value="US">United States</option>
               <option value="PT">Portugal</option>
@@ -130,10 +135,10 @@ const SignIn = () => {
           <button type="submit" className="signin-button">
             Sign Up
           </button>
+          <p className="login-link">
+            Already have an account? <Link to="/login">Log in here</Link>
+          </p>
         </form>
-        <p className="login-link">
-          Already have an account? <Link to="/login">Log in here</Link>
-        </p>
       </div>
     </div>
   );
