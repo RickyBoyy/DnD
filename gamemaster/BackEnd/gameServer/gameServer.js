@@ -29,7 +29,7 @@ io.on("connection", (socket) => {
 const token = socket.handshake.auth.token;
 if (token) {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);  
     socket.username = decoded.username;
     console.log(`User authenticated: ${socket.username}`);
   } catch (err) {
