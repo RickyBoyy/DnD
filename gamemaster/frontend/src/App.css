@@ -12,108 +12,111 @@ body {
 
 /*login*/
 
+/* Login Wrapper */
 .login-wrapper {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   height: 100vh;
+  justify-content: center;
+  align-items: center;
 }
 
-.login-logo {
-  width: 250px;
-  height: 120px;
+/* Lado Esquerdo da Tela (Animação) */
+.animation-container {
+  flex: 1; /* Garante que a animação ocupe 50% da largura */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* Garante que não há preenchimento */
+  margin: 0; /* Garante que não há margens */
+  background-color: transparent; /* Garante que o fundo seja transparente */
+  height: 100vh; /* Garante que o contêiner ocupe 100% da altura da tela */
+}
+
+/* Lado Direito da Tela (Card de Login) */
+.login-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Logo Fora do Card */
+.logo-container {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px; /* Distância entre o logo e o card */
+}
+
+/* Card de Login */
+.card-login {
+  width: 60%;
+  height: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 30px 35px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Título do Card */
+.card-login h1 {
+  color: #9f1d14; /* Cor do título em vermelho */
+  font-weight: 800;
+  margin: 0;
   margin-bottom: 20px;
 }
 
-.login-container {
-  width: 100%;
-  max-width: 320px;
-  padding: 20px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #24292e;
-}
-
-.form-group input {
+.textfield-login input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #d1d5da;
   border-radius: 6px;
-  font-size: 14px;
-  color: #24292e;
-  background-color: #f6f8fa;
+  border: 1px solid #ccc;
+  background-color: #f7f7f7;
 }
 
-.form-group input:focus {
-  border-color: #0366d6;
-  outline: none;
-}
-
-.login-button {
+/* Botão de Login */
+.btn-login {
   width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
   background-color: #9f1d14;
+  color: white;
   border: none;
   border-radius: 6px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  padding: 16px 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-.login-button:hover {
-  background-color: #6e0700;
+.btn-login:hover {
+  background-color: 9f1d14;
 }
 
+/* Mensagem de Erro */
 .error-message {
   color: #9f1d14;
   font-size: 14px;
   margin-top: 10px;
 }
 
-.forgot-password {
+/* Links */
+.reference-login {
   text-align: center;
-  margin-top: 15px;
-}
-
-.forgot-password a {
-  color: #0366d6;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.forgot-password a:hover {
-  text-decoration: underline;
-}
-
-.register-link {
   margin-top: 20px;
-  font-size: 14px;
-  text-align: center;
 }
 
-.register-link a {
-  color: #007bff;
+.reference-login a {
+  color: #0366d6;
   text-decoration: none;
 }
 
-.register-link a:hover {
+.reference-login a:hover {
   text-decoration: underline;
 }
-
 
 /*SignIn*/
 
@@ -125,110 +128,119 @@ body {
     sans-serif;
 }
 
+/* Wrapper principal */
+/* Página inteira dividida ao meio */
 .signin-wrapper {
-  text-align: center;
-  margin-top: 50px;
+  display: flex;
+  height: 100vh; /* Altura total da tela */
+  justify-content: center;
+  align-items: stretch;
 }
 
-.signin-logo {
-  width: 230px;
-  height: 100px;
-  margin-bottom: 20px;
+/* Lado Esquerdo (Animação) */
+.animation-container {
+  flex: 1; /* Ocupa 50% da largura */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Lado Direito (Card de Login) */
 .signin-container {
-  width: 100%;
-  max-width: 340px;
-  margin: 0 auto;
+  flex: 1; /* Ocupa 50% da largura */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 20px;
-  border: 1px solid #d1d5da;
-  border-radius: 6px;
-  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
-  background-color: #ffffff;
 }
 
-.signin-title {
-  font-size: 24px;
-  font-weight: 400;
-  color: #24292e;
+/* Card de Login */
+.card-signin {
+  width: 60%;
+  max-width: 400px;
+  height: auto;
+  padding: 30px 35px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Título do Card */
+.card-signin h1 {
+  color: #9f1d14; /* Cor do título */
+  font-weight: 800;
+  margin: 0;
   margin-bottom: 20px;
+  text-align: center;
 }
 
+/* Formulário */
 .form-group {
+  width: 100%;
   margin-bottom: 15px;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-label {
-  display: block;
-  font-weight: 600;
-  color: #24292e;
+.form-group label {
+  font-weight: bold;
   margin-bottom: 5px;
 }
 
-input,
-select {
-  width: 100%;
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #d1d5da;
-  border-radius: 4px;
-  background-color: #fafbfc;
-  outline: none;
-}
-
-input:focus,
-select:focus {
-  border-color: #0366d6;
-  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
-}
-
-.signin-button {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px;
-  font-size: 14px;
-  color: #fff;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #f7f7f7;
+}
+
+.form-group select {
+  background-color: white;
+}
+
+/* Botão de Cadastro */
+.signin-button {
+  width: 100%;
   background-color: #9f1d14;
+  color: white;
   border: none;
   border-radius: 6px;
+  font-weight: bold;
   cursor: pointer;
-  font-weight: 600;
-  margin-top: 10px;
+  padding: 16px 0;
+  margin-top: 20px;
 }
 
 .signin-button:hover {
-  background-color: #6e0700;
+  background-color: #b22018;
 }
 
-.signin-footer {
-  margin-top: 10px;
-  font-size: 12px;
-}
-
-.signin-footer a {
-  color: #0366d6;
-  text-decoration: none;
-}
-
-.signin-footer a:hover {
-  text-decoration: underline;
-}
-
-.login-link {
-  margin-top: 20px;
+/* Mensagens de Erro */
+.error {
+  color: #9f1d14;
   font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Links */
+.login-link {
   text-align: center;
+  margin-top: 20px;
 }
 
 .login-link a {
-  color: #007bff;
+  color: #0366d6;
   text-decoration: none;
 }
 
 .login-link a:hover {
   text-decoration: underline;
 }
-
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -664,21 +676,13 @@ button.submit-btn:hover {
 }
 
 .chat-container {
-  max-height: 100vh;
+  height: 100%;
   padding-bottom: 150px;
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
-:where(.chat-container, textarea)::-webkit-scrollbar {
-  width: 6px;
-}
-:where(.chat-container, textarea)::-webkit-scrollbar-track {
-  background-color: var(--incoming-chat-bg);
-  border-radius: 25px;
-}
-:where(.chat-container, textarea)::-webkit-scrollbar-thumb {
-  background: var(--icon-color);
-  border-radius: 25px;
-}
+
 .chat-container .chat {
   padding: 25px 10px;
   display: flex;
@@ -844,7 +848,6 @@ span.material-symbols-rounded {
   padding: 8px;
   width: 80%;
 }
-
 
 /* Loading/Error message styling */
 .loading,

@@ -52,37 +52,44 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
-      <img src={logoImage} alt="Logo" className="login-logo" />
+      <div className="animation-container"></div>
+
       <div className="login-container">
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button className="login-button" type="submit">
-            Login
-          </button>
-          {error && <div className="error-message">{error}</div>}
-        </form>
-        <p className="register-link">
-          Don’t have an account? <Link to="/signin">Sign up here</Link>
-        </p>
+        <div className="logo-container">
+          <img src={logoImage} alt="Logo" className="login-logo" />
+        </div>
+
+        <div className="card-login">
+          <form onSubmit={handleLogin}>
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button className="btn-login" type="submit">
+              Login
+            </button>
+            {error && <div className="error-message">{error}</div>}
+          </form>
+          <p className="register-link">
+            Don’t have an account? <Link to="/signin">Sign up here</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

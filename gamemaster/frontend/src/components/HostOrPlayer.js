@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import getSocket from "../socket";
 import "../App.css";
+import { io } from "socket.io-client";
 
 const HostOrPlayer = () => {
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -29,6 +30,7 @@ const HostOrPlayer = () => {
       navigate(`/lobby/${playerCode}`);
     });
 
+    // Cleanup
     return () => {
       socket.off("lobbyError");
       socket.off("playerJoined");
@@ -69,7 +71,6 @@ const HostOrPlayer = () => {
       }
     });
   };
-
   const handlePlayerClick = () => {
     setShowCodeInput(true);
   };
@@ -95,13 +96,23 @@ const HostOrPlayer = () => {
           <div className="left_choice">
             <div className="card_host" onClick={handleHostClick}>
               <h2>Host</h2>
-              <p>Create a new game and guide players as the Dungeon Master.</p>
+              <p>
+                As a Host, you'll create a new Dungeons & Dragons game and
+                invite others to join. You'll take on the role of the Dungeon
+                Master, guiding the story, setting up challenges, and
+                controlling the adventure for the players.
+              </p>
             </div>
           </div>
           <div className="right_choice">
             <div className="card_player" onClick={handlePlayerClick}>
               <h2>Player</h2>
-              <p>Join an existing game with a code provided by the host.</p>
+              <p>
+                As a Player, you can join an existing Dungeons & Dragons game by
+                entering a code provided by the Host. Once in, you’ll embark on
+                an adventure, collaborate with other players, and face
+                challenges together.
+              </p>
             </div>
           </div>
         </div>
@@ -123,7 +134,9 @@ const HostOrPlayer = () => {
                 Cancel
               </button>
             </form>
-            {errorMessage && <div className="error_message">{errorMessage}</div>}
+            {errorMessage && (
+              <div className="error_message">{errorMessage}</div>
+            )}
           </div>
         </div>
       )}
