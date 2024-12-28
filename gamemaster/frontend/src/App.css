@@ -879,6 +879,23 @@ span.material-symbols-rounded {
   text-align: center; /* Centers text inside the element */
 }
 
+.logout-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #f00;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #c00;
+}
+
+
+
 .play-button {
   position: fixed;
   bottom: 20px;

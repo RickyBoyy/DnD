@@ -1,15 +1,8 @@
-import React, { useEffect } from "react";
-import socket from "./socket";
-import "./App.css";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
-
-import SignInPage from "./pages/SignInPage";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from "react-router-dom";
+import getSocket from "./socket"; // Use getSocket instead of socket directly
 import LoginPage from "./pages/LoginPage";
+import SignInPage from "./pages/SignInPage";
 import HostOrPlayerPage from "./pages/HostOrPlayerPage";
 import Header from "./components/Header";
 import GamePage from "./pages/GamePage";
@@ -36,9 +29,7 @@ const Layout = () => {
 
   return (
     <>
-      {/* Conditionally render the Header */}
-
-      {/* Define all the routes */}
+      {showHeader && <Header />}
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/signin" element={<SignInPage />} />
@@ -56,19 +47,42 @@ const Layout = () => {
 };
 
 const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const authRequiredPaths = ["/hostorplayer", "/lobby", "/createcharacter"];
+
   useEffect(() => {
-    socket.connect();
+    const token = localStorage.getItem("token");
+    console.log("Token retrieved from localStorage:", token);
+
+    if (authRequiredPaths.some((path) => location.pathname.startsWith(path))) {
+      if (token) {
+        setIsAuthenticated(true);
+        const socket = getSocket(); // Use getSocket() here
+        socket.connect(); // Connect to socket if token is valid
+      } else {
+        console.error("No token available. Redirecting to login.");
+        navigate("/login");
+      }
+    }
 
     return () => {
-      socket.disconnect();
+      if (isAuthenticated) {
+        const socket = getSocket(); // Get socket instance
+        socket.disconnect(); // Disconnect on unmount
+      }
     };
-  }, []);
+  }, [location.pathname, navigate]);
 
-  return (
-    <Router>
-      <Layout />
-    </Router>
-  );
+  return <Layout />;
 };
 
-export default App;
+const Root = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default Root;

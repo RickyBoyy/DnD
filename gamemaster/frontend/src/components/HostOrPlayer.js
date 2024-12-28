@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import socket from "../socket"; // Ensure this points to the correct socket instance
+import getSocket from "../socket";
 import "../App.css";
 
 const HostOrPlayer = () => {
@@ -11,6 +11,7 @@ const HostOrPlayer = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const socket = getSocket();
     if (!socket.connected) {
       console.log("Socket not connected, attempting to reconnect...");
       socket.connect();
@@ -19,11 +20,12 @@ const HostOrPlayer = () => {
     }
 
     socket.on("lobbyError", (message) => {
+      console.error("Lobby error received:", message);
       setErrorMessage(message);
     });
 
     socket.on("playerJoined", (players) => {
-      // Wait until player joins, then navigate
+      console.log("Player joined the lobby:", players);
       navigate(`/lobby/${playerCode}`);
     });
 
@@ -31,7 +33,7 @@ const HostOrPlayer = () => {
       socket.off("lobbyError");
       socket.off("playerJoined");
     };
-  }, [playerCode, navigate]);  // Ensure navigate is in the dependency list
+  }, [playerCode, navigate]);
 
   const getUsernameFromToken = () => {
     const token = localStorage.getItem("token");
@@ -50,16 +52,18 @@ const HostOrPlayer = () => {
   };
 
   const handleHostClick = () => {
+    const socket = getSocket();
     const username = getUsernameFromToken();
     if (!username) return;
 
     console.log("Creating lobby with username:", username);
 
-    socket.emit("createLobby", { username }, (gameCode) => {
+    socket.emit("createLobby", { username });
+
+    socket.on("lobbyCreated", ({ gameCode }) => {
       if (gameCode) {
         console.log("Lobby created with game code:", gameCode);
-        setPlayerCode(gameCode);  // Set the player code here
-        socket.emit("joinLobbyRoom", { gameCode, username });  // Emit the event to join the lobby
+        navigate(`/lobby/${gameCode}`);
       } else {
         console.error("Failed to create a lobby. No game code received.");
       }
@@ -72,15 +76,14 @@ const HostOrPlayer = () => {
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
-  
+
     const username = getUsernameFromToken();
     if (!username) return;
-  
-    console.log("Joining lobby with code:", playerCode); // Add this line to check the player code
-  
+
+    console.log("Joining lobby with code:", playerCode);
+    const socket = getSocket(); // Ensure socket is defined
     socket.emit("joinLobbyRoom", { gameCode: playerCode, username });
   };
-  
 
   return (
     <div id="HostOrPlayer">
@@ -92,13 +95,13 @@ const HostOrPlayer = () => {
           <div className="left_choice">
             <div className="card_host" onClick={handleHostClick}>
               <h2>Host</h2>
-              <p>As a Host, you'll create a new Dungeons & Dragons game and invite others to join. You'll take on the role of the Dungeon Master, guiding the story, setting up challenges, and controlling the adventure for the players.</p>
+              <p>Create a new game and guide players as the Dungeon Master.</p>
             </div>
           </div>
           <div className="right_choice">
             <div className="card_player" onClick={handlePlayerClick}>
               <h2>Player</h2>
-              <p>As a Player, you can join an existing Dungeons & Dragons game by entering a code provided by the Host. Once in, you’ll embark on an adventure, collaborate with other players, and face challenges together.</p>
+              <p>Join an existing game with a code provided by the host.</p>
             </div>
           </div>
         </div>

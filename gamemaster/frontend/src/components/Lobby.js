@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import socket from "../socket";
+import getSocket from "../socket";
 import "../App.css";
 
 const Lobby = () => {
   const { gameCode } = useParams();
-  const navigate = useNavigate(); // React Router's navigation hook
+  const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [username, setUsername] = useState("");
   const [isHost, setIsHost] = useState(false);
   const maxPlayers = 6;
 
+  // UseEffect for setting up socket and fetching username from token
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const socket = getSocket();
 
     if (!token) {
       console.error("Token not found in localStorage");
@@ -20,39 +22,46 @@ const Lobby = () => {
     }
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload
+      const payload = JSON.parse(atob(token.split(".")[1]));
       setUsername(payload.username);
     } catch (error) {
       console.error("Error decoding token:", error);
     }
 
-    // Emit joinLobbyRoom event after retrieving the username
-    socket.emit("joinLobbyRoom", { gameCode, username });
+    // Attach socket event listeners
+    socket.on("connect", () => {
+      console.log("Socket connected successfully");
+    });
 
-    // Handle playerJoined event to update the player list
     socket.on("playerJoined", (updatedPlayers) => {
-      setPlayers(updatedPlayers); // Update the players state
-      if (updatedPlayers[0]?.name === username) {
-        setIsHost(true); // First player in the list is the host
-      }
+      console.log("Player joined the lobby:", updatedPlayers);
+      setPlayers(updatedPlayers);
+
+      // Determine if the current user is the host
+      const currentHost = updatedPlayers[0]?.name === username;
+      console.log("Am I the host?", currentHost);
+      setIsHost(currentHost);
     });
 
-    // Handle playerLeft event to update the player list when a player leaves
-    socket.on("playerLeft", (updatedPlayers) => {
-      setPlayers(updatedPlayers); // Update the players state
-      if (updatedPlayers[0]?.name === username) {
-        setIsHost(true); // Reassign host if the previous host left
-      } else {
-        setIsHost(false);
-      }
+    socket.on("playerLeft", ({ players: updatedPlayers }) => {
+      console.log("Players after player left:", updatedPlayers);
+      setPlayers(updatedPlayers);
+
+      // Update host status
+      const currentHost = updatedPlayers[0]?.name === username;
+      console.log("Am I the host?", currentHost);
+      setIsHost(currentHost);
     });
 
-    // Listen for the gameStarted event to navigate all players to the game page
     socket.on("gameStarted", ({ gameCode }) => {
-      navigate(`/game/${gameCode}`); // Navigate to the game page
+      navigate(`/game/${gameCode}`);
     });
 
-    // Clean up socket listeners when component is unmounted
+    // Emit joinLobbyRoom after listeners are attached
+    if (username) {
+      socket.emit("joinLobbyRoom", { gameCode, username });
+    }
+
     return () => {
       socket.off("playerJoined");
       socket.off("playerLeft");
@@ -60,9 +69,18 @@ const Lobby = () => {
     };
   }, [gameCode, username, navigate]);
 
+  // Emit joinLobbyRoom after username is set (for reactivity)
+  useEffect(() => {
+    if (username) {
+      const socket = getSocket();
+      socket.emit("joinLobbyRoom", { gameCode, username });
+    }
+  }, [username, gameCode]);
+
   const startGame = () => {
     if (players.length > 1) {
-      socket.emit("startGame", gameCode); // Notify server to start the game
+      const socket = getSocket();
+      socket.emit("startGame", gameCode);
     } else {
       alert("At least 2 players are needed to start.");
     }
@@ -75,11 +93,16 @@ const Lobby = () => {
         <div className="game-code">Game Code: {gameCode}</div>
 
         <div className="player-slots">
+          {console.log("Rendering players:", players)}
           {[...Array(maxPlayers)].map((_, index) => (
             <div
               key={index}
               className={`player-slot ${
-                index < players.length ? (index === 0 ? "host" : "filled") : "empty"
+                index < players.length
+                  ? index === 0
+                    ? "host"
+                    : "filled"
+                  : "empty"
               }`}
             >
               {index < players.length ? players[index].name : "Available"}
@@ -87,6 +110,7 @@ const Lobby = () => {
           ))}
         </div>
 
+        {/* Display Start Game Button only for the host */}
         {isHost && (
           <button className="start-game-btn" onClick={startGame}>
             Start Game

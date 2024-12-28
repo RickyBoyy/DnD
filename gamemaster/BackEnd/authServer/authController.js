@@ -187,12 +187,15 @@ exports.getCharacters = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
+const userId = decoded.id;
+console.log("User ID from token:", userId);
 
-    const [characters] = await pool.execute(
-      `SELECT * FROM character_player WHERE character_user_id = ?`,
-      [userId]
-    );
+const [characters] = await pool.execute(
+  `SELECT * FROM character_player WHERE character_user_id = ?`,
+  [userId]
+);
+console.log("Fetched characters for user:", characters);
+
 
     res.status(200).json({ characters });
   } catch (error) {
@@ -227,6 +230,26 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+exports.refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token is required" });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const newAccessToken = jwt.sign({ id: decoded.id, username: decoded.username }, process.env.JWT_SECRET, { expiresIn: "15m" });
+
+    return res.status(200).json({ accessToken: newAccessToken });
+  } catch (error) {
+    console.error("Invalid refresh token:", error.message);
+    return res.status(403).json({ message: "Invalid refresh token" });
+  }
+};
+
 
 
 

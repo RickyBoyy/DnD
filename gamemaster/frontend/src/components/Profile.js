@@ -41,6 +41,12 @@ const Profile = () => {
     navigate("/characters");
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Clear the token
+    setProfile(null); // Reset the profile state
+    navigate("/login"); // Navigate back to the login page
+  };
+
   if (error) {
     return <div>{error}</div>;
   }
@@ -65,6 +71,11 @@ const Profile = () => {
       {/* Navigate Home Button */}
       <button className="character-button" onClick={handleNavigateCharacter}>
         Your Characters
+      </button>
+
+      {/* Logout Button */}
+      <button className="logout-button" onClick={handleLogout}>
+        Logout
       </button>
     </div>
   );
