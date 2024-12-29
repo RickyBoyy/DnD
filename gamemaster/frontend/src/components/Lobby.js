@@ -5,7 +5,7 @@ import "../App.css";
 
 const Lobby = () => {
   const { gameCode } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // To navigate to the game page
   const [players, setPlayers] = useState([]);
   const [username, setUsername] = useState("");
   const [isHost, setIsHost] = useState(false);
@@ -13,9 +13,48 @@ const Lobby = () => {
 
   // UseEffect for setting up socket and fetching username from token
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const socket = getSocket();
 
+    // Clear existing listeners to avoid duplicates
+    socket.off("playerJoined");
+    socket.off("playerLeft");
+    socket.off("gameStarted"); // Listen for game start
+
+    // Attach new listeners
+    socket.on("playerJoined", (updatedPlayers) => {
+      console.log("Received updated players:", updatedPlayers);
+      setPlayers(updatedPlayers);
+    });
+
+    socket.on("playerLeft", ({ players: updatedPlayers }) => {
+      console.log("Player left the lobby:", updatedPlayers);
+      setPlayers(updatedPlayers);
+    });
+
+    // Listen for the game started event to navigate all players
+    socket.on("gameStarted", () => {
+      navigate(`/game/${gameCode}`);
+    });
+
+    return () => {
+      socket.off("playerJoined");
+      socket.off("playerLeft");
+      socket.off("gameStarted");
+    };
+  }, [gameCode, navigate]); // Empty dependency array ensures this runs only once on mount
+
+  // UseEffect to update `isHost` whenever `players` or `username` changes
+  useEffect(() => {
+    if (players.length > 0 && players[0].name === username) {
+      setIsHost(true);
+    } else {
+      setIsHost(false);
+    }
+  }, [players, username]);
+
+  // UseEffect to fetch username from token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
     if (!token) {
       console.error("Token not found in localStorage");
       return;
@@ -27,60 +66,23 @@ const Lobby = () => {
     } catch (error) {
       console.error("Error decoding token:", error);
     }
-
-    // Attach socket event listeners
-    socket.on("connect", () => {
-      console.log("Socket connected successfully");
-    });
-
-    socket.on("playerJoined", (updatedPlayers) => {
-      console.log("Player joined the lobby:", updatedPlayers);
-      setPlayers(updatedPlayers);
-
-      // Determine if the current user is the host
-      const currentHost = updatedPlayers[0]?.name === username;
-      console.log("Am I the host?", currentHost);
-      setIsHost(currentHost);
-    });
-
-    socket.on("playerLeft", ({ players: updatedPlayers }) => {
-      console.log("Players after player left:", updatedPlayers);
-      setPlayers(updatedPlayers);
-
-      // Update host status
-      const currentHost = updatedPlayers[0]?.name === username;
-      console.log("Am I the host?", currentHost);
-      setIsHost(currentHost);
-    });
-
-    socket.on("gameStarted", ({ gameCode }) => {
-      navigate(`/game/${gameCode}`);
-    });
-
-    // Emit joinLobbyRoom after listeners are attached
-    if (username) {
-      socket.emit("joinLobbyRoom", { gameCode, username });
-    }
-
-    return () => {
-      socket.off("playerJoined");
-      socket.off("playerLeft");
-      socket.off("gameStarted");
-    };
-  }, [gameCode, username, navigate]);
+  }, []);
 
   // Emit joinLobbyRoom after username is set (for reactivity)
   useEffect(() => {
     if (username) {
       const socket = getSocket();
+      console.log(
+        `Emitting joinLobbyRoom with gameCode: ${gameCode} and username: ${username}`
+      );
       socket.emit("joinLobbyRoom", { gameCode, username });
     }
-  }, [username, gameCode]);
+  }, [username, gameCode]); // Ensure dependency on `username`
 
   const startGame = () => {
     if (players.length > 1) {
       const socket = getSocket();
-      socket.emit("startGame", gameCode);
+      socket.emit("startGame", gameCode); // Notify the server to start the game
     } else {
       alert("At least 2 players are needed to start.");
     }

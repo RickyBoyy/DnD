@@ -1,35 +1,50 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { HelmetProvider, Helmet } from "react-helmet-async";
+import { useParams } from "react-router-dom";
+import getSocket from "../socket";
+import initializeChat from "../scripts/chat";
 
 const Game = () => {
+  const { gameCode } = useParams();
+  const [players, setPlayers] = useState([]);
+
   useEffect(() => {
-    const loadScript = (src, onLoad) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.defer = true;
-      script.onload = onLoad;
-      document.body.appendChild(script);
-      return script;
-    };
-
-    const socketIoScript = loadScript(
-      "https://cdn.socket.io/4.7.2/socket.io.min.js",
-      () => {
-        console.log("Socket.IO script loaded");
-
-        loadScript("/scripts/chat.js", () => console.log("chat.js loaded"));
-      }
-    );
-
+    const socket = getSocket();
+  
+    if (!socket) {
+      console.error("Socket initialization failed.");
+      return;
+    }
+  
+    console.log("Requesting player list for game code:", gameCode);
+    socket.emit("getPlayersInGame", gameCode);
+  
+    // Listen for player updates
+    socket.on("playersUpdated", (updatedPlayers) => {
+      console.log("Received updated players in game:", updatedPlayers);
+      setPlayers(updatedPlayers); // Update player list
+    });
+  
+    socket.on("playerJoined", (updatedPlayers) => {
+      console.log("Player joined:", updatedPlayers);
+      setPlayers(updatedPlayers); // Update player list
+    });
+  
+    socket.on("playerLeft", (updatedPlayers) => {
+      console.log("Player left:", updatedPlayers);
+      setPlayers(updatedPlayers); // Update player list
+    });
+  
     document.body.style.overflow = "hidden";
-
+  
     return () => {
-      // Cleanup scripts and styles
-      document.body.removeChild(socketIoScript);
       document.body.style.overflow = "auto";
+      socket.off("playersUpdated");
+      socket.off("playerJoined");
+      socket.off("playerLeft");
     };
-  }, []);
-
+  }, [gameCode]); // Ensure gameCode is included in dependency array
+  
   return (
     <HelmetProvider>
       <>
@@ -41,20 +56,26 @@ const Game = () => {
         </Helmet>
 
         <div id="GameId">
+          {/* Players Display */}
           <div className="players_display">
             <div className="side_nav">
               <span>Players</span>
-
               <div className="players_icons">
-                <img
-                  src=""
-                  alt="player_icon"
-                  style={{ width: "150px", height: "150px" }}
-                />
-                <h3>Player Name</h3>
+                {players.map((player, index) => (
+                  <div key={index} className="player_info">
+                    <img
+                      src={player.avatar || ""}
+                      alt={`${player.name || "Player"}_icon`}
+                      style={{ width: "50px", height: "50px" }}
+                    />
+                    <h3>{player.name || "Unknown Player"}</h3>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+
+          {/* Chat and Typing Area */}
           <div className="chat-container"></div>
 
           <div className="typing-container">

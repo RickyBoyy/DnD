@@ -61,7 +61,10 @@ const App = () => {
       if (token) {
         setIsAuthenticated(true);
         const socket = getSocket(); // Use getSocket() here
-        socket.connect(); // Connect to socket if token is valid
+        if (!socket.connected) {
+          console.log("Connecting socket...");
+          socket.connect();
+        } // Connect to socket if token is valid
       } else {
         console.error("No token available. Redirecting to login.");
         navigate("/login");
@@ -69,9 +72,10 @@ const App = () => {
     }
 
     return () => {
-      if (isAuthenticated) {
-        const socket = getSocket(); // Get socket instance
-        socket.disconnect(); // Disconnect on unmount
+      const socket = getSocket();
+      if (isAuthenticated && socket.connected) {
+        console.log("Disconnecting socket on unmount.");
+        socket.disconnect();
       }
     };
   }, [location.pathname, navigate]);

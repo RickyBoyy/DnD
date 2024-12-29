@@ -2,7 +2,6 @@ require("dotenv").config();
 const http = require("http");
 const socketIo = require("socket.io");
 const jwt = require("jsonwebtoken");
-const { spawn } = require("child_process");
 
 const MAX_PLAYERS = 6;
 
@@ -59,7 +58,7 @@ io.on("connection", (socket) => {
     io.to(gameCode).emit("playerJoined", lobby.players);
   });
 
-  socket.on("joinLobbyRoom", ({ gameCode, username }, callback) => {
+  socket.on("joinLobbyRoom", ({ gameCode, username }) => {
     const lobby = lobbies[gameCode];
 
     if (!lobby) {
@@ -82,10 +81,11 @@ io.on("connection", (socket) => {
 
     console.log("Updated players in lobby:", lobby.players);
 
-    // Emit the updated players list to everyone in the lobby
+    // Emit the updated players list to everyone in the room
     io.to(gameCode).emit("playerJoined", lobby.players);
+    io.to(gameCode).emit("playersUpdated", lobby.players);
 
-    // Emit the current players list directly to the joining player
+    // Explicitly emit the updated list to the new player
     socket.emit("playerJoined", lobby.players);
   });
 
@@ -94,7 +94,24 @@ io.on("connection", (socket) => {
     if (!lobby || lobby.players.length < 2) {
       return socket.emit("lobbyError", "At least 2 players are required.");
     }
+
+    // Now emit `playersUpdated` only after the game starts
+    io.to(gameCode).emit("playersUpdated", lobby.players);
+
+    // Emit `gameStarted` event to all players in the game
     io.to(gameCode).emit("gameStarted", { gameCode });
+  });
+
+  socket.on("getPlayersInGame", (gameCode) => {
+    const lobby = lobbies[gameCode];
+    if (!lobby) {
+      console.log("Lobby not found for gameCode:", gameCode);
+      return socket.emit("lobbyError", "Lobby not found.");
+    }
+  
+    // Emit the current players in the lobby
+    socket.emit("playersUpdated", lobby.players); // Send to the requesting player
+    console.log("Sent players list for game code:", gameCode);
   });
 
   socket.on("disconnect", () => {
@@ -147,13 +164,11 @@ io.on("connection", (socket) => {
       callback(errorResponse);
     }
   });
-
 });
 
 server.listen(4000, () => {
   console.log("Server running on http://localhost:4000");
 });
-
 
 function generateGameCode() {
   return Math.random().toString(36).substr(2, 6).toUpperCase();
