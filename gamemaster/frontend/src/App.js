@@ -51,7 +51,7 @@ const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const authRequiredPaths = ["/hostorplayer", "/lobby", "/createcharacter"];
+  const authRequiredPaths = ["/hostorplayer", "/lobby", "/createcharacter","/game"];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -70,14 +70,6 @@ const App = () => {
         navigate("/login");
       }
     }
-
-    return () => {
-      const socket = getSocket();
-      if (isAuthenticated && socket.connected) {
-        console.log("Disconnecting socket on unmount.");
-        socket.disconnect();
-      }
-    };
   }, [location.pathname, navigate]);
 
   return <Layout />;
