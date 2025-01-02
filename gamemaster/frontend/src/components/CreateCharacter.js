@@ -133,7 +133,7 @@ const CreateCharacter = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const token = localStorage.getItem("token"); // Replace with your token storage mechanism
+    const token = sessionStorage.getItem("token"); // Replace with your token storage mechanism
     if (!token) {
       alert("You need to log in to create a character.");
       return;

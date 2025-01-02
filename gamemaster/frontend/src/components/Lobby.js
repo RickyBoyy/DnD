@@ -5,45 +5,47 @@ import "../App.css";
 
 const Lobby = () => {
   const { gameCode } = useParams();
-  const navigate = useNavigate(); // To navigate to the game page
+  const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [username, setUsername] = useState("");
   const [isHost, setIsHost] = useState(false);
+  const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const [characters, setCharacters] = useState([]);
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [characterSelections, setCharacterSelections] = useState({});
   const maxPlayers = 6;
 
-  // UseEffect for setting up socket and fetching username from token
   useEffect(() => {
     const socket = getSocket();
 
-    // Clear existing listeners to avoid duplicates
-    socket.off("playerJoined");
-    socket.off("playerLeft");
-    socket.off("gameStarted"); // Listen for game start
-
-    // Attach new listeners
+    // Set up socket listeners
     socket.on("playerJoined", (updatedPlayers) => {
-      console.log("Received updated players:", updatedPlayers);
       setPlayers(updatedPlayers);
     });
 
     socket.on("playerLeft", ({ players: updatedPlayers }) => {
-      console.log("Player left the lobby:", updatedPlayers);
       setPlayers(updatedPlayers);
     });
 
-    // Listen for the game started event to navigate all players
+    socket.on("characterSelected", (updatedSelections) => {
+      console.log("Updated selections:", updatedSelections); // Debugging
+      setCharacterSelections(updatedSelections);
+    });
+    
+
     socket.on("gameStarted", () => {
       navigate(`/game/${gameCode}`);
     });
 
     return () => {
+      // Clean up socket listeners
       socket.off("playerJoined");
       socket.off("playerLeft");
+      socket.off("characterSelected");
       socket.off("gameStarted");
     };
-  }, [gameCode, navigate]); // Empty dependency array ensures this runs only once on mount
+  }, [gameCode, navigate]);
 
-  // UseEffect to update `isHost` whenever `players` or `username` changes
   useEffect(() => {
     if (players.length > 0 && players[0].name === username) {
       setIsHost(true);
@@ -52,13 +54,9 @@ const Lobby = () => {
     }
   }, [players, username]);
 
-  // UseEffect to fetch username from token
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token not found in localStorage");
-      return;
-    }
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -68,24 +66,80 @@ const Lobby = () => {
     }
   }, []);
 
-  // Emit joinLobbyRoom after username is set (for reactivity)
   useEffect(() => {
     if (username) {
       const socket = getSocket();
-      console.log(
-        `Emitting joinLobbyRoom with gameCode: ${gameCode} and username: ${username}`
-      );
       socket.emit("joinLobbyRoom", { gameCode, username });
     }
-  }, [username, gameCode]); // Ensure dependency on `username`
+  }, [username, gameCode]);
+
+  const fetchCharacters = async () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch("http://localhost:5000/getCharacters", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCharacters(data.characters);
+        console.log("Characters fetched:", data.characters);
+
+      } else {
+        alert("Failed to fetch characters.");
+      }
+    } catch (error) {
+      console.error("Error fetching characters:", error);
+    }
+  };
 
   const startGame = () => {
-    if (players.length > 1) {
-      const socket = getSocket();
-      socket.emit("startGame", gameCode); // Notify the server to start the game
-    } else {
-      alert("At least 2 players are needed to start.");
+    const allSelected = players.every((player) => {
+      console.log(`Checking player ${player.name}:`, characterSelections[player.name]);
+      return characterSelections[player.name];
+    });
+  
+    if (!allSelected) {
+      alert("All players must select a character before starting the game.");
+      return;
     }
+  
+    const socket = getSocket();
+    socket.emit("startGame", { gameCode });
+  };
+  
+
+  const openCharacterModal = () => {
+    fetchCharacters();
+    setShowCharacterModal(true);
+  };
+
+  const handleCharacterSelect = (character) => {
+    setSelectedCharacter(character);
+    console.log("Character selected:", character);
+
+  };
+
+  const confirmCharacterSelection = () => {
+    if (!selectedCharacter) {
+      alert("Please select a character.");
+      return;
+    }
+
+    const socket = getSocket();
+    socket.emit("characterSelected", {
+      gameCode,
+      username,
+      character: selectedCharacter,
+    });
+
+    setShowCharacterModal(false);
   };
 
   return (
@@ -95,30 +149,46 @@ const Lobby = () => {
         <div className="game-code">Game Code: {gameCode}</div>
 
         <div className="player-slots">
-          {console.log("Rendering players:", players)}
-          {[...Array(maxPlayers)].map((_, index) => (
-            <div
-              key={index}
-              className={`player-slot ${
-                index < players.length
-                  ? index === 0
-                    ? "host"
-                    : "filled"
-                  : "empty"
-              }`}
-            >
-              {index < players.length ? players[index].name : "Available"}
-            </div>
-          ))}
-        </div>
+  {[...Array(maxPlayers)].map((_, index) => (
+    <div key={index} className={`player-slot ${index < players.length ? index === 0 ? "host" : "filled" : "empty"}`}>
+      {index < players.length ? `${players[index].name} ${characterSelections[players[index].name] ? "(Ready)" : "(Not Ready)"}` : "Available"}
+    </div>
+  ))}
+</div>
 
-        {/* Display Start Game Button only for the host */}
+
+        <button className="character-select-btn" onClick={openCharacterModal}>
+          Select Character
+        </button>
+
         {isHost && (
           <button className="start-game-btn" onClick={startGame}>
             Start Game
           </button>
         )}
       </div>
+
+      {/* Character Selection Modal */}
+      {showCharacterModal && (
+        <div className="character-modal">
+          <h2>Select Your Character</h2>
+          <div className="character-list">
+            {characters.map((character) => (
+              <div
+                key={character.id}
+                className={`character-item ${
+                  selectedCharacter?.id === character.id ? "selected" : ""
+                }`}
+                onClick={() => handleCharacterSelect(character)}
+              >
+                <img src={character.image || "/default-image.jpg"} alt={character.name} />
+                <h4>{character.character_name}</h4>
+              </div>
+            ))}
+          </div>
+          <button onClick={confirmCharacterSelection}>Confirm</button>
+        </div>
+      )}
     </div>
   );
 };

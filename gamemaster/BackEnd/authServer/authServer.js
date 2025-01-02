@@ -29,6 +29,8 @@ app.get("/getCharacters", authenticate, authController.getCharacters);
 app.post("/refresh-token",authController.refreshToken);
 
 
+
+
 // Serve static files for frontend (if applicable)
 //app.use(express.static(path.join(__dirname, "build")));
 //app.get("*", (req, res) => {

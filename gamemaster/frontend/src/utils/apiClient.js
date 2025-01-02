@@ -11,7 +11,7 @@ const apiClient = axios.create({
 // Add a request interceptor to handle token expiration and refresh
 apiClient.interceptors.request.use(
   async (config) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     if (token) {
       // Decode token to check expiration
@@ -20,11 +20,11 @@ apiClient.interceptors.request.use(
 
       if (payload.exp < now) {
         // Token has expired, attempt to refresh
-        const refreshToken = localStorage.getItem("refreshToken");
+        const refreshToken = sessionStorage.getItem("refreshToken");
 
         if (!refreshToken) {
           console.error("Refresh token missing, logging out.");
-          localStorage.clear();
+          sessionStorage.clear();
           window.location.href = "/login"; // Redirect to login if no refresh token
           return Promise.reject("No refresh token available");
         }
@@ -34,11 +34,11 @@ apiClient.interceptors.request.use(
             refreshToken,
           });
 
-          localStorage.setItem("token", response.data.accessToken); // Save new token
+          sessionStorage.setItem("token", response.data.accessToken); // Save new token
           config.headers.Authorization = `Bearer ${response.data.accessToken}`;
         } catch (error) {
           console.error("Failed to refresh token:", error);
-          localStorage.clear();
+          sessionStorage.clear();
           window.location.href = "/login"; // Redirect to login if refresh fails
           return Promise.reject(error);
         }

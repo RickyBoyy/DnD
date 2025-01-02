@@ -22,6 +22,8 @@ const Layout = () => {
     "/game",
     "/profile",
     "/set-username",
+    "/profile",
+    "/characters"
   ];
 
   const currentPath = location.pathname.trim().toLowerCase();
@@ -54,8 +56,8 @@ const App = () => {
   const authRequiredPaths = ["/hostorplayer", "/lobby", "/createcharacter","/game"];
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    console.log("Token retrieved from localStorage:", token);
+    const token = sessionStorage.getItem("token");
+    console.log("Token retrieved from sessionStorage:", token);
 
     if (authRequiredPaths.some((path) => location.pathname.startsWith(path))) {
       if (token) {

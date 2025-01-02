@@ -38,7 +38,7 @@ const HostOrPlayer = () => {
   }, [playerCode, navigate]);
 
   const getUsernameFromToken = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       console.error("Token is missing!");
       return null;

@@ -2,15 +2,25 @@ const mysql = require("mysql2/promise");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-
+// Configuração do pool de conexão MySQL
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  
 });
 
+// Testar conexão com o banco
+(async () => {
+  try {
+    await pool.execute("SELECT 1");
+    console.log("Database connected successfully.");
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  }
+})();
+
+// Registro de usuário
 exports.register = async (req, res) => {
   const { email, password, country } = req.body;
 
@@ -20,8 +30,7 @@ exports.register = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const [result] = await pool.execute(
+    await pool.execute(
       "INSERT INTO users (email, password, country) VALUES (?, ?, ?)",
       [email, hashedPassword, country]
     );
@@ -32,12 +41,12 @@ exports.register = async (req, res) => {
     if (error.code === "ER_DUP_ENTRY") {
       res.status(400).json({ message: "Email already in use" });
     } else {
-      res.status(500).json({ message: "Error registering user", error });
+      res.status(500).json({ message: "Error registering user" });
     }
   }
 };
 
-
+// Login de usuário
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -46,7 +55,6 @@ exports.login = async (req, res) => {
   }
 
   try {
-    // Fetch the user
     const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     if (rows.length === 0) {
@@ -54,39 +62,33 @@ exports.login = async (req, res) => {
     }
 
     const user = rows[0];
-
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Check if the username is set
     const hasUsername = user.username ? true : false;
-
-    // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email, username: user.username }, // Ensure username is included here
+      { id: user.id, email: user.email, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    
+
     res.status(200).json({
       message: "Login successful",
       token,
       email: user.email,
-      username: user.username, // Will be null if not set
+      username: user.username,
       hasUsername,
     });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ message: "Error logging in", error });
+    res.status(500).json({ message: "Error logging in" });
   }
 };
 
-
-
-// In your authController.js or appropriate controller
+// Atualizar username
 exports.setUsername = async (req, res) => {
   const { email, username } = req.body;
 
@@ -95,7 +97,6 @@ exports.setUsername = async (req, res) => {
   }
 
   try {
-    // Update the user's username in the database
     const [result] = await pool.execute(
       "UPDATE users SET username = ? WHERE email = ?",
       [username, email]
@@ -108,11 +109,11 @@ exports.setUsername = async (req, res) => {
     res.status(200).json({ message: "Username set successfully" });
   } catch (error) {
     console.error("Error setting username:", error);
-    res.status(500).json({ message: "Error setting username", error });
-
+    res.status(500).json({ message: "Error setting username" });
   }
 };
 
+// Criar personagem
 exports.createCharacter = async (req, res) => {
   const {
     name,
@@ -137,16 +138,16 @@ exports.createCharacter = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    // Ensure character name is unique for the user
     const [existingCharacter] = await pool.execute(
-      `SELECT * FROM character_player WHERE character_name = ? AND character_user_id = ?`,
+      "SELECT * FROM character_player WHERE character_name = ? AND character_user_id = ?",
       [name, userId]
     );
+
     if (existingCharacter.length > 0) {
       return res.status(400).json({ message: "Character name already exists for this user" });
     }
 
-    const [result] = await pool.execute(
+    await pool.execute(
       `INSERT INTO character_player 
       (character_name, character_race, character_class, character_alignment, character_strength, character_dexterity, 
       character_constitution, character_intelligence, character_wisdom, character_charisma, 
@@ -168,17 +169,14 @@ exports.createCharacter = async (req, res) => {
       ]
     );
 
-    res.status(201).json({ message: "Character created successfully", characterId: result.insertId });
+    res.status(201).json({ message: "Character created successfully" });
   } catch (error) {
-    console.error("Error during character creation:", error);
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Invalid token" });
-    }
-    res.status(500).json({ message: "Error creating character", error });
+    console.error("Error creating character:", error);
+    res.status(500).json({ message: "Error creating character" });
   }
 };
 
-
+// Obter personagens
 exports.getCharacters = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -187,34 +185,29 @@ exports.getCharacters = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-const userId = decoded.id;
-console.log("User ID from token:", userId);
+    const userId = decoded.id;
 
-const [characters] = await pool.execute(
-  `SELECT * FROM character_player WHERE character_user_id = ?`,
-  [userId]
-);
-console.log("Fetched characters for user:", characters);
-
+    const [characters] = await pool.execute(
+      "SELECT * FROM character_player WHERE character_user_id = ?",
+      [userId]
+    );
 
     res.status(200).json({ characters });
   } catch (error) {
     console.error("Error fetching characters:", error);
-    res.status(500).json({ message: "Error fetching characters", error });
+    res.status(500).json({ message: "Error fetching characters" });
   }
 };
 
-
-
-
-
-// Get profile (user info)
+// Obter perfil do usuário
 exports.getProfile = async (req, res) => {
-  const userId = req.user.id; // Extracted from JWT via the authenticate middleware
+  const userId = req.user.id;
 
   try {
-    // Query the database to get the user's information
-    const [rows] = await pool.execute("SELECT username, email FROM users WHERE id = ?", [userId]);
+    const [rows] = await pool.execute(
+      "SELECT username, email FROM users WHERE id = ?",
+      [userId]
+    );
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -227,11 +220,11 @@ exports.getProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-
+// Refresh Token
 exports.refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -241,17 +234,15 @@ exports.refreshToken = async (req, res) => {
 
   try {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const newAccessToken = jwt.sign({ id: decoded.id, username: decoded.username }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const newAccessToken = jwt.sign(
+      { id: decoded.id, username: decoded.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
 
-    return res.status(200).json({ accessToken: newAccessToken });
+    res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
     console.error("Invalid refresh token:", error.message);
-    return res.status(403).json({ message: "Invalid refresh token" });
+    res.status(403).json({ message: "Invalid refresh token" });
   }
 };
-
-
-
-
-
-

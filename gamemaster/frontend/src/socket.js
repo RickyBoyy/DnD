@@ -5,7 +5,7 @@ const socketUrl = process.env.REACT_APP_SOCKET_URL || "http://localhost";
 let socket;
 
 const initializeSocket = () => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   if (!token) {
     console.warn("No token found. Socket connection will not be initialized.");
@@ -29,7 +29,7 @@ const initializeSocket = () => {
     console.error("Connection error:", err.message);
     if (err.message === "Unauthorized") {
       console.warn("Unauthorized token. Redirecting to login...");
-      localStorage.clear();
+      sessionStorage.clear();
       window.location.href = "/login"; // Replace with navigate("/login") in React component context
     }
   });

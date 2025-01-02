@@ -19,10 +19,10 @@ const Login = () => {
     try {
       const response = await apiClient.post("/login", { email, password });
   
-      // Save token to localStorage
+      // Save token to sessionStorage
       const token = response.data.token;
-      localStorage.setItem("token", token);
-      console.log("Token saved to localStorage:", token);
+      sessionStorage.setItem("token", token);
+      console.log("Token saved to sessionStorage:", token);
   
       // Initialize/reconnect the socket with the new token
       const socket = getSocket();
