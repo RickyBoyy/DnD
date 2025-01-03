@@ -1,21 +1,12 @@
-(function () {
-  console.log("Chat script loaded");
+export default function initializeChat(socket) {
+  console.log("Chat script initialized");
 
   const chatInput = document.querySelector("#chat-input");
   const sendButton = document.querySelector("#send_btn");
   let typingChatDiv = null;
-  const token = localStorage.getItem("token");
-  const socket = io("http://localhost:3000", {
-    transports: ["websocket", "polling"],
-    auth: {
-      token: token,
-    },
-
-    withCredentials: true,
-  });
 
   socket.on("connect", () => {
-    console.log("Successfully connected to the server");
+    console.log("Successfully connected to the server:", socket.id);
   });
 
   socket.on("connect_error", (error) => {
@@ -26,7 +17,10 @@
     console.log("Disconnected from the server:", reason);
   });
 
+  // Function to create chat elements
   const createChatElement = (message, className) => {
+    console.log("Creating chat element:", message, className);
+
     const chatDiv = document.createElement("div");
     chatDiv.classList.add("chat", className);
 
@@ -74,49 +68,35 @@
       showTypingAnimation();
 
       const actionData = {
-        action: "attack",
+        action: userText,
         player: "Elven Mage",
-        target: "Orc",
       };
 
-      // Send action data to the server
       socket.emit("playerAction", actionData, (response) => {
-        console.log("Event received:", response);
-        hideTypingAnimation(); // Hide typing animation
+        hideTypingAnimation();
 
         if (response.success) {
-          const { response: message, game_state } = response.response;
-          createChatElement(message, "incoming");
-
-          // Optionally, log or display updated game state
-          console.log("Updated Game State:", game_state);
+          createChatElement(response.response, "incoming");
         } else {
-          createChatElement("Error: " + response.error, "incoming");
+          createChatElement("Error: " + response.response, "incoming");
         }
       });
     }
   };
 
-  // Function to handle copying chat response
   const copyResponse = (copyBtn) => {
     const responseTextElement = copyBtn.parentElement.querySelector("p");
     if (responseTextElement) {
       const textToCopy = responseTextElement.textContent;
-      navigator.clipboard
-        .writeText(textToCopy)
-        .then(() => {
-          copyBtn.textContent = "done";
-          setTimeout(() => {
-            copyBtn.textContent = "content_copy";
-          }, 1000);
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-        });
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        copyBtn.textContent = "done";
+        setTimeout(() => {
+          copyBtn.textContent = "content_copy";
+        }, 1000);
+      });
     }
   };
 
-  // Function to show the typing animation
   const showTypingAnimation = () => {
     if (typingChatDiv) return;
 
@@ -139,7 +119,6 @@
     for (let i = 0; i < 3; i++) {
       const dot = document.createElement("div");
       dot.classList.add("typing-dot");
-      dot.style.setProperty("--delay", `${0.2 + i * 0.1}s`);
       typingAnimationDiv.appendChild(dot);
     }
 
@@ -152,7 +131,6 @@
     chatContainer.appendChild(typingChatDiv);
   };
 
-  // Function to hide the typing animation
   const hideTypingAnimation = () => {
     if (typingChatDiv) {
       typingChatDiv.remove();
@@ -160,14 +138,5 @@
     }
   };
 
-  // Event listener for the send button
-  sendButton.addEventListener("click", () => {
-    const userText = chatInput.value.trim();
-    if (userText) {
-      console.log("Sending command to server:", userText); // Debug log
-      socket.emit("playerAction", { action: userText, player: "Player Name" });
-      chatInput.value = "";
-      showTypingAnimation();
-    }
-  });
-})();
+  sendButton.addEventListener("click", handleOutgoingChat);
+}

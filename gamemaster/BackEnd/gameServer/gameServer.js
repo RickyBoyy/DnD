@@ -5,100 +5,147 @@ const jwt = require("jsonwebtoken");
 
 const MAX_PLAYERS = 6;
 
-// Directly create an HTTP server without using 'app'
+// Create an HTTP server for the game server
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Game server is running');
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Game server is running");
 });
 
 const io = socketIo(server, {
   cors: {
-    origin: '*',
+    origin: "*",
     methods: ["GET", "POST"],
+    allowedHeaders: ["Content-type"],
+    credentials: true,
   },
-  transports: ['websocket'], 
 });
 
 const lobbies = {}; // Store lobbies in memory
 
+// Middleware for token authentication
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  if (!token) {
+    return next(new Error("Authentication failed. Token missing."));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.user = { id: decoded.id, username: decoded.username };
+    next();
+  } catch (err) {
+    return next(new Error("Authentication failed. Invalid token."));
+  }
+});
+
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
-  socket.username = null; // Initialize to ensure no stale username is attached
-
-const token = socket.handshake.auth.token;
-if (token) {
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);  
-    socket.username = decoded.username;
-    console.log(`User authenticated: ${socket.username}`);
-  } catch (err) {
-    console.error("Invalid token:", err.message);
-    socket.emit("lobbyError", "Authentication failed. Invalid token.");
-    return socket.disconnect(true);
-  }
-} else {
-  console.error("Token missing in socket handshake.");
-  socket.emit("lobbyError", "Authentication failed. Token missing.");
-  return socket.disconnect(true);
-}
-
-
-  // Lobby management
-  socket.on("createLobby", ({ username }, callback) => {
+  socket.on("createLobby", ({ username }) => {
     const gameCode = generateGameCode();
-    const newLobby = {
+    const lobby = {
       gameCode,
-      players: [{ id: socket.id, name: username }],
+      players: [{ id: socket.id, name: username, isHost: true, selectedCharacter: null }],
     };
+    lobbies[gameCode] = lobby;
+    socket.join(gameCode);
 
-    lobbies[gameCode] = newLobby; // Ensure this is set
-    callback(gameCode); // Ensure the callback sends the game code
+    // Emit the game code back to the host
+    socket.emit("lobbyCreated", { gameCode, host: username, players: lobby.players });
+
+    // Emit `playerJoined` with the initial list
+    io.to(gameCode).emit("playerJoined", lobby.players);
+    console.log("Emitted playerJoined:", lobby.players);
   });
 
   socket.on("joinLobbyRoom", ({ gameCode, username }) => {
     const lobby = lobbies[gameCode];
 
     if (!lobby) {
+      console.log("Lobby not found for gameCode:", gameCode);
       return socket.emit("lobbyError", "Lobby not found.");
     }
+
     if (lobby.players.length >= MAX_PLAYERS) {
+      console.log("Lobby is full:", gameCode);
       return socket.emit("lobbyError", "Lobby is full.");
     }
 
-    // Check if the player is already in the lobby
-    if (!lobby.players.some((player) => player.id === socket.id)) {
-      lobby.players.push({ id: socket.id, name: username });
-      console.log(`${username} joined lobby ${gameCode}`);
+    if (lobby.players.some((player) => player.id === socket.id)) {
+      console.log(`${username} is already in the lobby.`);
+      return;
     }
 
-    // Join the socket.io room for the lobby
+    lobby.players.push({ id: socket.id, name: username, isHost: false, selectedCharacter: null });
     socket.join(gameCode);
 
-    // Notify all players in the lobby about the updated player list
+    console.log("Updated players in lobby:", lobby.players);
+
+    // Emit the updated players list to everyone in the room
     io.to(gameCode).emit("playerJoined", lobby.players);
+    io.to(gameCode).emit("playersUpdated", lobby.players);
+
+    socket.emit("playerJoined", lobby.players);
+
   });
 
-  socket.on("startGame", (gameCode) => {
+  socket.on("characterSelected", ({ gameCode, username, character }) => {
     const lobby = lobbies[gameCode];
     if (!lobby) {
       return socket.emit("lobbyError", "Lobby not found.");
     }
-    if (lobby.players.length < 2) {
-      return socket.emit(
-        "lobbyError",
-        "At least 2 players are required to start the game."
-      );
+
+    const player = lobby.players.find((p) => p.name === username);
+    if (!player) {
+      return socket.emit("lobbyError", "Player not found in the lobby.");
     }
 
-    io.to(gameCode).emit("gameStarted", { gameCode });
+    player.selectedCharacter = character;
+    console.log(`${username} selected character:`, character);
+
+    // Emit the updated character selections to everyone in the lobby
+    const characterSelections = {};
+lobby.players.forEach((p) => {
+  characterSelections[p.name] = p.selectedCharacter;
+});
+io.to(gameCode).emit("characterSelected", characterSelections);
+
+    
+  });
+
+  socket.on("getPlayersInGame", (gameCode) => {
+    const lobby = lobbies[gameCode];
+    if (lobby) {
+      // Emit the current list of players to the requesting client
+      socket.emit("playersUpdated", lobby.players);
+      console.log(`Sent players list for gameCode ${gameCode}:`, lobby.players);
+    } else {
+      console.log(`Lobby not found for gameCode: ${gameCode}`);
+      socket.emit("lobbyError", "Lobby not found.");
+    }
+  });
+  
+
+  socket.on("startGame", ({ gameCode }) => {
+    const lobby = lobbies[gameCode];
+    if (!lobby) {
+      return socket.emit("lobbyError", "Lobby not found.");
+    }
+
+    if (lobby.players.length < 2) {
+      return socket.emit("lobbyError", "At least 2 players are required.");
+    }
+
+    if (lobby.players.some((player) => !player.selectedCharacter)) {
+      return socket.emit("lobbyError", "All players must select a character.");
+    }
+
+    console.log(`Starting game for lobby: ${gameCode}`);
+    io.to(gameCode).emit("gameStarted", { gameCode, players: lobby.players });
   });
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-
-    delete socket.username;
-
     for (const gameCode in lobbies) {
       const lobby = lobbies[gameCode];
       const playerIndex = lobby.players.findIndex(
@@ -107,107 +154,21 @@ if (token) {
 
       if (playerIndex !== -1) {
         lobby.players.splice(playerIndex, 1);
-        io.to(gameCode).emit("playerLeft", lobby.players);
+        io.to(gameCode).emit("playerLeft", { players: lobby.players });
 
         if (lobby.players.length === 0) {
           delete lobbies[gameCode];
-          console.log(`Lobby ${gameCode} deleted because it is empty.`);
         }
         break;
       }
     }
   });
-
-  // Function for player actions
-  socket.on("playerAction", (data, callback) => {
-    console.log("Received playerAction:", data);
-    console.log("Callback function:", callback);
-
-    if (typeof callback !== "function") {
-      console.error("Callback is not a function");
-      return;
-    }
-
-    if (data && data.action) {
-      const successMessage = `Action '${data.action}' processed for user '${socket.username}'`;
-
-      const response = {
-        success: true,
-        response: successMessage,
-        game_state: {
-          /* Updated game state data */
-        },
-      };
-
-      callback(response);
-    } else {
-      const errorResponse = {
-        success: false,
-        error: "Invalid action data",
-      };
-
-      callback(errorResponse);
-    }
-  });
-
-  // Function for game actions
-  socket.on("gameAction", (data, callback) => {
-    const { action, player, target } = data;
-
-    if (!action || !player) {
-      return callback({
-        success: false,
-        message: "Invalid action or player data",
-      });
-    }
-
-    console.log(
-      `Received game action: ${action} by ${player} targeting ${target}`
-    );
-
-    const pythonProcess = spawn("python", ["./gamemaster/Backend/GameMaster.py"]);
-
-    const input = JSON.stringify({ action, player, target });
-    let result = "";
-
-    pythonProcess.stdout.on("data", (data) => {
-      result += data.toString();
-    });
-
-    pythonProcess.stderr.on("data", (error) => {
-      console.error("Python Error:", error.toString());
-    });
-
-    pythonProcess.on("close", () => {
-      try {
-        const response = JSON.parse(result);
-        console.log("Python Response:", response);
-
-        if (response.error) {
-          return callback({ success: false, message: response.error });
-        }
-
-        callback({ success: true, response });
-      } catch (error) {
-        console.error("Error parsing Python response:", error);
-        callback({
-          success: false,
-          error: "Invalid response from GameMaster.py",
-        });
-      }
-    });
-
-    pythonProcess.stdin.write(input);
-    pythonProcess.stdin.end();
-  });
 });
 
-// Function to generate a game code
-function generateGameCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
+server.listen(4000, () => {
+  console.log("Server running on http://localhost:4000");
+});
 
-const PORT = process.env.GAME_PORT || 3002;
-server.listen(PORT, () =>
-  console.log(`Game Server running on http://localhost:${PORT}`)
-);
+function generateGameCode() {
+  return Math.random().toString(36).substr(2, 6).toUpperCase();
+}

@@ -5,28 +5,37 @@ import "../App.css";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
+  const [characters, setCharacters] = useState([]); // State for user characters
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
 
         if (!token) {
           throw new Error("No token found");
         }
 
-        const response = await axios.get("http://localhost:5000/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const [profileResponse, charactersResponse] = await Promise.all([
+          axios.get("http://localhost:5000/profile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get("http://localhost:5000/getCharacters", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-        setProfile(response.data);
+        setProfile(profileResponse.data);
+        setCharacters(charactersResponse.data.characters || []);
       } catch (error) {
-        console.error("Error fetching profile", error);
-        setError(error.response?.data?.message || "Error fetching profile");
+        console.error("Error fetching data", error);
+        setError(error.response?.data?.message || "Error fetching data");
       }
     };
 
@@ -34,11 +43,19 @@ const Profile = () => {
   }, []);
 
   const handlePlayButtonClick = () => {
-    navigate("/hostorplayer");
+    if (characters.length > 0) {
+      navigate("/hostorplayer");
+    }
   };
 
   const handleNavigateCharacter = () => {
     navigate("/characters");
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("token");
+    setProfile(null);
+    navigate("/login");
   };
 
   if (error) {
@@ -81,6 +98,7 @@ const Profile = () => {
         </div>
       </div>
 
+
       {/* Buttons outside the card */}
       <div className="buttons-container">
         <button className="play-button" onClick={handlePlayButtonClick}>
@@ -93,6 +111,33 @@ const Profile = () => {
           Your Characters
         </button>
       </div>
+
+      {/* Floating Play Button */}
+      <button
+        className="play-button"
+        onClick={handlePlayButtonClick}
+        disabled={characters.length === 0} // Disable if no characters
+      >
+        Play
+      </button>
+
+      {/* Navigate Home Button */}
+      <button className="character-button" onClick={handleNavigateCharacter}>
+        Your Characters
+      </button>
+
+      {/* Logout Button */}
+      <button className="logout-button" onClick={handleLogout}>
+        Logout
+      </button>
+
+      {/* Inform the user if no characters exist */}
+      {characters.length === 0 && (
+        <p className="no-characters-message">
+          You need to create a character to play!
+        </p>
+      )}
+
     </div>
   );
 };
