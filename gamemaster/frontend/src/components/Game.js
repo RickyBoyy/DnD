@@ -61,39 +61,40 @@ const Game = () => {
             <div className="side_nav">
               <span>Players</span>
               <div className="players_icons">
-                {players.length > 0 ? (
-                  players.map((player, index) => (
-                    <div key={index} className="player_info">
-                      <img
-                        src={player.avatar || "/path/to/default-image.jpg"} // Display avatar if available
-                        alt={`${player.name || "Player"}_icon`}
-                        style={{ width: "50px", height: "50px", borderRadius: "50%" }}
-                      />
-                      <h3>{player.name || "Unknown Player"}</h3>
-                      {player.selectedCharacter ? (
-                        <div className="character_stats">
-                          <p><strong>Character:</strong> {player.selectedCharacter.character_name}</p>
-                          <p><strong>Race:</strong> {player.selectedCharacter.character_race}</p>
-                          <p><strong>Class:</strong> {player.selectedCharacter.character_class}</p>
-                          <p><strong>Level:</strong> {player.selectedCharacter.character_level}</p>
-                          <p><strong>Stats:</strong></p>
-                          <ul>
-                            <li>Strength: {player.selectedCharacter.character_strength}</li>
-                            <li>Dexterity: {player.selectedCharacter.character_dexterity}</li>
-                            <li>Constitution: {player.selectedCharacter.character_constitution}</li>
-                            <li>Intelligence: {player.selectedCharacter.character_intelligence}</li>
-                            <li>Wisdom: {player.selectedCharacter.character_wisdom}</li>
-                            <li>Charisma: {player.selectedCharacter.character_charisma}</li>
-                          </ul>
-                        </div>
-                      ) : (
-                        <p>No character selected.</p>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p>No players in the game yet.</p>
-                )}
+              {players.length > 0 ? (
+  players.map((player, index) => (
+    <div key={index} className="player_info">
+      <img
+        src={player.avatar || "/path/to/default-image.jpg"}
+        alt={`${player.name || "Player"}_icon`}
+        style={{ width: "50px", height: "50px" }}
+      />
+      <h3>{player.name || "Unknown Player"}</h3>
+      {player.selectedCharacter ? (
+        <div className="character_stats">
+          <p><strong>Character:</strong> {player.selectedCharacter.character_name}</p>
+          <p><strong>Race:</strong> {player.selectedCharacter.character_race}</p>
+          <p><strong>Class:</strong> {player.selectedCharacter.character_class}</p>
+          <p><strong>Level:</strong> {player.selectedCharacter.character_level}</p>
+          <p><strong>Stats:</strong></p>
+          <ul>
+            <li>Strength: {player.selectedCharacter.character_strength}</li>
+            <li>Dexterity: {player.selectedCharacter.character_dexterity}</li>
+            <li>Constitution: {player.selectedCharacter.character_constitution}</li>
+            <li>Intelligence: {player.selectedCharacter.character_intelligence}</li>
+            <li>Wisdom: {player.selectedCharacter.character_wisdom}</li>
+            <li>Charisma: {player.selectedCharacter.character_charisma}</li>
+          </ul>
+        </div>
+      ) : (
+        <p>No character selected.</p>
+      )}
+    </div>
+  ))
+) : (
+  <p>No players in the game yet.</p>
+)}
+
               </div>
             </div>
           </div>
