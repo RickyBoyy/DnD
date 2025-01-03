@@ -1,16 +1,22 @@
 from dotenv import load_dotenv
 import random
-import cohere
+import groq
 import os
 import json
 import sys
-import openai
+import re
+from ai_request import LanguageModel
+
+
+
+
+
 
 load_dotenv()
 
 # Initialize Cohere API
-cohere_api_key = os.getenv("open_ai_key")
-co = cohere.Client(cohere_api_key)
+groq_api_key = os.getenv("GROQ_API_KEY")  # Ensure the correct environment variable name
+groq_client = groq.Client(api_key=groq_api_key)
 
 
 # Game Variables
@@ -18,33 +24,27 @@ game_history = []
 game_state = {
     "players": [],
     "enemies": [],
-    "map": {
-        "Hall": {"description": "A large room with broken columns.", "items": [], "exits": ["Corridor"]},
-        "Corridor": {"description": "A narrow hallway filled with cobwebs.", "items": ["Key"], "exits": ["Hall"]},
-    },
+    "map": {},
 }
+language_model = LanguageModel()
 
-# Core Functions
-def call_cohere(prompt):
+# Define the game history
+game_history = []
+
+def call_groq(prompt):
     global game_history
     game_history.append(prompt)
-    
 
+    # Combine the game history into a full prompt
     full_prompt = "\n".join(game_history)
-    try:
-        response = co.generate(
-            model="command",
-            prompt=full_prompt,
-            max_tokens=200,
-            temperature=0.7,
-            stop_sequences=["\n"],
-        )
-        return response.generations[0].text.strip()
-    except cohere.error.CohereAPIError as e:
-        return f"API error: {e.message}"
-    except Exception as e:
-        return f"Unexpected error: {str(e)}"
 
+    # Generate a response using the language model
+    response = language_model.generate_response(full_prompt)
+
+    if response:
+        return response.strip()
+    else:
+        return "Error: Unable to generate response."
 
 def roll_dice(dice: str):
     """Rolls a dice in the format 'd20', '2d6', etc."""
@@ -56,36 +56,32 @@ def roll_dice(dice: str):
 
 # Combat System
 def initiate_combat(player, enemies):
-    """Handles combat until all enemies are defeated or the player dies."""
+    """Handles combat for the current player."""
     while player["health"] > 0 and any(enemy["health"] > 0 for enemy in enemies):
-        print(f"Your turn! What would you like to do? (Describe your attack, spell, or run)")
-
+        print(f"\n{player['name']}, your turn! Describe your action (attack, spell, or run):")
         action = input().strip()
 
-        # If the player wants to run away
         if "run" in action.lower():
             result = handle_run(action, player, enemies)
             if result == "escape_successful":
-                return "escape_successful"  # Successfully escaped combat
+                return "escape_successful"
 
-        # Process player action and describe combat result
         player_result = process_player_action(action, player, enemies)
-        print(f"Player action result: {player_result}")
+        print(f"\n{player['name']}'s action result: {player_result}")
 
-        # Enemy turn
         for enemy in enemies:
             if enemy["health"] > 0:
-                print(f"\nEnemy turn! {enemy['type']} attacks!")
-                damage = random.randint(5, 15)  # Random damage for enemy
+                print(f"{enemy['type']} attacks {player['name']}!")
+                damage = random.randint(5, 15)
                 player["health"] -= damage
-                print(f"You have {player['health']} health remaining.")
+                print(f"{player['name']} has {player['health']} health remaining.")
 
         if player["health"] <= 0:
-            print("You have been defeated!")
+            print(f"{player['name']} has been defeated!")
             return "player_defeated"
 
     if all(enemy["health"] <= 0 for enemy in enemies):
-        print("\nAll enemies have been defeated!")
+        print("All enemies have been defeated!")
         return "victory"
 
     return "ongoing"
@@ -145,7 +141,7 @@ def check_for_encounter(player, game_state):
     """Determine if a combat encounter should occur and add the enemy to the game state."""
     # Randomly decide if an encounter happens or base it on the narrative
     encounter_chance = random.random()
-    if encounter_chance > 0.7:  # 30% chance for an encounter
+    if encounter_chance > 0.9:  # 30% chance for an encounter
         # Generate a new enemy dynamically and add it to the game state
         new_enemy = create_enemy(player["position"], game_state)
         print(f"\nAs you proceed, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
@@ -242,7 +238,7 @@ def handle_spell(action, player, enemies):
              "Create a detailed description of the spell's effect on the surroundings, " \
              "the enemy, and the emotional atmosphere, based on a fantasy setting."
 
-    spell_description = call_cohere(prompt)
+    spell_description = call_groq(prompt)
 
     
     spell_damage = random.randint(10, 20)
@@ -261,7 +257,7 @@ def handle_creative_action(action, player, enemies):
     """Handle a player's creative action."""
     prompt = f"The player describes their action: '{action}'. As the Dungeon Master, interpret this action " \
              f"and provide a resolution based on the game state, including any effects on the enemies."
-    return call_cohere(prompt)
+    return call_groq(prompt)
 
 def enemy_turn(enemy, player):
     """Handle the enemy's action."""
@@ -269,44 +265,69 @@ def enemy_turn(enemy, player):
     player["health"] -= damage
     return f"The {enemy['type']} attacks you for {damage} damage! You have {player['health']} health remaining."
 
-def interactive_storytelling(player, game_state):
-    """Handles the interactive storytelling phase, with questions answered as needed."""
+def process_question(question):
+    """Handle a player's question and provide a relevant response."""
+    global game_history
+    global game_state
+
+    # Create a prompt for the AI to answer the question
+    prompt = (
+        f"As the Dungeon Master, the player asks: '{question}'. Based on the current game state and history, "
+        f"answer the question in the context of the story. Provide a detailed and immersive response. "
+        f"Do not generate new room names or unrelated content."
+    )
+
+    # Use the AI to generate a response
+    answer = call_groq(prompt)
+    return answer
+
+    
+
+def interactive_storytelling(game_state):
+    """Handles interactive storytelling in a turn-based manner for multiple players."""
     while True:
-        # Prompt the player for their action
-        player_action = input("\nWhat would you like to do?\n").strip()
-        
-        # Handle questions that begin with "ask:"
-        if player_action.lower().startswith("ask:"):
-            question = player_action[4:].strip()  # Remove the "ask:" part and handle the rest as a question.
-            
-            # Call the process_question function to handle the question
-            answer = process_question(question)
-            print(f"\nAnswer: {answer}")
-            
-            # Skip combat initiation or further story processing after answering the question
-            continue
-        
-        # Handle player actions like running, attacking, etc.
-        if player_action.lower().startswith("action:"):
-            action = player_action[7:].strip()  # Get the action from the input
-            story_response = process_input({
-                "action": action,
-                "player": player["name"],
-                "game_state": game_state,
-            })
-            print("\nStory response:", story_response)
-            
-            # Check if an encounter happens (no question asked)
+        for player in game_state["players"]:
+            # Skip players who are defeated
+            if player["health"] <= 0:
+                print(f"{player['name']} is unconscious and cannot take a turn.")
+                continue
+
+            print(f"\n{player['name']}'s turn! What would you like to do?")
+            player_action = input().strip()
+
+            if player_action.lower().startswith("ask:"):
+                # Handle player questions
+                question = player_action[4:].strip()
+                answer = process_question(question)
+                print(f"\nAnswer: {answer}")
+                continue
+
+            if player_action.lower().startswith("action:"):
+                # Process player actions
+                action = player_action[7:].strip()
+                story_response = process_input({
+                    "action": action,
+                    "player": player["name"],
+                    "game_state": game_state,
+                })
+                print("\nStory response:", story_response)
+
+            # Check for encounters specific to the current player
             enemies = check_for_encounter(player, game_state)
             if enemies:
-                print(f"Combat initiated! You face: {', '.join([f'{enemy['type']} with {enemy['health']} HP' for enemy in enemies])}.")
+                print(f"Combat initiated for {player['name']}! Facing: {', '.join([enemy['type'] for enemy in enemies])}.")
                 combat_result = initiate_combat(player, enemies)
-                        
+
+                # Handle combat outcomes
                 if combat_result == "victory":
-                    print("Combat has ended. Returning to the story...")
+                    print(f"{player['name']} defeated the enemies! Returning to the story...")
                 elif combat_result == "player_defeated":
-                    print("Game over.")
-                    break
+                    print(f"{player['name']} has been defeated and is out of the game.")
+
+        # Optional: Check if all players are defeated
+        if all(player["health"] <= 0 for player in game_state["players"]):
+            print("All players have been defeated. Game over.")
+            break
             
 
 
@@ -321,48 +342,95 @@ def process_input(data):
     if not player:
         return {"error": f"Player {player_name} not found."}
 
-    # Get the current enemy and check if combat is ongoing
+    # Check if combat is ongoing
     enemies_in_combat = [enemy for enemy in current_state["enemies"] if enemy["health"] > 0]
 
-    # If the player is in combat with an enemy, adjust the prompt to reflect the combat scenario
     if enemies_in_combat:
-        # Example: Attack Dragon with 187 HP
-        combat_enemy = enemies_in_combat[0]
-        prompt = f"As the Dungeon Master, the player, {player_name}, is currently fighting a {combat_enemy['type']} with {combat_enemy['health']} HP. " \
-                 f"The player takes the action: '{user_input}'. Continue the story and describe the effects of this action in the context of the ongoing battle."
+        # In combat, focus on the player's action and its consequences
+        prompt = (
+            f"The player {player_name}, a {player['name']}, is engaged in combat with "
+            f"a {enemies_in_combat[0]['type']} with {enemies_in_combat[0]['health']} HP. "
+            f"The player takes the action: '{user_input}'. Describe the result of this action in detail, "
+            f"including its effects on the enemy and the surrounding environment while describing in a DnD game style narration."
+        )
     else:
-        # No enemies in combat, just continuing the narrative
-        prompt = f"As the Dungeon Master, the player, {player_name}, takes the action: '{user_input}'. Continue the story based on this action."
+        # Exploration and storytelling
+        prompt = (
+            f"The player {player_name}, a {player['name']}, is exploring the environment. "
+            f"The player takes the action: '{user_input}'. Continue the immersive story, "
+            f"describing the environment, the effects of their action, and any new details they uncover. "
+            f"Do not generate summaries or non-immersive text; focus on storytelling like a Dungeon Master in Dungeons and Dragons."
+        )
 
-    # Now, call Cohere API to generate the narrative
-    return call_cohere(prompt)
+    # Generate the response
+    response = call_groq(prompt)
+    return response
 
-def process_question(question):
-    """Handle questions."""
-    prompt = f"As the Dungeon Master, the player asks: '{question}'. Provide a relevant response. According to what was previous said"
-    return call_cohere(prompt)
+
+
+
+
+
 
 def start_game():
-    """Starts the game with an AI-generated detailed introduction."""
-    prompt = (
+    """Starts the game with an AI-generated introduction and map."""
+    
+    intro_prompt = (
         "You are a Dungeon Master creating an immersive introduction for a group of players in a Dungeons and Dragons game. "
         "The introduction should be at least six lines long, including deep descriptions of the setting, "
         "detailed sensory elements (smells, sounds, textures), and a rich atmosphere. "
         "The players should feel immediately drawn into the world. "
         "Provide a clear group objective. "
         "The players are starting in a specific place, and you should describe what they are doing in that moment. "
-        "End with an engaging prompt that invites the players to take action."
+        "Don't forget to end with an engaging prompt that invites the players to take action."
     )
-
-    intro = call_cohere(prompt)
+    intro = call_groq(intro_prompt)
     game_history.append(intro)
     print(intro)
+
+
+   
+def transform_to_json(response_text):
+    rooms = {}
+    current_room = None
+    for line in response_text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        room_match = re.match(r"^([A-Za-z0-9\s,':-]+):$", line)
+        if room_match:
+            current_room = room_match.group(1).strip()
+            rooms[current_room] = {"description": "", "items": [], "exits": []}
+            continue
+
+        if current_room and line.lower().startswith("description:"):
+            rooms[current_room]["description"] = line.split(":", 1)[1].strip() or "No description available."
+
+        if current_room and line.lower().startswith("items:"):
+            items = line.split(":", 1)[1].strip()
+            rooms[current_room]["items"] = [item.strip() for item in items.split(",") if item.strip()]
+
+        if current_room and line.lower().startswith("exits:"):
+            exits = line.split(":", 1)[1].strip()
+            rooms[current_room]["exits"] = [exit.strip() for exit in exits.split(",") if exit.strip()]
+
+    if not rooms:
+        raise ValueError("No valid rooms detected in the map response.")
+
+    return rooms
+
+
+
+
+
+
 # Main Function
 def main():
     print("Welcome to the game!")
     
     # Initialize the player with attributes
-    player = {
+    player1 = {
         "name": "Human Rogue",  
         "position": "Hall",
         "health": 100,
@@ -377,13 +445,28 @@ def main():
         },
     }
 
-    game_state["players"] = [player]
+    player2 = {
+        "name": "Human Thief",  
+        "position": "Hall",
+        "health": 100,
+        "attributes": {          
+            "DEX": 14,          
+            "STR": 10,           
+            "CON": 12,
+            "INT": 11,
+            "WIS": 13,
+            "CHA": 15,
+              
+        },
+    }
+
+    game_state["players"] = [player1, player2]
 
     # Start the game with an introduction
     start_game()
 
     # Enter interactive storytelling
-    interactive_storytelling(player, game_state)
+    interactive_storytelling(game_state)
 
 if __name__ == "__main__":
     main()
