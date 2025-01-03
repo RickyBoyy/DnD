@@ -28,11 +28,11 @@ body {
   align-items: center;
   padding: 0; /* Garante que não há preenchimento */
   margin: 0; /* Garante que não há margens */
-  background-color: transparent; /* Garante que o fundo seja transparente */
-  height: 100vh; /* Garante que o contêiner ocupe 100% da altura da tela */
+  background-color: transparent;
+  height: 100vh; 
 }
 
-/* Lado Direito da Tela (Card de Login) */
+
 .login-container {
   flex: 1;
   display: flex;
@@ -42,26 +42,26 @@ body {
   padding: 20px;
 }
 
-/* Logo Fora do Card */
+
 .logo-container {
   width: 100%;
   text-align: center;
-  margin-bottom: 30px; /* Distância entre o logo e o card */
 }
 
 
 /* Card de Login */
 .card-login {
-    width: 60%; 
-    height: 450px; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: 30px 35px;
-    border-radius: 20px;
-    overflow: hidden; 
-  }
+  width: 60%; 
+  max-width: 400px;
+  height: auto;
+  padding: 30px 35px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  } 
+  
 
 
 /* Título do Card */
@@ -72,14 +72,30 @@ body {
   margin-bottom: 20px;
 }
 
+.form-group {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 
-.textfield-login input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
   background-color: #f7f7f7;
+}
+
+.form-group select {
+  background-color: white;
 }
 
 /* Botão de Login */
@@ -97,7 +113,7 @@ body {
 }
 
 .btn-login:hover {
-  background-color: 9f1d14;
+  background-color: #9f1d14;
 }
 
 /* Mensagem de Erro */
@@ -147,7 +163,7 @@ body {
 
 /* Lado Esquerdo (Animação) */
 .animation-container {
-  flex: 1; /* Ocupa 50% da largura */
+  flex: 1; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -155,7 +171,7 @@ body {
 
 /* Lado Direito (Card de Login) */
 .signin-container {
-  flex: 1; /* Ocupa 50% da largura */
+  flex: 1; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -773,6 +789,8 @@ span.material-symbols-rounded {
     opacity: 0.2;
   }
 }
+
+
 /*Typing Container Styling*/
 
 .typing-container {
@@ -885,83 +903,112 @@ span.material-symbols-rounded {
   text-decoration: underline;
 }
 
+/*Profile*/
 /* Button-like decorative flair for page details */
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; 
+  padding: 20px;
+}
+
+/* Card styling */
+.profile-card {
+  max-width: 600px;
+  width: 100%;
+  background-color: #f4f4f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 30px; 
+}
+
+
+.dnd-title {
+  font-family: 'DragonHunter', sans-serif;
+  font-size: 2.5rem;
+  color: #a52a2a;
+  margin-bottom: 20px;
+}
+
 .decorative-flair {
-  margin: 20px auto; /* Centers the element */
-  display: block; /* Forces it to a new line */
-  background-color: #a52a2a; /* Dark red-brown */
+  background-color: #a52a2a;
   color: #fff5e6;
-  padding: 5px 10px;
-  border: 2px solid #ffcc00;
+  padding: 8px 15px;
   border-radius: 5px;
-  font-size: 1rem;
-  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
-  text-shadow: 1px 1px 3px #000;
-  text-align: center; /* Centers text inside the element */
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+
+.profile-info p {
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #a52a2a;
+}
+
+
+.no-quests-message {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: #555;
+  font-style: italic;
+  background-color: #f9f9f9;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Buttons container outside the card */
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between buttons */
+}
+
+/* Individual button styling */
+.play-button, .character-button {
+  padding: 12px 30px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .play-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #a72828; /* Green */
+  background-color: #a72828;
   color: white;
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .play-button:hover {
-  background-color: #681317; /* Darker green */
+  background-color: #681317;
 }
 
 .character-button {
-  background: #2d2d2d;
-  color: #fff;
-  font-size: 1rem;
+  background-color: #2d2d2d;
+  color: white;
   border: 2px solid #b22222;
-  border-radius: 8px;
-  padding: 10px 15px;
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .character-button:hover {
-  background: #8b0000;
-  color: #ffd700;
+  background-color: #8b0000;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .profile-container {
-    padding: 15px;
-  }
 
-  .profile-container h1 {
-    font-size: 2rem;
-  }
 
-  .profile-container p {
-    font-size: 1rem;
-  }
 
-  .decorative-flair {
-    font-size: 0.9rem;
-  }
-}
+
+
 
 .container {
   overflow: hidden;

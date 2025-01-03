@@ -42,30 +42,57 @@ const Profile = () => {
   };
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div className="profile-container centered">
+        <div className="error-card">
+          <h2 className="error-title">Oops! Something went wrong.</h2>
+          <p className="error-message">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   if (!profile) {
-    return <div>Loading...</div>;
+    return (
+      <div className="profile-container centered">
+        <div className="loading-card">
+          <p className="loading-message">Fetching your profile...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="profile-container">
-      <h1 className="dnd-title">Adventurer's Profile</h1>
-      <div className="decorative-flair">Heroic Stats</div>
-      <p>Username: {profile.username}</p>
-      <p>Email: {profile.email}</p>
-      <div className="decorative-flair">Quest Log</div>
+    <div className="profile-container centered">
+      <div className="profile-card">
+        <h1 className="dnd-title">Adventurer's Profile</h1>
+        <div className="decorative-flair">Heroic Stats</div>
+        <div className="profile-info">
+          <p>
+            <span className="info-label">Username:</span> {profile.username}
+          </p>
+          <p>
+            <span className="info-label">Email:</span> {profile.email}
+          </p>
+        </div>
+        <div className="decorative-flair">Quest Log</div>
+        <div className="no-quests-message">
+          <p>You have not embarked on any quests yet. Start your journey now!</p>
+        </div>
+      </div>
 
-      {/* Floating Play Button */}
-      <button className="play-button" onClick={handlePlayButtonClick}>
-        Play
-      </button>
-
-      {/* Navigate Home Button */}
-      <button className="character-button" onClick={handleNavigateCharacter}>
-        Your Characters
-      </button>
+      {/* Buttons outside the card */}
+      <div className="buttons-container">
+        <button className="play-button" onClick={handlePlayButtonClick}>
+          Play
+        </button>
+        <button
+          className="character-button"
+          onClick={handleNavigateCharacter}
+        >
+          Your Characters
+        </button>
+      </div>
     </div>
   );
 };
