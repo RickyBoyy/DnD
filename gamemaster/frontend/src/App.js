@@ -19,15 +19,18 @@ const Layout = () => {
     "/",
     "/signin",
     "/login",
-    "/game",
     "/profile",
     "/set-username",
-    "/profile",
-    "/characters"
+    "/characters",
+    "/hostorplayer",
   ];
 
+  // Check if the current path matches any in the list or starts with "/lobby/"
   const currentPath = location.pathname.trim().toLowerCase();
-  const showHeader = !pagesWithoutHeader.includes(currentPath);
+  const showHeader =
+    !pagesWithoutHeader.includes(currentPath) &&
+    !currentPath.startsWith("/lobby/");
+    !currentPath.startsWith("/game/");
 
   return (
     <>
@@ -47,6 +50,7 @@ const Layout = () => {
     </>
   );
 };
+
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
