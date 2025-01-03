@@ -99,7 +99,7 @@ const Profile = () => {
       </div>
 
 
-      {/* Buttons outside the card */}
+      
       <div className="buttons-container">
         <button className="play-button" onClick={handlePlayButtonClick}>
           Play
@@ -112,19 +112,6 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Floating Play Button */}
-      <button
-        className="play-button"
-        onClick={handlePlayButtonClick}
-        disabled={characters.length === 0} // Disable if no characters
-      >
-        Play
-      </button>
-
-      {/* Navigate Home Button */}
-      <button className="character-button" onClick={handleNavigateCharacter}>
-        Your Characters
-      </button>
 
       {/* Logout Button */}
       <button className="logout-button" onClick={handleLogout}>
