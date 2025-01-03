@@ -629,6 +629,41 @@ button.submit-btn:hover {
   background-color: darkred;
 }
 
+
+.character-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.character-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.character-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.character-item:hover {
+  transform: scale(1.05);
+}
+
+.character-item.selected {
+  border: 2px solid #9e3308;
+}
+
+
 /* header */
 
 .header {
@@ -754,6 +789,32 @@ span.material-symbols-rounded {
     opacity: 0.2;
   }
 }
+
+
+.player_info {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.character_stats {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.character_stats ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.character_stats ul li {
+  margin: 2px 0;
+}
+
 /*Typing Container Styling*/
 
 .typing-container {
@@ -881,6 +942,23 @@ span.material-symbols-rounded {
   text-shadow: 1px 1px 3px #000;
   text-align: center; /* Centers text inside the element */
 }
+
+.logout-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #f00;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #c00;
+}
+
+
 
 .play-button {
   position: fixed;
@@ -1103,6 +1181,22 @@ span.material-symbols-rounded {
     100vh - 60px
   ); /* Adjust height relative to the title and padding */
 }
+
+.profile-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff; /* Blue color for the button */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.profile-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
 
 .players_icons img {
   border-radius: 50%; /* Optional: Make the image circular */

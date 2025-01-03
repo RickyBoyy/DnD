@@ -1,15 +1,8 @@
-import React, { useEffect } from "react";
-import socket from "./socket";
-import "./App.css";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
-
-import SignInPage from "./pages/SignInPage";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from "react-router-dom";
+import getSocket from "./socket"; // Use getSocket instead of socket directly
 import LoginPage from "./pages/LoginPage";
+import SignInPage from "./pages/SignInPage";
 import HostOrPlayerPage from "./pages/HostOrPlayerPage";
 import Header from "./components/Header";
 import GamePage from "./pages/GamePage";
@@ -29,6 +22,8 @@ const Layout = () => {
     "/game",
     "/profile",
     "/set-username",
+    "/profile",
+    "/characters"
   ];
 
   const currentPath = location.pathname.trim().toLowerCase();
@@ -36,9 +31,7 @@ const Layout = () => {
 
   return (
     <>
-      {/* Conditionally render the Header */}
-
-      {/* Define all the routes */}
+      {showHeader && <Header />}
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/signin" element={<SignInPage />} />
@@ -56,19 +49,38 @@ const Layout = () => {
 };
 
 const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const authRequiredPaths = ["/hostorplayer", "/lobby", "/createcharacter","/game"];
+
   useEffect(() => {
-    socket.connect();
+    const token = sessionStorage.getItem("token");
+    console.log("Token retrieved from sessionStorage:", token);
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+    if (authRequiredPaths.some((path) => location.pathname.startsWith(path))) {
+      if (token) {
+        setIsAuthenticated(true);
+        const socket = getSocket(); // Use getSocket() here
+        if (!socket.connected) {
+          console.log("Connecting socket...");
+          socket.connect();
+        } // Connect to socket if token is valid
+      } else {
+        console.error("No token available. Redirecting to login.");
+        navigate("/login");
+      }
+    }
+  }, [location.pathname, navigate]);
 
-  return (
-    <Router>
-      <Layout />
-    </Router>
-  );
+  return <Layout />;
 };
 
-export default App;
+const Root = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default Root;

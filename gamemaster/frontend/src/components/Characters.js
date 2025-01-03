@@ -8,7 +8,7 @@ const Characters = () => {
 
   useEffect(() => {
     const fetchCharacters = async () => {
-      const token = localStorage.getItem("token"); // Retrieve the token
+      const token = sessionStorage.getItem("token"); // Retrieve the token
       if (!token) {
         alert("You need to log in to view your characters.");
         return;
@@ -45,12 +45,23 @@ const Characters = () => {
     navigate("/createcharacter");
   };
 
+  const navigateToProfile = () => {
+    navigate("/profile"); // Navigate to the profile page
+  };
+
   return (
     <div className="container">
-      {/* Button to create a new character */}
-      <button className="create-character-button" onClick={navigateToCreateCharacter}>
-        Create Character
-      </button>
+      <div className="header-buttons">
+        {/* Profile button */}
+        <button className="profile-button" onClick={navigateToProfile}>
+          Profile
+        </button>
+
+        {/* Create character button */}
+        <button className="create-character-button" onClick={navigateToCreateCharacter}>
+          Create Character
+        </button>
+      </div>
 
       <div className="title_characters">
         <span>Characters</span>
