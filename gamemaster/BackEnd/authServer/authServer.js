@@ -18,6 +18,7 @@ app.use(
 
 
 app.use(bodyParser.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Auth routes
 app.post("/register", authController.register);
@@ -27,6 +28,7 @@ app.get("/profile", authenticate, authController.getProfile);
 app.post("/createCharacter", authenticate, authController.createCharacter);
 app.get("/getCharacters", authenticate, authController.getCharacters);
 app.post("/refresh-token",authController.refreshToken);
+app.post("/uploadAvatar", authenticate, authController.uploadAvatar);
 
 
 

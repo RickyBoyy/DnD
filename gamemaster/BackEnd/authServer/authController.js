@@ -1,6 +1,8 @@
 const mysql = require("mysql2/promise");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
 
 // Configuração do pool de conexão MySQL
 const pool = mysql.createPool({
@@ -10,15 +12,75 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-// Testar conexão com o banco
-(async () => {
-  try {
-    await pool.execute("SELECT 1");
-    console.log("Database connected successfully.");
-  } catch (error) {
-    console.error("Database connection failed:", error);
-  }
-})();
+
+const storage = multer.diskStorage({
+  
+  destination: (req, file, cb) => {
+    console.log("Saving file to:", path.resolve("uploads/"));
+    cb(null, "uploads/"); // Directory where avatars will be stored
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error("Only images are allowed (jpeg, jpg, png)"));
+    }
+  },
+}).single("avatar");
+
+
+
+exports.uploadAvatar = async (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error("Multer error:", err);
+      return res.status(400).json({ message: err.message });
+    }
+
+    if (!req.file) {
+      console.error("No file uploaded");
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    
+    console.log("Uploaded file details:", req.file);
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Authorization token is required" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.id;
+      const avatarUrl = `/uploads/${req.file.filename}`;
+
+      // Update avatar URL in the database
+      const [result] = await pool.execute(
+        "UPDATE users SET avatar_url = ? WHERE id = ?",
+        [avatarUrl, userId]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({ message: "Avatar uploaded successfully", avatar_url: avatarUrl });
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+};
 
 // Registro de usuário
 exports.register = async (req, res) => {
@@ -87,6 +149,8 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Error logging in" });
   }
 };
+
+
 
 // Atualizar username
 exports.setUsername = async (req, res) => {
@@ -205,7 +269,7 @@ exports.getProfile = async (req, res) => {
 
   try {
     const [rows] = await pool.execute(
-      "SELECT username, email FROM users WHERE id = ?",
+      "SELECT username, email, avatar_url FROM users WHERE id = ?",
       [userId]
     );
 
@@ -217,12 +281,14 @@ exports.getProfile = async (req, res) => {
     res.status(200).json({
       username: user.username,
       email: user.email,
+      avatar_url: user.avatar_url,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // Refresh Token
 exports.refreshToken = async (req, res) => {
