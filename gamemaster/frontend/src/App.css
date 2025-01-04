@@ -26,13 +26,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0; /* Garante que não há preenchimento */
-  margin: 0; /* Garante que não há margens */
-  background-color: transparent; /* Garante que o fundo seja transparente */
-  height: 100vh; /* Garante que o contêiner ocupe 100% da altura da tela */
+  padding: 0; 
+  margin: 0; 
+  background-color: transparent;
+  height: 100vh; 
+  padding-left: 100px;
 }
 
-/* Lado Direito da Tela (Card de Login) */
+
 .login-container {
   flex: 1;
   display: flex;
@@ -42,25 +43,27 @@ body {
   padding: 20px;
 }
 
-/* Logo Fora do Card */
+
 .logo-container {
   width: 100%;
   text-align: center;
-  margin-bottom: 30px; /* Distância entre o logo e o card */
 }
+
 
 /* Card de Login */
 .card-login {
-  width: 60%;
-  height: 450px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  width: 60%; 
+  max-width: 400px;
+  height: auto;
   padding: 30px 35px;
   border-radius: 20px;
-  overflow: hidden;
-}
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  } 
+  
+
 
 /* Título do Card */
 .card-login h1 {
@@ -70,12 +73,30 @@ body {
   margin-bottom: 20px;
 }
 
-.textfield-login input {
+.form-group {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: #f7f7f7;
+  background-color: white;
+}
+
+.form-group select {
+  background-color: white;
 }
 
 /* Botão de Login */
@@ -93,7 +114,7 @@ body {
 }
 
 .btn-login:hover {
-  background-color: 9f1d14;
+  background-color: #9f1d14;
 }
 
 /* Mensagem de Erro */
@@ -118,14 +139,16 @@ body {
   text-decoration: underline;
 }
 
+
+
+
+
 /*SignIn*/
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
-    sans-serif;
 }
 
 /* Wrapper principal */
@@ -139,15 +162,18 @@ body {
 
 /* Lado Esquerdo (Animação) */
 .animation-container {
-  flex: 1; /* Ocupa 50% da largura */
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100vh; 
+  padding-left: 70px;
 }
+
 
 /* Lado Direito (Card de Login) */
 .signin-container {
-  flex: 1; /* Ocupa 50% da largura */
+  flex: 1; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -156,7 +182,7 @@ body {
 
 /* Card de Login */
 .card-signin {
-  width: 60%;
+  width: 60%; 
   max-width: 400px;
   height: auto;
   padding: 30px 35px;
@@ -165,7 +191,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
+  }
+
 
 /* Título do Card */
 .card-signin h1 {
@@ -196,7 +223,7 @@ body {
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: #f7f7f7;
+  background-color: #ffffff;
 }
 
 .form-group select {
@@ -241,6 +268,8 @@ body {
 .login-link a:hover {
   text-decoration: underline;
 }
+
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -629,41 +658,6 @@ button.submit-btn:hover {
   background-color: darkred;
 }
 
-
-.character-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border: 1px solid #ccc;
-  padding: 20px;
-  z-index: 1000;
-}
-
-.character-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.character-item {
-  border: 1px solid #ccc;
-  padding: 10px;
-  cursor: pointer;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.character-item:hover {
-  transform: scale(1.05);
-}
-
-.character-item.selected {
-  border: 2px solid #9e3308;
-}
-
-
 /* header */
 
 .header {
@@ -711,13 +705,21 @@ button.submit-btn:hover {
 }
 
 .chat-container {
-  height: 100%;
+  max-height: 100vh;
   padding-bottom: 150px;
   overflow-y: auto;
-  position: relative;
-  z-index: 1;
 }
-
+:where(.chat-container, textarea)::-webkit-scrollbar {
+  width: 6px;
+}
+:where(.chat-container, textarea)::-webkit-scrollbar-track {
+  background-color: var(--incoming-chat-bg);
+  border-radius: 25px;
+}
+:where(.chat-container, textarea)::-webkit-scrollbar-thumb {
+  background: var(--icon-color);
+  border-radius: 25px;
+}
 .chat-container .chat {
   padding: 25px 10px;
   display: flex;
@@ -790,30 +792,6 @@ span.material-symbols-rounded {
   }
 }
 
-
-.player_info {
-  margin: 10px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.character_stats {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.character_stats ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.character_stats ul li {
-  margin: 2px 0;
-}
 
 /*Typing Container Styling*/
 
@@ -910,6 +888,7 @@ span.material-symbols-rounded {
   width: 80%;
 }
 
+
 /* Loading/Error message styling */
 .loading,
 .error {
@@ -926,100 +905,112 @@ span.material-symbols-rounded {
   text-decoration: underline;
 }
 
+/*Profile*/
 /* Button-like decorative flair for page details */
-.decorative-flair {
-  margin: 20px auto; /* Centers the element */
-  display: block; /* Forces it to a new line */
-  background-color: #a52a2a; /* Dark red-brown */
-  color: #fff5e6;
-  padding: 5px 10px;
-  border: 2px solid #ffcc00;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-shadow: 1px 1px 3px #000;
-  text-align: center; /* Centers text inside the element */
-}
-
-.logout-button {
-  display: inline-block;
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #fff;
-  background-color: #f00;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.logout-button:hover {
-  background-color: #c00;
-}
-
-
-
-.play-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #a72828; /* Green */
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 16px;
+.profile-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 100vh; 
+  padding: 20px;
+}
+
+/* Card styling */
+.profile-card {
+  max-width: 600px;
+  width: 100%;
+  background-color: #f4f4f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 30px; 
+}
+
+
+.dnd-title {
+  font-family: 'DragonHunter', sans-serif;
+  font-size: 2.5rem;
+  color: #a52a2a;
+  margin-bottom: 20px;
+}
+
+.decorative-flair {
+  background-color: #a52a2a;
+  color: #fff5e6;
+  padding: 8px 15px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+
+.profile-info p {
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #a52a2a;
+}
+
+
+.no-quests-message {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: #555;
+  font-style: italic;
+  background-color: #f9f9f9;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Buttons container outside the card */
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between buttons */
+}
+
+/* Individual button styling */
+.play-button, .character-button {
+  padding: 12px 30px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.play-button {
+  background-color: #a72828;
+  color: white;
 }
 
 .play-button:hover {
-  background-color: #681317; /* Darker green */
+  background-color: #681317;
 }
 
 .character-button {
-  background: #2d2d2d;
-  color: #fff;
-  font-size: 1rem;
+  background-color: #2d2d2d;
+  color: white;
   border: 2px solid #b22222;
-  border-radius: 8px;
-  padding: 10px 15px;
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .character-button:hover {
-  background: #8b0000;
-  color: #ffd700;
+  background-color: #8b0000;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .profile-container {
-    padding: 15px;
-  }
 
-  .profile-container h1 {
-    font-size: 2rem;
-  }
 
-  .profile-container p {
-    font-size: 1rem;
-  }
 
-  .decorative-flair {
-    font-size: 0.9rem;
-  }
-}
+
+
 
 .container {
   overflow: hidden;
@@ -1181,22 +1172,6 @@ span.material-symbols-rounded {
     100vh - 60px
   ); /* Adjust height relative to the title and padding */
 }
-
-.profile-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff; /* Blue color for the button */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.profile-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
-
 
 .players_icons img {
   border-radius: 50%; /* Optional: Make the image circular */

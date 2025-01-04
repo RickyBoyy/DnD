@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Lottie from "react-lottie";
+import animationData from "../assets/animationlogin.json";
 import { useNavigate, Link } from "react-router-dom";
 import "../App.css";
 import logoImage from "../assets/logo.png";
@@ -11,26 +13,31 @@ const Login = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
- 
+  useEffect(() => {
+    // Optional: Clear session storage or perform cleanup when the component mounts
+    return () => {
+      // Cleanup logic, if needed
+    };
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     try {
       const response = await apiClient.post("/login", { email, password });
-  
+
       // Save token to sessionStorage
       const token = response.data.token;
       sessionStorage.setItem("token", token);
       console.log("Token saved to sessionStorage:", token);
-  
+
       // Initialize/reconnect the socket with the new token
       const socket = getSocket();
       socket.connect();
-  
+
       alert("Login successful!");
       setError(null);
-  
+
       // Navigate based on user status
       if (!response.data.hasUsername) {
         navigate("/set-username", { state: { email } });
@@ -39,20 +46,37 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Error during login:", error);
-  
+
       // Handle specific errors (e.g., invalid credentials)
       setError(
         error.response?.data?.message || "Invalid email or password. Please try again."
       );
     }
   };
-  
 
-  
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
 
   return (
     <div className="login-wrapper">
-      <div className="animation-container"></div>
+      <div className="animation-container">
+        
+      <Lottie
+    options={defaultOptions}
+    style={{
+      width: "100%",
+      maxWidth: "1000px", 
+      height: "auto",    
+      maxHeight: "2000px", 
+    }}
+  />    
+      </div>
 
       <div className="login-container">
         <div className="logo-container">

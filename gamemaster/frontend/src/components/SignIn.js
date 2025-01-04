@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Lottie from "react-lottie";
+import animationData from "../assets/animationregister.json"; // Certifique-se de ter o arquivo JSON da animação
 import "../App.css";
 import logoImage from "../assets/logo.png";
 import { useNavigate, Link } from "react-router-dom";
@@ -12,6 +14,8 @@ const SignIn = () => {
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
 
+  const navigate = useNavigate();
+
   const validatePassword = (password) => {
     const minLength = 8;
     const hasNumber = /\d/.test(password);
@@ -23,11 +27,8 @@ const SignIn = () => {
     if (!hasNumber && !hasSpecialChar) {
       return "Password must contain at least one number or one special character.";
     }
-
     return null;
   };
-
-  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -49,31 +50,44 @@ const SignIn = () => {
     }
 
     try {
-      // Get API URL from environment variable
-      const apiUrl = "http://localhost:5000"; // Default fallback if the env variable is not set
-
-      // Use the environment variable for the API URL
       const response = await axios.post("http://localhost:5000/register", {
         email,
         password,
         country,
       });
-      
 
       setError(null);
       alert("Registration successful!");
       navigate("/login");
     } catch (err) {
+      console.error("Error during registration:", err);
       setError("Error registering user. Please try again.");
     }
+  };
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
   };
 
   return (
     <div className="signin-wrapper">
       {/* Lado Esquerdo */}
       <div className="animation-container">
-        
-      </div>
+      <Lottie
+    options={defaultOptions}
+    style={{
+      width: "100%",
+      maxWidth: "800px", 
+      height: "auto",    
+      maxHeight: "800px", 
+    }}
+  />     
+</div>
 
       {/* Lado Direito */}
       <div className="signin-container">
@@ -122,7 +136,9 @@ const SignIn = () => {
               onChange={(e) => setCountry(e.target.value)}
               required
             >
-              <option value="" disabled>Select your country</option>
+              <option value="" disabled>
+                Select your country
+              </option>
               <option value="BR">Brazil</option>
               <option value="US">United States</option>
               <option value="PT">Portugal</option>
