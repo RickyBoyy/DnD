@@ -55,36 +55,93 @@ def roll_dice(dice: str):
         raise ValueError("Invalid dice format.")
 
 # Combat System
-def initiate_combat(player, enemies):
-    """Handles combat for the current player."""
+
+def initiate_combat_with_prompt(player, enemies):
+    """DnD-style turn-based combat with AI-interpreted prompts."""
+    print("\nCombat initiated!")
     while player["health"] > 0 and any(enemy["health"] > 0 for enemy in enemies):
-        print(f"\n{player['name']}, your turn! Describe your action (attack, spell, or run):")
+        print(f"\n{player['name']}, your turn! Describe your action:")
         action = input().strip()
+
+        # AI interprets action
+        if "check health" in action.lower():
+            check_health(player)
+            continue  # Allow the player to decide their action again after checking health
 
         if "run" in action.lower():
             result = handle_run(action, player, enemies)
             if result == "escape_successful":
                 return "escape_successful"
 
-        player_result = process_player_action(action, player, enemies)
-        print(f"\n{player['name']}'s action result: {player_result}")
+        # Interpret player's action as a combat move
+        response = interpret_action(action, player, enemies)
+        print(f"\n{response}")
 
+        # Enemy turn with additional reactions
         for enemy in enemies:
             if enemy["health"] > 0:
-                print(f"{enemy['type']} attacks {player['name']}!")
-                damage = random.randint(5, 15)
-                player["health"] -= damage
-                print(f"{player['name']} has {player['health']} health remaining.")
+                print(f"\nThe {enemy['type']} prepares to counterattack!")
+                enemy_action = enemy_attack(enemy, player)
+                print(enemy_action)
 
-        if player["health"] <= 0:
-            print(f"{player['name']} has been defeated!")
-            return "player_defeated"
+                if player["health"] <= 0:
+                    print(f"{player['name']} has been defeated!")
+                    return "player_defeated"
 
-    if all(enemy["health"] <= 0 for enemy in enemies):
-        print("All enemies have been defeated!")
-        return "victory"
+        # Check for combat victory
+        if all(enemy["health"] <= 0 for enemy in enemies):
+            print("All enemies have been defeated!")
+            return "victory"
 
     return "ongoing"
+
+def enemy_attack(enemy, player):
+    """Determine enemy's attack based on type and combat situation."""
+    attack_choice = random.choice(["fire_breath", "claw_strike", "pierce", "ambush"])
+
+    if attack_choice == "fire_breath" and enemy["type"] == "Dragon":
+        damage = random.randint(20, 40)
+        print(f"The {enemy['type']} breathes fire, scorching {player['name']}!")
+    elif attack_choice == "claw_strike":
+        damage = random.randint(10, 20)
+        print(f"The {enemy['type']} strikes with its claws!")
+    elif attack_choice == "pierce" and enemy["type"] == "Goblin":
+        damage = random.randint(5, 15)
+        print(f"The {enemy['type']} pierces you with its poisoned dagger!")
+    else:  # ambush or random attack
+        damage = random.randint(8, 18)
+        print(f"The {enemy['type']} attempts a surprise attack!")
+
+    player["health"] -= damage
+    return f"The attack dealt {damage} damage! {player['name']} now has {player['health']} health."
+
+
+def interpret_action(action, player, enemies):
+    """
+    AI interprets the player's free-form action and generates a response.
+    """
+    target_enemy = enemies[0]  # Default to the first enemy
+    if any(enemy["type"].lower() in action for enemy in enemies):
+        for enemy in enemies:
+            if enemy["type"].lower() in action and enemy["health"] > 0:
+                target_enemy = enemy
+                break
+    
+    roll_result = attack_roll(player, target_enemy)
+    if roll_result["hit"]:
+        damage = calculate_damage(player)
+        target_enemy["health"] -= damage
+        response = (
+            f"You successfully {action}. The {target_enemy['type']} takes {damage} damage and now has "
+            f"{target_enemy['health']} health."
+        )
+    else:
+        response = f"You attempt to {action}, but it misses!"
+    return response
+
+def check_health(player):
+    """Allow the player to check their current health."""
+    print(f"{player['name']}, you currently have {player['health']} health remaining.")
 
 def roll_dexterity_check(player, enemies):
     """Roll for the player's dexterity against the enemy's dexterity to determine if they can escape."""
@@ -97,11 +154,11 @@ def roll_dexterity_check(player, enemies):
 
 def create_enemy(position, game_state):
     """Create a new enemy based on the player's current position and game state."""
-    # Define some possible enemy types and their HP ranges
+    
     enemy_types = ['Goblin', 'Orc', 'Troll', 'Dragon']
     enemy_type = random.choice(enemy_types)
     
-    # Set the HP based on the enemy type (this could be more complex depending on the game)
+    
     if enemy_type == 'Goblin':
         hp = random.randint(10, 30)
     elif enemy_type == 'Orc':
@@ -121,12 +178,12 @@ def create_enemy(position, game_state):
         'CHA': random.randint(8, 15)
     }
     
-    # Create the enemy dictionary
+    
     enemy = {
         'type': enemy_type,
         'health': hp,
-        'position': position,  # Store position if needed
-        'attributes': attributes  # Add the attributes field here
+        'position': position,  
+        'attributes': attributes  
     }
     
     # Add the new enemy to the game_state
@@ -138,16 +195,31 @@ def create_enemy(position, game_state):
     return enemy
 
 def check_for_encounter(player, game_state):
-    """Determine if a combat encounter should occur and add the enemy to the game state."""
-    # Randomly decide if an encounter happens or base it on the narrative
-    encounter_chance = random.random()
-    if encounter_chance > 0.9:  # 30% chance for an encounter
-        # Generate a new enemy dynamically and add it to the game state
-        new_enemy = create_enemy(player["position"], game_state)
-        print(f"\nAs you proceed, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
-        return [new_enemy]
-    return []
+    """Determine if a combat encounter should occur based on the AI's narrative decision."""
+    global game_history
 
+    prompt = (
+        f"The player {player['name']} is currently in {player['position']}."
+        f" Based on the story so far:\n\n{'\n'.join(game_history)}\n\n"
+        f"Should a combat encounter take place here? If so, describe the enemy and the context of the encounter. "
+        f"Otherwise, continue the story without combat."
+    )
+    
+    response = call_groq(prompt)
+
+    if "yes" in response.lower() or "enemy" in response.lower():
+        new_enemy = create_enemy(player["position"], game_state)
+        print(f"\nAs the story progresses, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
+        return [new_enemy]
+    
+    # Create unique narrative twists or unexpected events
+    if "treasure" in response.lower():
+        print("You find a hidden treasure chest in the corner!")
+        game_state["players"][0]["health"] += 10  # Reward the player for discovering treasure.
+        return []  # No combat but progress the story.
+
+    print(f"\n{response.strip()}")
+    return []
 
 def process_player_action(action, player, enemies):
     """Process the player's action."""
@@ -200,58 +272,78 @@ def handle_action(action, player, enemies):
         return ""  # No story output, just health status.
     
 def handle_run(action, player, enemies):
-    """Handle the player's attempt to run away from combat."""
-    # Assume the player rolls against the enemy's dexterity to escape
+    """Handle the player's attempt to run away from combat with added environment context."""
+    # Use environment details (e.g., if there's a river or a cliff) to make escape attempts more exciting
+    if "river" in player["position"].lower():
+        print("The river's current is too strong! You can’t escape via the water.")
+    elif "forest" in player["position"].lower():
+        print("You sprint into the dense forest, weaving between trees, hoping to lose them!")
+    else:
+        print("You attempt to flee the battlefield!")
+    
     success = roll_dexterity_check(player, enemies)
     
     if success:
-        print("You successfully run away from combat!")
-        return "escape_successful"  # Flag to indicate escape was successful
+        print("You successfully escape the combat!")
+        return "escape_successful"
     else:
-        print("You failed to escape! The enemy is still chasing you.")
+        print("You fail to escape! The enemies close in on you!")
         return "escape_failed"
 
     
 def attack_roll(attacker, defender):
-    """Perform an attack roll."""
-    attack_bonus = attacker["attributes"].get("DEX", 0) // 2 - 5
+    """Perform an attack roll using DnD mechanics."""
+    attack_bonus = attacker["attributes"].get("STR", 0) // 2 - 5  # Default to STR for melee
     roll = roll_dice("1d20") + attack_bonus
     armor_class = 10 + (defender["attributes"].get("DEX", 0) // 2 - 5)
 
-    if roll >= armor_class:
-        return {"hit": True, "message": f"Attack roll successful! You rolled {roll} against AC {armor_class}."}
-    else:
-        return {"hit": False, "message": f"Attack roll failed. You rolled {roll} against AC {armor_class}."}
+    hit = roll >= armor_class
+    return {
+        "hit": hit,
+        "message": (
+            f"{attacker['name']} rolled {roll} against {defender['type']}'s AC {armor_class}. "
+            f"{'Hit!' if hit else 'Miss!'}"
+        )
+    }
 
 def calculate_damage(player):
     """Calculate the damage dealt by the player."""
     return random.randint(5, 15)
 def handle_spell(action, player, enemies):
-    """Handle spell casting logic with more descriptive results."""
+    """Handle spell casting with environmental effects and creative impact."""
     # Target the first enemy still alive
     target_enemy = next((e for e in enemies if e["health"] > 0), None)
     if not target_enemy:
         return "There are no valid targets for your spell."
 
-    # Generate spell effects based on the player's input
-    prompt = f"The player, an Elven Mage, casts a spell described as: '{action}'. " \
-             "Create a detailed description of the spell's effect on the surroundings, " \
-             "the enemy, and the emotional atmosphere, based on a fantasy setting."
+    # Generate a more immersive spell description
+    spell_effects = {
+        "fireball": lambda: f"A fiery ball of flames erupts from your hands, incinerating {target_enemy['type']}!",
+        "ice_blast": lambda: f"Cold, biting winds sweep over {target_enemy['type']}, freezing them in place.",
+        "healing_wave": lambda: f"A soothing wave of energy envelops you, restoring your health."
+    }
 
-    spell_description = call_groq(prompt)
+    spell_choice = random.choice(list(spell_effects.keys()))
+    spell_description = spell_effects[spell_choice]()
 
-    
-    spell_damage = random.randint(10, 20)
-    target_enemy["health"] -= spell_damage
+    # Calculate damage or effect
+    if spell_choice == "fireball":
+        damage = random.randint(15, 30)
+    elif spell_choice == "ice_blast":
+        damage = random.randint(10, 20)
+        target_enemy["health"] -= damage
+        status_effect = "frozen in place"  # Add a status effect
+        spell_description += f" The {target_enemy['type']} is now {status_effect}."
+    else:  # healing wave
+        healing = random.randint(10, 20)
+        player["health"] += healing
+        spell_description += f" You heal for {healing} health! Your health is now {player['health']}."
 
+    target_enemy["health"] -= damage
     if target_enemy["health"] <= 0:
-        defeat_message = f"The {target_enemy['type']} is defeated! Its charred remains fall to the ground, " \
-                         f"its last roar echoing through the Hall."
+        return f"{spell_description} The {target_enemy['type']} is defeated!"
     else:
-        remaining_hp = f"It now has {target_enemy['health']} health remaining."
-        defeat_message = f"The {target_enemy['type']} reels back from the impact, growling in pain. {remaining_hp}"
-
-    return f"{spell_description}\nThe spell deals {spell_damage} damage. {defeat_message}"
+        return f"{spell_description} The {target_enemy['type']} now has {target_enemy['health']} health remaining."
 
 def handle_creative_action(action, player, enemies):
     """Handle a player's creative action."""
@@ -270,11 +362,10 @@ def process_question(question):
     global game_history
     global game_state
 
-    # Create a prompt for the AI to answer the question
     prompt = (
         f"As the Dungeon Master, the player asks: '{question}'. Based on the current game state and history, "
-        f"answer the question in the context of the story. Provide a detailed and immersive response. "
-        f"Do not generate new room names or unrelated content."
+        f"answer the question in the context of the story. Provide a detailed and immersive response, "
+        f"possibly with new elements based on current world dynamics."
     )
 
     # Use the AI to generate a response
@@ -316,7 +407,7 @@ def interactive_storytelling(game_state):
             enemies = check_for_encounter(player, game_state)
             if enemies:
                 print(f"Combat initiated for {player['name']}! Facing: {', '.join([enemy['type'] for enemy in enemies])}.")
-                combat_result = initiate_combat(player, enemies)
+                combat_result = initiate_combat_with_prompt(player, enemies)
 
                 # Handle combat outcomes
                 if combat_result == "victory":
@@ -329,7 +420,19 @@ def interactive_storytelling(game_state):
             print("All players have been defeated. Game over.")
             break
             
+def update_world_state(player, action):
+    """Update the world based on player action, e.g., adding lore, side quests, or environmental effects."""
+    if "find" in action.lower() and "artifact" in action.lower():
+        # Generate a plot twist or side quest
+        prompt = f"Player {player['name']} discovers a mysterious artifact that glows with ancient power. What happens next?"
+        artifact_story = call_groq(prompt)
+        print(artifact_story)
 
+    elif "explore" in action.lower() and "forest" in action.lower():
+        # Change the environment and add a new encounter
+        prompt = f"Player {player['name']} explores the deep forest. Describe the forest and any potential dangers or encounters."
+        forest_story = call_groq(prompt)
+        print(forest_story)
 
 
 def process_input(data):
