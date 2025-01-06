@@ -138,7 +138,7 @@ io.on("connection", (socket) => {
     lobby.currentTurnIndex = 0;
 
     try {
-      const response = await axios.post("http://localhost:6000/startGame", {
+      const response = await axios.post("http://gamemaster:6000/startGame", {
         gameCode,
         players: lobby.players,
       });
@@ -189,7 +189,7 @@ io.on("connection", (socket) => {
     }
 
     try {
-      const response = await axios.post("http://localhost:6000/processAction", {
+      const response = await axios.post("http://gamemaster:6000/processAction", {
         action,
         player: currentTurnPlayer.name,
         gameState: lobby,
