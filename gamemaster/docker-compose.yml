@@ -27,6 +27,8 @@ services:
       - NODE_ENV=production
     depends_on:
       - database
+    volumes:
+      - uploads:/uploads # Add this volume to persist the uploads directory
 
   database:
     image: mysql:8
@@ -54,3 +56,4 @@ services:
 
 volumes:
   db_data:
+  uploads: # Declare the uploads volume here

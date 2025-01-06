@@ -25,12 +25,19 @@ const Layout = () => {
     "/hostorplayer",
   ];
 
-  // Check if the current path matches any in the list or starts with "/lobby/"
+  // Log the current path for debugging
   const currentPath = location.pathname.trim().toLowerCase();
+  console.log("Current Path:", currentPath);
+
+  // Dynamic path matching for "/lobby/:gameCode" and "/game/:gameCode"
+  const isLobbyPage = currentPath.startsWith("/lobby/");
+  const isGamePage = currentPath.startsWith("/game/");
+
+  // Determine if the header should be shown
   const showHeader =
-    !pagesWithoutHeader.includes(currentPath) &&
-    !currentPath.startsWith("/lobby/");
-    !currentPath.startsWith("/game/");
+    !pagesWithoutHeader.includes(currentPath) && !isLobbyPage && !isGamePage;
+
+  console.log("Show Header:", showHeader);
 
   return (
     <>
@@ -50,6 +57,7 @@ const Layout = () => {
     </>
   );
 };
+
 
 
 const App = () => {

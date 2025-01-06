@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
   
   destination: (req, file, cb) => {
     console.log("Saving file to:", path.resolve("uploads/"));
-    cb(null, "uploads/"); // Directory where avatars will be stored
+    cb(null, "uploads"); // Directory where avatars will be stored
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
@@ -62,7 +62,8 @@ exports.uploadAvatar = async (req, res) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
-      const avatarUrl = `/uploads/${req.file.filename}`;
+      const avatarUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
 
       // Update avatar URL in the database
       const [result] = await pool.execute(

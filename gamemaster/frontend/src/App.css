@@ -708,6 +708,7 @@ button.submit-btn:hover {
   max-height: 100vh;
   padding-bottom: 150px;
   overflow-y: auto;
+  border: 2px solid red; /* Debug visibility */
 }
 :where(.chat-container, textarea)::-webkit-scrollbar {
   width: 6px;
