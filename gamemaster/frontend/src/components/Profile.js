@@ -80,6 +80,7 @@ const Profile = () => {
         ...prevProfile,
         avatar_url: response.data.avatar_url,
       }));
+      
       alert("Avatar uploaded successfully!");
     } catch (error) {
       console.error("Error uploading avatar:", error);
@@ -131,11 +132,13 @@ const Profile = () => {
         <div className="decorative-flair">Heroic Stats</div>
         <div className="profile-info">
           {profile.avatar_url && (
-            <img
-              src={`http://localhost:5000${profile.avatar_url}`}
-              alt="Avatar"
-              style={{ width: "100px", height: "100px", borderRadius: "50%" }}
-            />
+           <img
+           src={profile.avatar_url}
+           alt="Avatar"
+           style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+         />
+         
+          
           )}
           <p>
             <span className="info-label">Username:</span> {profile.username}

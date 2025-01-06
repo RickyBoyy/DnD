@@ -13,6 +13,13 @@ export default function initializeChat(socket) {
     console.error("Connection failed:", error);
   });
 
+  socket.on("aiResponse", ({ player, action, response }) => {
+    // Display the action and AI response in the chat
+    createChatElement(`${player} performed: ${action}`, "outgoing");
+    createChatElement(response, "incoming");
+  });
+  
+
   socket.on("disconnect", (reason) => {
     console.log("Disconnected from the server:", reason);
   });

@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "gameserver": "file:",
     "jsonwebtoken": "^9.0.2",
