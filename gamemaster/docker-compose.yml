@@ -28,7 +28,18 @@ services:
     depends_on:
       - database
     volumes:
-      - uploads:/uploads # Add this volume to persist the uploads directory
+      - uploads:/uploads
+
+  gamemaster:
+    build:
+      context: ./BackEnd/game
+      dockerfile: Dockerfile
+    ports:
+      - "6000:6000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}  # Pass the API key
+    depends_on:
+      - database
 
   database:
     image: mysql:8
@@ -53,7 +64,8 @@ services:
       - frontend
       - gameserver
       - authserver
+      - gamemaster
 
 volumes:
   db_data:
-  uploads: # Declare the uploads volume here
+  uploads:

@@ -197,9 +197,11 @@ def check_for_encounter(player, game_state):
     """Determine if a combat encounter should occur based on the AI's narrative decision."""
     global game_history
 
+    story_so_far = "\n".join(game_history).replace("\\", "\\\\")
+
     prompt = (
         f"The player {player['name']} is currently in {player['position']}."
-        f" Based on the story so far:\n\n{'\n'.join(game_history)}\n\n"
+        f" Based on the story so far:\n\n{story_so_far}\n\n"
         f"Should a combat encounter take place here? If so, describe the enemy and the context of the encounter. "
         f"Otherwise, continue the story without combat."
     )
