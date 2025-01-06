@@ -34,7 +34,7 @@ const Layout = () => {
 
   return (
     <>
-      {showHeader && <Header />}
+      
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/signin" element={<SignInPage />} />

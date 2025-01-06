@@ -31,7 +31,7 @@ create table character_player (
     character_strength int not null,
     character_dexterity int not null,
     character_constitution int not null,
-    character_inteligence int not null,
+    character_intelligence int not null,
     character_charisma int not null,
     character_wisdom int not null,
     character_personality varchar(50),

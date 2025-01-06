@@ -67,7 +67,7 @@ body {
 
 /* Título do Card */
 .card-login h1 {
-  color: #9f1d14; /* Cor do título em vermelho */
+  color: #9f1d14; 
   font-weight: 800;
   margin: 0;
   margin-bottom: 20px;
@@ -547,7 +547,7 @@ button.submit-btn:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: darkred;
+  color: #9f1d14;
   font-family: "DragonHunter", sans-serif;
   font-size: 2rem;
   text-align: center;
@@ -571,7 +571,7 @@ button.submit-btn:hover {
 
 .title_for_choice span {
   font-family: "DragonHunter", sans-serif;
-  color: darkred;
+  color: #9f1d14;
   font-size: 3rem;
   margin-bottom: 30px;
 }
@@ -605,7 +605,7 @@ button.submit-btn:hover {
 
 .game-code-label {
   font-size: 1.5rem;
-  color: darkred;
+  color: #9f1d14;
   font-family: Arial, sans-serif;
 }
 
@@ -615,6 +615,8 @@ button.submit-btn:hover {
   margin: 20px 0;
   text-align: center;
 }
+
+
 
 .player-slots {
   display: grid;
@@ -635,14 +637,14 @@ button.submit-btn:hover {
 }
 
 .player-slot.filled {
-  background: darkred;
+  background: #9f1d14;
 }
 
 .start-game-btn {
   padding: 15px 25px;
   font-size: 1.5rem;
   color: white;
-  background-color: rgb(185, 23, 50);
+  background-color: #9f1d14;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -655,8 +657,107 @@ button.submit-btn:hover {
 }
 
 .start-game-btn:hover {
-  background-color: darkred;
+  background-color: #9f1d14;
 }
+
+/* Container geral do modal */
+.character-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  z-index: 1000;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+/* Título do modal */
+.character-modal h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Lista de personagens */
+.character-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Item de personagem */
+.character-item {
+  background-color: #f9f9f9;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px;
+  width: 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
+}
+
+/* Imagem do personagem */
+.character-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* Nome do personagem */
+.character-item h4 {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Efeito visual quando o personagem é selecionado */
+.character-item.selected {
+  border: 2px solid #9f1d14; 
+  background-color: #e0f7fa; 
+  transform: scale(1.05); 
+  transition: transform 0.2s, background-color 0.2s ease, border-color 0.3s ease;
+}
+
+/* Efeito de hover para os itens de personagem */
+.character-item:hover {
+  border: 2px solid #000; 
+  background-color: #e0f7fa; 
+  transform: scale(1.20); 
+  transition: transform 0.2s, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+
+/* Botão de confirmação */
+.character-modal button {
+  margin-top: 20px;
+  background-color: #9f1d14;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.character-modal button:hover {
+  background-color: #b30000;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .character-item {
+    width: 100px;
+  }
+}
+
 
 /* header */
 
