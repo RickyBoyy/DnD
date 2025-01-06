@@ -3,7 +3,8 @@ CREATE TABLE users (
     username VARCHAR(50) UNIQUE,
     email VARCHAR(50) UNIQUE,
     password VARCHAR(255),
-    country VARCHAR(50)
+    country VARCHAR(50),
+    avatar_url VARCHAR(50)
 );
 
 create table campaign (
@@ -27,18 +28,18 @@ create table character_player (
     character_class varchar(50),
     character_background text,
     character_alignment varchar(50),
-    character_level int not null,
+    character_level int not null DEFAULT 0,
     character_strength int not null,
     character_dexterity int not null,
     character_constitution int not null,
-    character_inteligence int not null,
+    character_intelligence int not null,
     character_charisma int not null,
     character_wisdom int not null,
     character_personality varchar(50),
     character_role varchar(50),
     character_status varchar(50),
 	character_user_id int not null,
-	campaign_id int not null,
+	campaign_id int DEFAULT NULL,
     CONSTRAINT character_fk_user FOREIGN KEY (character_user_id) REFERENCES users(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT campaign_fk_character FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
