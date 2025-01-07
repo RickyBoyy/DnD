@@ -640,6 +640,19 @@ button.submit-btn:hover {
   background: #9f1d14;
 }
 
+.character-select-btn{
+  padding: 15px 25px;
+  font-size: 1.5rem;
+  color: white;
+  background-color: #9f1d14;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .start-game-btn {
   padding: 15px 25px;
   font-size: 1.5rem;
@@ -1080,7 +1093,7 @@ span.material-symbols-rounded {
 }
 
 /* Individual button styling */
-.play-button, .character-button {
+.play-button, .character-button, .logout-button {
   padding: 12px 30px;
   font-size: 1rem;
   border-radius: 5px;
@@ -1090,28 +1103,32 @@ span.material-symbols-rounded {
 }
 
 .play-button {
-  background-color: #a72828;
+  background-color: #9f1d14;
   color: white;
 }
 
 .play-button:hover {
-  background-color: #681317;
+  background-color: #8b0000;
 }
 
 .character-button {
   background-color: #2d2d2d;
   color: white;
-  border: 2px solid #b22222;
 }
 
 .character-button:hover {
   background-color: #8b0000;
 }
 
+.logout-button{
+  color: white;
+  background-color: #9f1d14;
+ 
+}
 
-
-
-
+.logout-button{
+  background-color: #8b0000;
+}
 
 
 .container {
@@ -1266,18 +1283,18 @@ span.material-symbols-rounded {
 
 .players_icons {
   display: flex;
-  flex-direction: column; /* Stack the image and name vertically */
-  align-items: center; /* Center them horizontally */
-  margin-top: 20px; /* Space between title and icons */
-  overflow-y: auto; /* Scroll only if the player icons exceed available space */
+  flex-direction: column; 
+  align-items: center; 
+  margin-top: 20px; 
+  overflow-y: auto; 
   max-height: calc(
     100vh - 60px
-  ); /* Adjust height relative to the title and padding */
+  ); 
 }
 
 .players_icons img {
-  border-radius: 50%; /* Optional: Make the image circular */
-  margin-bottom: 10px; /* Space below the image */
+  border-radius: 50%; 
+  margin-bottom: 10px; 
 }
 
 .create-character-button {
@@ -1298,6 +1315,15 @@ span.material-symbols-rounded {
 .create-character-button:hover {
   background: #b22222;
   transform: scale(1.1);
+}
+
+.profile-button{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  transition: transform 0.2s;
 }
 
 /*SetUsername*/

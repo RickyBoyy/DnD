@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+import profilePicPlaceholder from "../assets/1547006.jpg"; 
 
 const Characters = () => {
   const [characters, setCharacters] = useState([]); // State to store fetched characters
@@ -54,7 +55,7 @@ const Characters = () => {
       <div className="header-buttons">
         {/* Profile button */}
         <button className="profile-button" onClick={navigateToProfile}>
-          Profile
+          <img src={profilePicPlaceholder} alt="Profile" className="profile-pic" />
         </button>
 
         {/* Create character button */}

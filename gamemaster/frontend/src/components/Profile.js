@@ -174,11 +174,6 @@ const Profile = () => {
       </div>
 
 
-      {/* Logout Button */}
-      <button className="logout-button" onClick={handleLogout}>
-        Logout
-      </button>
-
 
       {/* Inform the user if no characters exist */}
       {characters.length === 0 && (
