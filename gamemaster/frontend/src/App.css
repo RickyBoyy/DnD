@@ -513,7 +513,7 @@ button.submit-btn:hover {
   resize: none;
 }
 .ending_character_button {
-  background-color: darkred;
+  background-color: #9f1d14;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -524,7 +524,7 @@ button.submit-btn:hover {
 }
 
 .ending_character_button:hover {
-  background-color: #a30000;
+  background-color: #8b0000;
 }
 
 /*Lobby*/
@@ -670,7 +670,7 @@ button.submit-btn:hover {
 }
 
 .start-game-btn:hover {
-  background-color: #9f1d14;
+  background-color: #8b0000;
 }
 
 /* Container geral do modal */
@@ -693,6 +693,7 @@ button.submit-btn:hover {
 /* Título do modal */
 .character-modal h2 {
   font-size: 1.5rem;
+  color: #9f1d14;
   margin-bottom: 20px;
 }
 
@@ -732,16 +733,14 @@ button.submit-btn:hover {
 
 /* Efeito visual quando o personagem é selecionado */
 .character-item.selected {
-  border: 2px solid #9f1d14; 
-  background-color: #e0f7fa; 
+  border: 2px solid #9f1d14;  
   transform: scale(1.05); 
   transition: transform 0.2s, background-color 0.2s ease, border-color 0.3s ease;
 }
 
 /* Efeito de hover para os itens de personagem */
 .character-item:hover {
-  border: 2px solid #000; 
-  background-color: #e0f7fa; 
+  border: 2px solid #000;  
   transform: scale(1.20); 
   transition: transform 0.2s, background-color 0.3s ease, border-color 0.3s ease;
 }
@@ -1126,7 +1125,7 @@ span.material-symbols-rounded {
  
 }
 
-.logout-button{
+.logout-button:hover{
   background-color: #8b0000;
 }
 
@@ -1301,20 +1300,17 @@ span.material-symbols-rounded {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: #8b0000;
+  background: #9f1d14;
   color: #fff;
   font-size: 1rem;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-  transition: transform 0.3s ease, background 0.3s ease;
 }
 
 .create-character-button:hover {
-  background: #b22222;
-  transform: scale(1.1);
+  background: #8b0000;
 }
 
 .profile-button{
