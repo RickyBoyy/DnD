@@ -28,14 +28,12 @@ game_state = {
 }
 language_model = LanguageModel()
 
-# Define the game history
 game_history = []
 
 def call_groq(prompt):
     global game_history
     game_history.append(prompt)
 
-    # Combine the game history into a full prompt
     full_prompt = (
         "You are a Dungeon Master. The story so far is as follows:\n"
         + "\n".join(game_history)
@@ -43,7 +41,6 @@ def call_groq(prompt):
         + "Now continue the story based on the player's latest action."
     )
 
-    # Generate a response using the language model
     response = language_model.generate_response(full_prompt)
 
     if response:
@@ -76,7 +73,7 @@ def roll_dice(dice: str):
 def prune_game_history():
     """Limit the size of the game history to avoid excessive repetition."""
     global game_history
-    max_history = 10  # Keep the last 10 prompts for context
+    max_history = 10  
     if len(game_history) > max_history:
         game_history = game_history[-max_history:]
 
@@ -88,21 +85,18 @@ def initiate_combat_with_prompt(player, enemies):
         print(f"\n{player['name']}, your turn! Describe your action:")
         action = input().strip()
 
-        # AI interprets action
         if "check health" in action.lower():
             check_health(player)
-            continue  # Allow the player to decide their action again after checking health
+            continue 
 
         if "run" in action.lower():
             result = handle_run(action, player, enemies)
             if result == "escape_successful":
                 return "escape_successful"
 
-        # Interpret player's action as a combat move
         response = interpret_action(action, player, enemies)
         print(f"\n{response}")
 
-        # Enemy turn with additional reactions
         for enemy in enemies:
             if enemy["health"] > 0:
                 print(f"\nThe {enemy['type']} prepares to counterattack!")
@@ -113,7 +107,6 @@ def initiate_combat_with_prompt(player, enemies):
                     print(f"{player['name']} has been defeated!")
                     return "player_defeated"
 
-        # Check for combat victory
         if all(enemy["health"] <= 0 for enemy in enemies):
             print("All enemies have been defeated!")
             return "victory"
@@ -163,6 +156,19 @@ def interpret_action(action, player, enemies):
     else:
         response = f"You attempt to {action}, but it misses!"
     return response
+
+def trim_repetition(response, previous_responses):
+    """Remove repeated sentences from the AI's response."""
+    sentences = response.split(". ")
+    unique_sentences = []
+    seen_sentences = set(previous_responses)
+
+    for sentence in sentences:
+        if sentence not in seen_sentences:
+            unique_sentences.append(sentence)
+            seen_sentences.add(sentence)
+
+    return ". ".join(unique_sentences).strip() + "."
 
 def check_health(player):
     """Allow the player to check their current health."""
@@ -223,7 +229,6 @@ def check_for_encounter(player, game_state):
     """Determine if a combat encounter should occur based on the AI's narrative decision."""
     global game_history
 
-    # Generate a narrative prompt for the current situation
     story_so_far = "\n".join(game_history).replace("\\", "\\\\")
     prompt = (
         f"The player {player['name']} is currently in {player['position']}."
@@ -232,20 +237,15 @@ def check_for_encounter(player, game_state):
         f"Otherwise, continue the story without combat."
     )
 
-    # Get the AI response
     response = call_groq(prompt)
 
-    # Check if the response implies combat
     combat_keywords = ["enemy", "threat", "attack", "ambush", "danger"]
     if any(keyword in response.lower() for keyword in combat_keywords):
-        # Further refine: Ensure the response explicitly mentions an enemy
         if "enemy" in response.lower():
-            # Create an enemy based on the narrative context
             new_enemy = create_enemy(player["position"], game_state)
             print(f"\nAs the story progresses, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
             return [new_enemy]
 
-    # Otherwise, assume no combat and continue storytelling
     print(f"\n{response.strip()}")
     return []
 
@@ -475,9 +475,11 @@ def process_input(data):
         )
     else:
         prompt = (
-           f"The player {player_name}, a {player['name']}, is exploring the environment. "
-    f"The player takes the action: '{user_input}'. Continue the immersive story, "
-    f"but limit your response to a single paragraph and avoid verbosity."
+           f"The player {player_name}, a {player['name']}, is currently located in {player['position']}.\n"
+        f"The story so far:\n{'\n'.join(game_history)}\n\n"
+        f"The player takes the action: '{user_input}'.\n"
+        f"Continue the story in a logical way, ensuring it aligns with the context and avoids repetition. "
+        f"Focus on advancing the narrative and providing clear options for the next move."
         )
 
     # Generate the response
