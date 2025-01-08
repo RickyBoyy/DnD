@@ -30,6 +30,14 @@ language_model = LanguageModel()
 
 game_history = []
 
+SPECIAL_ABILITIES = {
+    "Fighter": "Power Strike: A powerful melee attack dealing extra damage.",
+    "Wizard": "Fireball: An explosive spell that deals damage to all enemies.",
+    "Cleric": "Healing Wave: Restores health to the player.",
+    "Rogue": "Precision Strike: A precise attack dealing high damage to a single target.",
+    "Barbarian": "Rage: Gain temporary health and deal increased damage next turn.",
+}
+
 def call_groq(prompt):
     global game_history
     game_history.append(prompt)
@@ -78,61 +86,267 @@ def prune_game_history():
         game_history = game_history[-max_history:]
 
 
-def initiate_combat_with_prompt(player, enemies):
-    """DnD-style turn-based combat with AI-interpreted prompts."""
+def initiate_combat_with_prompt(players, enemies):
+    """Turn-based combat with combat narration."""
     print("\nCombat initiated!")
-    while player["health"] > 0 and any(enemy["health"] > 0 for enemy in enemies):
-        print(f"\n{player['name']}, your turn! Describe your action:")
-        action = input().strip()
 
-        if "check health" in action.lower():
-            check_health(player)
-            continue 
+    while any(player["health"] > 0 for player in players) and any(enemy["health"] > 0 for enemy in enemies):
+        # Players' Turn
+        for player in players:
+            if player["health"] <= 0:
+                print(f"{player['name']} is unconscious and cannot act.")
+                continue  # Skip if player is defeated
 
-        if "run" in action.lower():
-            result = handle_run(action, player, enemies)
-            if result == "escape_successful":
-                return "escape_successful"
+            print(f"\n{player['name']}, your turn! Choose an action:")
+            print("1. Attack")
+            print("2. Defend")
+            if player["special_cooldown"] > 0:
+                print(f"3. Use Special Ability (Unavailable, {player['special_cooldown']} turn(s) remaining)")
+            else:
+                print("3. Use Special Ability")
+            print("4. Attempt Tactical Move")
 
-        response = interpret_action(action, player, enemies)
-        print(f"\n{response}")
+            action = input("Enter the number of your action: ").strip()
+            recent_action = ""
 
+            if action == "1":
+                # Attack
+                target = choose_target(enemies)
+                recent_action = attack(player, target)
+                print(recent_action)
+            elif action == "2":
+                # Defend
+                recent_action = defend(player)
+                print(recent_action)
+            elif action == "3":
+                # Use Special Ability
+                if player["special_cooldown"] > 0:
+                    recent_action = f"{player['name']} cannot use their special ability for {player['special_cooldown']} more turn(s)."
+                    print(recent_action)
+                else:
+                    print(f"\n{player['class']} Special Ability: {SPECIAL_ABILITIES.get(player['class'], 'No ability available.')}")
+                    recent_action = use_special_ability(player, enemies)
+                    print(recent_action)
+                    player["special_cooldown"] = 3  # Set cooldown to 3 turns
+            elif action == "4":
+                # Tactical Move
+                recent_action = perform_tactical_move(player, enemies)
+                print(recent_action)
+            else:
+                recent_action = f"{player['name']} made no valid move this turn."
+                print("Invalid choice! You lose your turn.")
+
+            # Reduce cooldown after the player's turn
+            if player["special_cooldown"] > 0:
+                player["special_cooldown"] -= 1
+
+            # Narrate the combat after the player's turn
+            narration = narrate_combat(players, enemies, recent_action)
+            print(f"\n[NARRATION]: {narration}")
+
+            # Check if all enemies are defeated
+            if all(enemy["health"] <= 0 for enemy in enemies):
+                print("All enemies have been defeated!")
+                return "victory"
+
+        # Enemies' Turn
+        print("\nEnemies' turn!")
+        recent_action = ""
         for enemy in enemies:
             if enemy["health"] > 0:
-                print(f"\nThe {enemy['type']} prepares to counterattack!")
-                enemy_action = enemy_attack(enemy, player)
-                print(enemy_action)
+                # Randomly target an alive player
+                alive_players = [p for p in players if p["health"] > 0]
 
-                if player["health"] <= 0:
-                    print(f"{player['name']} has been defeated!")
-                    return "player_defeated"
+                if alive_players:
+                    target = random.choice(alive_players)
+                    recent_action += enemy_attack(enemy, target) + "\n"
 
-        if all(enemy["health"] <= 0 for enemy in enemies):
-            print("All enemies have been defeated!")
-            return "victory"
+        print(recent_action.strip())
 
-    return "ongoing"
+        # Narrate the combat after the enemies' turn
+        narration = narrate_combat(players, enemies, recent_action)
+        print(f"\n[NARRATION]: {narration}")
 
-def enemy_attack(enemy, player):
-    """Determine enemy's attack based on type and combat situation."""
-    attack_choice = random.choice(["fire_breath", "claw_strike", "pierce", "ambush"])
+        # Check if all players are defeated
+        if all(player["health"] <= 0 for player in players):
+            print("All players have been defeated!")
+            return "player_defeated"
 
-    if attack_choice == "fire_breath" and enemy["type"] == "Dragon":
-        damage = random.randint(20, 40)
-        print(f"The {enemy['type']} breathes fire, scorching {player['name']}!")
-    elif attack_choice == "claw_strike":
+    # Combat conclusion
+    if all(player["health"] <= 0 for player in players):
+        return "player_defeated"
+    elif all(enemy["health"] <= 0 for enemy in enemies):
+        return "victory"
+    else:
+        return "ongoing"
+
+
+
+def perform_tactical_move(player, enemies):
+    """Perform a creative tactical move."""
+    print("\nChoose a tactical move:")
+    print("1. Dodge")
+    print("2. Shove Enemy")
+    print("3. Use Environment")
+
+    choice = input("Enter the number of your tactical move: ").strip()
+
+    if choice == "1":
+        # Dodge: Player attempts to avoid the next attack
+        success = roll_dice("1d20") + (player["attributes"]["DEX"] // 2) > 15
+        if success:
+            player["dodging"] = True  # Mark the player as dodging
+            return f"{player['name']} successfully dodges the next attack!"
+        else:
+            return f"{player['name']} tries to dodge but fails."
+
+    elif choice == "2":
+        # Shove Enemy: Push an enemy back
+        target = choose_target(enemies)
+        success = roll_dice("1d20") + (player["attributes"]["STR"] // 2) > 12
+        if success:
+            target["shoved"] = True  # Mark the enemy as shoved
+            return f"{player['name']} shoves {target['type']}, knocking them off balance!"
+        else:
+            return f"{player['name']} attempts to shove {target['type']} but fails."
+
+    elif choice == "3":
+        # Use Environment: Interact with surroundings
+        outcome = random.choice([
+            "You knock over a barrel, tripping the nearest enemy!",
+            "You climb to higher ground, gaining a better position.",
+            "You hurl a rock, distracting the enemies momentarily.",
+        ])
+        return f"{player['name']} uses the environment: {outcome}"
+
+    else:
+        return "Invalid choice! Tactical move failed."
+
+
+def attack(attacker, target):
+    """Perform an attack on the target."""
+    attack_roll = roll_dice("1d20") + (attacker["attributes"]["STR"] // 2)  # STR modifier
+    armor_class = 10 + (target["attributes"]["DEX"] // 2)  # DEX modifier for AC
+
+    if attack_roll >= armor_class:
+        damage = random.randint(5, 15) + (attacker["attributes"]["STR"] // 2)
+        target["health"] -= damage
+        return f"{attacker['name']} attacks {target['type']} and deals {damage} damage! {target['type']} has {target['health']} health remaining."
+    else:
+        return f"{attacker['name']} attacks {target['type']} but misses!"
+
+def defend(player):
+    """Set the player to a defensive stance."""
+    player["defending"] = True
+    return f"{player['name']} is defending and will take reduced damage next turn."
+
+
+def use_special_ability(player, enemies):
+    """Activate a special ability based on the player's class."""
+    if player["class"] == "Fighter":
+        # Fighter: Power Strike
+        target = choose_target(enemies)
+        damage = random.randint(20, 35) + (player["attributes"]["STR"] // 2)
+        target["health"] -= damage
+        return f"{player['name']} uses Power Strike and deals {damage} damage to {target['type']}! {target['type']} has {target['health']} health remaining."
+
+    elif player["class"] == "Wizard":
+        # Wizard: Fireball
+        damage = random.randint(15, 30)
+        for enemy in enemies:
+            enemy["health"] -= damage
+        return f"{player['name']} casts Fireball, dealing {damage} damage to all enemies!"
+
+    elif player["class"] == "Cleric":
+        # Cleric: Healing Wave
+        healing = random.randint(15, 25)
+        player["health"] += healing
+        return f"{player['name']} uses Healing Wave and restores {healing} health! {player['health']} health remaining."
+
+    elif player["class"] == "Rogue":
+        # Rogue: Precision Strike
+        target = choose_target(enemies)
+        damage = random.randint(15, 30) + (player["attributes"]["DEX"] // 2)
+        target["health"] -= damage
+        return f"{player['name']} uses Precision Strike and deals {damage} damage to {target['type']}! {target['type']} has {target['health']} health remaining."
+
+    elif player["class"] == "Barbarian":
+        # Barbarian: Rage
+        player["health"] += 15  # Gains temporary health
+        return f"{player['name']} enters a Rage, gaining 15 temporary health! {player['health']} health remaining."
+    
+    elif player["class"] == "Paladin":
+        # Paladin: Divine Smite
+        target = choose_target(enemies)
+        damage = random.randint(25, 40)
+        target["health"] -= damage
+        return f"{player['name']} uses Divine Smite, dealing {damage} radiant damage to {target['type']}! {target['type']} has {target['health']} health remaining."
+    
+    elif player["class"] == "Sorcerer":
+        # Sorcerer: Arcane Bolt
+        target = choose_target(enemies)
+        damage = random.randint(15, 30)
+        target["health"] -= damage
+        return f"{player['name']} uses Arcane Bolt, dealing {damage} arcane damage to {target['type']}! {target['type']} has {target['health']} health remaining."
+    
+    elif player["class"] == "Druid":
+        # Druid: Thorn Whip
+        target = choose_target(enemies)
         damage = random.randint(10, 20)
-        print(f"The {enemy['type']} strikes with its claws!")
-    elif attack_choice == "pierce" and enemy["type"] == "Goblin":
-        damage = random.randint(5, 15)
-        print(f"The {enemy['type']} pierces you with its poisoned dagger!")
-    else:  # ambush or random attack
+        target["health"] -= damage
+        return f"{player['name']} uses Thorn Whip, dealing {damage} damage and pulling {target['type']} closer!"
+    
+    elif player["class"] == "Monk":
+        # Monk: Flurry of Blows
+        total_damage = 0
+        for _ in range(2):  # Attack twice
+            target = choose_target(enemies)
+            damage = random.randint(8, 15)
+            target["health"] -= damage
+            total_damage += damage
+        return f"{player['name']} uses Flurry of Blows, striking twice and dealing a total of {total_damage} damage!"
+
+    elif player["class"] == "Warlock":
+        # Warlock: Eldritch Blast
+        damage = random.randint(15, 25)
+        target = choose_target(enemies)
+        target["health"] -= damage
+        return f"{player['name']} casts Eldritch Blast, dealing {damage} damage to {target['type']}! {target['type']} has {target['health']} health remaining."
+
+
+    else:
+        return f"{player['name']} has no special abilities available."
+
+       
+def enemy_attack(enemy, player):
+    """Determine and execute an enemy's attack."""
+    attack_roll = roll_dice("1d20") + (enemy["attributes"]["STR"] // 2)
+    player_armor_class = 10 + (player["attributes"]["DEX"] // 2)
+
+    if attack_roll >= player_armor_class:
         damage = random.randint(8, 18)
-        print(f"The {enemy['type']} attempts a surprise attack!")
+        if player.get("defending", False):
+            damage //= 2  # Halve damage if defending
+        player["health"] -= damage
+        return f"The {enemy['type']} attacks {player['name']} and deals {damage} damage! {player['name']} has {player['health']} health remaining."
+    else:
+        return f"The {enemy['type']} attacks {player['name']} but misses!"
 
-    player["health"] -= damage
-    return f"The attack dealt {damage} damage! {player['name']} now has {player['health']} health."
-
+def choose_target(enemies):
+    """Let the player choose an enemy target."""
+    print("\nChoose a target:")
+    for i, enemy in enumerate(enemies):
+        print(f"{i + 1}. {enemy['type']} (Health: {enemy['health']})")
+    
+    while True:
+        try:
+            choice = int(input("Enter the number of your target: ").strip()) - 1
+            if 0 <= choice < len(enemies) and enemies[choice]["health"] > 0:
+                return enemies[choice]
+            else:
+                print("Invalid choice or enemy is already defeated. Try again.")
+        except ValueError:
+            print("Invalid input. Enter a number corresponding to an enemy.")
 
 def interpret_action(action, player, enemies):
     """
@@ -400,6 +614,29 @@ def process_question(question):
     answer = call_groq(prompt)
     return answer
 
+def narrate_combat(players, enemies, recent_action):
+    """Generate combat narration using call_groq."""
+    combat_state = f"Players:\n"
+    for player in players:
+        combat_state += f"- {player['name']} ({player['class']}): {player['health']} HP\n"
+
+    combat_state += f"\nEnemies:\n"
+    for enemy in enemies:
+        combat_state += f"- {enemy['type']}: {enemy['health']} HP\n"
+
+    # Include the recent action for context
+    prompt = (
+        f"The following combat is taking place:\n\n"
+        f"{combat_state}\n\n"
+        f"Most recent action: {recent_action}\n\n"
+        f"Provide a vivid and immersive narration of the current state of the battle."
+    )
+
+    # Call call_groq to generate narration
+    narration = call_groq(prompt)
+    return narration
+
+
     
 
 def interactive_storytelling(game_state):
@@ -559,7 +796,7 @@ def start_game_endpoint():
     game_state["players"] = players
 
     try:
-        introduction = start_game()  # Ensure this is accessible
+        introduction = start_game()  
     except Exception as e:
         print("Error during game initialization:", str(e))
         return jsonify({"error": "Internal Server Error"}), 500
@@ -601,11 +838,12 @@ def process_action_endpoint():
         return jsonify({"error": "Internal Server Error"}), 500
 
 
+PORT = int(os.getenv('GAME_PORT',6001))
 
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6000)
+    app.run(host='0.0.0.0', port=PORT)
 
 
 
@@ -615,7 +853,9 @@ def main():
     
     # Initialize the player with attributes
     player1 = {
-        "name": "Human Rogue",  
+        "name": "Hagrid",
+        "class": "Rogue",
+        "race": "Human",  
         "position": "Hall",
         "health": 100,
         "attributes": {          
@@ -630,14 +870,16 @@ def main():
     }
 
     player2 = {
-        "name": "Human Thief",  
+        "name": "Aurora",  
+        "class": "Cleric",
+        "race": "Elf",  
         "position": "Hall",
-        "health": 100,
+        "health": 150,
         "attributes": {          
-            "DEX": 14,          
-            "STR": 10,           
+            "DEX": 10,          
+            "STR": 11,           
             "CON": 12,
-            "INT": 11,
+            "INT": 14,
             "WIS": 13,
             "CHA": 15,
               
@@ -652,5 +894,112 @@ def main():
     # Enter interactive storytelling
     interactive_storytelling(game_state)
 
+def start_combat_test():
+    """Set up a combat scenario for testing turn-based mechanics."""
+    # Create players
+    players = [
+        {
+            "name": "Aelin",
+            "race": "Human",
+            "class": "Rogue",
+            "position": "Forest",
+            "health": 100,
+            "attributes": {
+                "DEX": 14,
+                "STR": 12,
+                "CON": 10,
+                "INT": 10,
+                "WIS": 10,
+                "CHA": 12,
+            },
+            "defending": False,
+            "special_cooldown": 0,
+        },
+        {
+            "name": "Thrain",
+            "race": "Dwarf",
+            "class": "Fighter",
+            "position": "Forest",
+            "health": 120,
+            "attributes": {
+                "DEX": 10,
+                "STR": 16,
+                "CON": 14,
+                "INT": 8,
+                "WIS": 10,
+                "CHA": 10,
+            },
+            "defending": False,
+            "special_cooldown": 0,
+        },
+        {
+            "name": "Eldrin",
+            "race": "Elf",
+            "class": "Wizard",
+            "position": "Forest",
+            "health": 90,
+            "attributes": {
+                "DEX": 12,
+                "STR": 8,
+                "CON": 10,
+                "INT": 16,
+                "WIS": 14,
+                "CHA": 10,
+            },
+            "defending": False,
+            "special_cooldown": 0,
+        },
+    ]
+
+    # Create enemies
+    enemies = [
+        {
+            "type": "Goblin",
+            "health": 30,
+            "attributes": {
+                "DEX": 12,
+                "STR": 10,
+                "CON": 8,
+                "INT": 8,
+                "WIS": 8,
+                "CHA": 6,
+            },
+        },
+        {
+            "type": "Orc",
+            "health": 50,
+            "attributes": {
+                "DEX": 10,
+                "STR": 14,
+                "CON": 12,
+                "INT": 8,
+                "WIS": 8,
+                "CHA": 6,
+            },
+        },
+    ]
+
+    # Print initial setup
+    print("Combat Test Initialized!")
+    for player in players:
+        print(f"Player: {player['name']} ({player['race']} {player['class']}) - Health: {player['health']}")
+
+    print("\nEnemies:")
+    for enemy in enemies:
+        print(f"  {enemy['type']} - Health: {enemy['health']}")
+
+    # Start combat
+    combat_result = initiate_combat_with_prompt(players, enemies)
+
+    # Print combat outcome
+    if combat_result == "victory":
+        print("The players have emerged victorious!")
+    elif combat_result == "player_defeated":
+        print("The players have been defeated!")
+    else:
+        print("Combat ended inconclusively.")
+
+
+
 if __name__ == "__main__":
-    main()
+   main()
