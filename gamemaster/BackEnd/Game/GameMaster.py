@@ -17,6 +17,7 @@ load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")  # Ensure the correct environment variable name
 groq_client = groq.Client(api_key=groq_api_key)
 
+visited_locations = set()
 
 # Game Variables
 game_history = []
@@ -35,15 +36,33 @@ def call_groq(prompt):
     game_history.append(prompt)
 
     # Combine the game history into a full prompt
-    full_prompt = "\n".join(game_history)
+    full_prompt = (
+        "You are a Dungeon Master. The story so far is as follows:\n"
+        + "\n".join(game_history)
+        + "\n\n"
+        + "Now continue the story based on the player's latest action."
+    )
 
     # Generate a response using the language model
     response = language_model.generate_response(full_prompt)
 
     if response:
-        return response.strip()
+        first_paragraph = response.strip().split("\n\n")[0]
+        sentences = first_paragraph.split('. ')
+        limited_response = '. '.join(sentences[:5]).strip()  
+        if not limited_response.endswith('.'):
+            limited_response += '.' 
+        return limited_response
     else:
         return "Error: Unable to generate response."
+
+    
+def add_location_to_history(location):
+    """Track visited locations to ensure variety in descriptions."""
+    if location not in visited_locations:
+        visited_locations.add(location)
+    else:
+        print("You've already been here. The scene looks the same.")
 
 def roll_dice(dice: str):
     """Rolls a dice in the format 'd20', '2d6', etc."""
@@ -54,6 +73,13 @@ def roll_dice(dice: str):
         raise ValueError("Invalid dice format.")
 
 # Combat System
+def prune_game_history():
+    """Limit the size of the game history to avoid excessive repetition."""
+    global game_history
+    max_history = 10  # Keep the last 10 prompts for context
+    if len(game_history) > max_history:
+        game_history = game_history[-max_history:]
+
 
 def initiate_combat_with_prompt(player, enemies):
     """DnD-style turn-based combat with AI-interpreted prompts."""
@@ -197,28 +223,29 @@ def check_for_encounter(player, game_state):
     """Determine if a combat encounter should occur based on the AI's narrative decision."""
     global game_history
 
+    # Generate a narrative prompt for the current situation
     story_so_far = "\n".join(game_history).replace("\\", "\\\\")
-
     prompt = (
         f"The player {player['name']} is currently in {player['position']}."
         f" Based on the story so far:\n\n{story_so_far}\n\n"
         f"Should a combat encounter take place here? If so, describe the enemy and the context of the encounter. "
         f"Otherwise, continue the story without combat."
     )
-    
+
+    # Get the AI response
     response = call_groq(prompt)
 
-    if "yes" in response.lower() or "enemy" in response.lower():
-        new_enemy = create_enemy(player["position"], game_state)
-        print(f"\nAs the story progresses, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
-        return [new_enemy]
-    
-    # Create unique narrative twists or unexpected events
-    if "treasure" in response.lower():
-        print("You find a hidden treasure chest in the corner!")
-        game_state["players"][0]["health"] += 10  # Reward the player for discovering treasure.
-        return []  # No combat but progress the story.
+    # Check if the response implies combat
+    combat_keywords = ["enemy", "threat", "attack", "ambush", "danger"]
+    if any(keyword in response.lower() for keyword in combat_keywords):
+        # Further refine: Ensure the response explicitly mentions an enemy
+        if "enemy" in response.lower():
+            # Create an enemy based on the narrative context
+            new_enemy = create_enemy(player["position"], game_state)
+            print(f"\nAs the story progresses, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
+            return [new_enemy]
 
+    # Otherwise, assume no combat and continue storytelling
     print(f"\n{response.strip()}")
     return []
 
@@ -379,7 +406,9 @@ def interactive_storytelling(game_state):
     """Handles interactive storytelling in a turn-based manner for multiple players."""
     while True:
         for player in game_state["players"]:
-            # Skip players who are defeated
+            # Debugging output
+            print(f"Processing action for player: {player['name']}")
+
             if player["health"] <= 0:
                 print(f"{player['name']} is unconscious and cannot take a turn.")
                 continue
@@ -387,39 +416,25 @@ def interactive_storytelling(game_state):
             print(f"\n{player['name']}'s turn! What would you like to do?")
             player_action = input().strip()
 
-            if player_action.lower().startswith("ask:"):
-                # Handle player questions
-                question = player_action[4:].strip()
-                answer = process_question(question)
-                print(f"\nAnswer: {answer}")
-                continue
-
             if player_action.lower().startswith("action:"):
-                # Process player actions
                 action = player_action[7:].strip()
+                # Debugging output: Ensure only one call per action
+                print("Calling process_input for action:", action)
+
                 story_response = process_input({
                     "action": action,
                     "player": player["name"],
                     "game_state": game_state,
                 })
-                print("\nStory response:", story_response)
+                
+                # Limit response to a single paragraph
+                
+                limited_response = story_response.strip().split("\n\n")[0]
+                
 
-            # Check for encounters specific to the current player
-            enemies = check_for_encounter(player, game_state)
-            if enemies:
-                print(f"Combat initiated for {player['name']}! Facing: {', '.join([enemy['type'] for enemy in enemies])}.")
-                combat_result = initiate_combat_with_prompt(player, enemies)
+                print("\nStory response:", limited_response)
 
-                # Handle combat outcomes
-                if combat_result == "victory":
-                    print(f"{player['name']} defeated the enemies! Returning to the story...")
-                elif combat_result == "player_defeated":
-                    print(f"{player['name']} has been defeated and is out of the game.")
 
-        # Optional: Check if all players are defeated
-        if all(player["health"] <= 0 for player in game_state["players"]):
-            print("All players have been defeated. Game over.")
-            break
             
 def update_world_state(player, action):
     """Update the world based on player action, e.g., adding lore, side quests, or environmental effects."""
@@ -449,21 +464,20 @@ def process_input(data):
     # Check if combat is ongoing
     enemies_in_combat = [enemy for enemy in current_state["enemies"] if enemy["health"] > 0]
 
+    # Define a prompt for storytelling or combat
     if enemies_in_combat:
-        # In combat, focus on the player's action and its consequences
         prompt = (
             f"The player {player_name}, a {player['name']}, is engaged in combat with "
             f"a {enemies_in_combat[0]['type']} with {enemies_in_combat[0]['health']} HP. "
-            f"The player takes the action: '{user_input}'. Describe the result of this action in detail, "
-            f"including its effects on the enemy and the surrounding environment while describing in a DnD game style narration."
+            f"The player takes the action: '{user_input}'. "
+            f"Describe the result of this action in detail, including its effects on the enemy and the environment. "
+            f"Do not repeat details already described earlier in the story. Focus on dynamic, fresh narration."
         )
     else:
-        # Exploration and storytelling
         prompt = (
-            f"The player {player_name}, a {player['name']}, is exploring the environment. "
-            f"The player takes the action: '{user_input}'. Continue the immersive story, "
-            f"describing the environment, the effects of their action, and any new details they uncover. "
-            f"Do not generate summaries or non-immersive text; focus on storytelling like a Dungeon Master in Dungeons and Dragons."
+           f"The player {player_name}, a {player['name']}, is exploring the environment. "
+    f"The player takes the action: '{user_input}'. Continue the immersive story, "
+    f"but limit your response to a single paragraph and avoid verbosity."
         )
 
     # Generate the response
