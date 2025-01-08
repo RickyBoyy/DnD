@@ -36,6 +36,8 @@ const CreateCharacter = () => {
   const [pointsRemaining, setPointsRemaining] = useState(27);
   const [background, setBackground] = useState("");
   const [usedScores, setUsedScores] = useState([]);
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
 
   const alignments = [
     "Lawful Good",
@@ -73,13 +75,13 @@ const CreateCharacter = () => {
       wis: "wisdom",
       cha: "charisma",
     };
-    
+
     if (selectedRace) {
       fetch(`${API_BASE_URL}/races/${selectedRace.toLowerCase()}`)
         .then((response) => response.json())
         .then((data) => {
           const adjustments = { ...baseAbilityScores };
-          
+
           // Map ability bonuses from API to state keys
           data.ability_bonuses.forEach((bonus) => {
             const abilityKey = abilityMapping[bonus.ability_score.index];
@@ -87,7 +89,7 @@ const CreateCharacter = () => {
               adjustments[abilityKey] += bonus.bonus;
             }
           });
-    
+
           // Update state with adjusted abilities and remaining points
           setAbilities(adjustments);
           setPointsRemaining(27 - calculateTotalCost(adjustments));
@@ -96,7 +98,6 @@ const CreateCharacter = () => {
           console.error("Error fetching race adjustments:", error)
         );
     }
-    
   }, [selectedRace]);
 
   const calculateTotalCost = (currentAbilities) => {
@@ -130,15 +131,47 @@ const CreateCharacter = () => {
 
   const navigate = useNavigate();
 
+  const handleProfileImageChange = (e) => {
+    setProfileImage(e.target.files[0]);
+  };
+
+  const handleProfileImageUpload = async () => {
+    if (!profileImage) {
+      alert("Please select a profile image to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("profileImage", profileImage);
+
+    try {
+      const response = await fetch("http://localhost:5000/uploadProfileImage", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Profile image uploaded successfully!");
+        setProfileImageUrl(data.profileImageUrl);
+      } else {
+        alert(data.message || "Failed to upload profile image.");
+      }
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      alert("An error occurred while uploading the profile image.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const token = sessionStorage.getItem("token"); // Replace with your token storage mechanism
+
+    const token = sessionStorage.getItem("token");
     if (!token) {
       alert("You need to log in to create a character.");
       return;
     }
-  
+
     const characterData = {
       name: characterName,
       race: selectedRace,
@@ -150,9 +183,10 @@ const CreateCharacter = () => {
       intelligence: abilities.intelligence,
       wisdom: abilities.wisdom,
       charisma: abilities.charisma,
-      ch_background: background, // Replace with state variable for background input
+      ch_background: background,
+      profileImageUrl: profileImageUrl,
     };
-  
+
     try {
       const response = await fetch("http://localhost:5000/createCharacter", {
         method: "POST",
@@ -162,12 +196,11 @@ const CreateCharacter = () => {
         },
         body: JSON.stringify(characterData),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         alert("Character created successfully!");
         navigate("/characters");
-        console.log("Character ID:", data.characterId);
       } else {
         alert(data.message || "Failed to create character.");
       }
@@ -176,7 +209,7 @@ const CreateCharacter = () => {
       alert("An error occurred while creating the character.");
     }
   };
-  
+
   return (
     <div id="CreateCharacter">
       <div className="player_character_title">
@@ -196,6 +229,24 @@ const CreateCharacter = () => {
                   placeholder="Enter your character's name"
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="profileImage">Profile Image:</label>
+                <input type="file" onChange={handleProfileImageChange} />
+                <button type="button" onClick={handleProfileImageUpload}>
+                  Upload Profile Image
+                </button>
+                {profileImageUrl && (
+                  <div>
+                    <img
+                      src={profileImageUrl}
+                      alt="Profile"
+                      className="profile-preview"
+                      style={{ width: "100px", height: "100px" }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -296,7 +347,6 @@ const CreateCharacter = () => {
             cols="50"
             className="background-textarea"
           />
-
         </div>
         <button
           className="ending_character_button"
