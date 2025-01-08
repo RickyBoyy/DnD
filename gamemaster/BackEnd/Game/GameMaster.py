@@ -33,17 +33,17 @@ game_history = []
 def call_groq(prompt):
     global game_history
     game_history.append(prompt)
-
-    # Combine the game history into a full prompt
     full_prompt = "\n".join(game_history)
+    print("Sending prompt:", full_prompt)
 
-    # Generate a response using the language model
-    response = language_model.generate_response(full_prompt)
-
-    if response:
-        return response.strip()
-    else:
+    try:
+        response = language_model.generate_response(full_prompt)
+        print("Received response:", response)
+        return response.strip() if response else "Error: Unable to generate response."
+    except Exception as e:
+        print("Error during API call:", str(e))
         return "Error: Unable to generate response."
+
 
 def roll_dice(dice: str):
     """Rolls a dice in the format 'd20', '2d6', etc."""
@@ -585,11 +585,12 @@ def process_action_endpoint():
         return jsonify({"error": "Internal Server Error"}), 500
 
 
+PORT = int(os.getenv('GAME_PORT',6001))
 
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6000)
+    app.run(host='0.0.0.0', port=PORT)
 
 
 
