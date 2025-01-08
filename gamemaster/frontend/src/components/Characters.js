@@ -52,17 +52,18 @@ const Characters = () => {
 
   return (
     <div className="container">
-      <div className="header-buttons">
-        {/* Profile button */}
-        <button className="profile-button" onClick={navigateToProfile}>
-          <img src={profilePicPlaceholder} alt="Profile" className="profile-pic" />
-        </button>
+    <div className="header-buttons">
+  {/* Botão de Perfil  */}
+  <button className="profile-button" onClick={navigateToProfile}>
+    <img src={profilePicPlaceholder} alt="Profile" className="profile-pic1" />
+  </button>
 
-        {/* Create character button */}
-        <button className="create-character-button" onClick={navigateToCreateCharacter}>
-          Create Character
-        </button>
-      </div>
+  {/* Botão Criar Personagem */}
+  <button className="create-character-button" onClick={navigateToCreateCharacter}>
+    Create Character
+  </button>
+</div>
+
 
       <div className="title_characters">
         <span>Characters</span>
