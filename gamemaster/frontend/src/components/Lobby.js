@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import getSocket from "../socket";
 import "../App.css";
+import characterimage from "../assets/personagem d&d.jpg";
 
 const Lobby = () => {
   const { gameCode } = useParams();
@@ -194,9 +195,16 @@ const Lobby = () => {
                 }`}
                 onClick={() => handleCharacterSelect(character)}
               >
+                {/* Exibe a imagem personalizada ou a imagem padrão */}
                 <img
-                  src={character.image || "/default-image.jpg"}
-                  alt={character.name}
+                  src={character.character_image || characterimage}
+                  alt={character.character_name}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
                 />
                 <h4>{character.character_name}</h4>
               </div>

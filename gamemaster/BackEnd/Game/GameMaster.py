@@ -887,58 +887,70 @@ def transform_to_json(response_text):
 
 
 
-# @app.route("/startGame", methods=["POST"])
-# def start_game_endpoint():
-#     global game_state
-#     data = request.json
-#     print("Received data:", data)
-#
-#     game_code = data.get("gameCode")
-#     players = data.get("players")
-#
-#     if not game_code or not players:
-#         print("Invalid data received.")
-#         return jsonify({"error": "Invalid data: Missing gameCode or players"}), 400
-#
-#     game_state["players"] = players
-#
-#     try:
-#         introduction = start_game()  
-#     except Exception as e:
-#         print("Error during game initialization:", str(e))
-#         return jsonify({"error": "Internal Server Error"}), 500
-#
-#     return jsonify({"introduction": introduction, "gameState": game_state})
-#
-#
-# @app.route("/processAction", methods=["POST"])
-# def process_action_endpoint():
-#     data = request.json
-#     print("Received data for processing action:", data)
-#
-#     action = data.get("action")
-#     player = data.get("player")
-#     game_state = data.get("gameState", {})
-#
-#     if "enemies" not in game_state:
-#         print("Enemies key missing in gameState. Initializing to empty list.")
-#         game_state["enemies"] = []
-#
-#     if not action or not player or not game_state:
-#         print("Invalid data received:", data)
-#         return jsonify({"error": "Invalid data"}), 400
-#
-#     try:
-#         response = process_input({
-#             "action": action,
-#             "player": player,
-#             "game_state": game_state,
-#         })
-#         print("Generated AI response:", response)
-#         return jsonify({"response": response})
-#     except Exception as e:
-#         print("Error processing action:", str(e))
-#         return jsonify({"error": "Internal Server Error"}), 500
+@app.route("/startGame", methods=["POST"])
+def start_game_endpoint():
+    global game_state
+    data = request.json
+    print("Received data:", data)
+
+    game_code = data.get("gameCode")
+    players = data.get("players")
+
+    if not game_code or not players:
+        print("Invalid data received.")
+        return jsonify({"error": "Invalid data: Missing gameCode or players"}), 400
+
+    game_state["players"] = players
+
+    try:
+        introduction = start_game()  
+    except Exception as e:
+        print("Error during game initialization:", str(e))
+        return jsonify({"error": "Internal Server Error"}), 500
+
+    return jsonify({"introduction": introduction, "gameState": game_state})
+
+
+
+
+@app.route("/processAction", methods=["POST"])
+def process_action_endpoint():
+    data = request.json
+    print("Received data for processing action:", data)
+
+    action = data.get("action")
+    player = data.get("player")
+    game_state = data.get("gameState", {})
+
+    # Ensure gameState has required keys
+    if "enemies" not in game_state:
+        print("Enemies key missing in gameState. Initializing to empty list.")
+        game_state["enemies"] = []
+
+    if not action or not player or not game_state:
+        print("Invalid data received:", data)
+        return jsonify({"error": "Invalid data"}), 400
+
+    try:
+        # Process the action using the AI
+        response = process_input({
+            "action": action,
+            "player": player,
+            "game_state": game_state,
+        })
+        print("Generated AI response:", response)
+        return jsonify({"response": response})
+    except Exception as e:
+        print("Error processing action:", str(e))
+        return jsonify({"error": "Internal Server Error"}), 500
+
+
+PORT = int(os.getenv('GAME_PORT',6001))
+
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=PORT)
 
 
 
