@@ -729,7 +729,6 @@ def narrate_combat(players, enemies, recent_action):
 
 def interactive_storytelling(game_state):
     """Handles interactive storytelling in a turn-based manner for multiple players."""
-    combat_initiated = False
     while True:
         for player in game_state["players"]:
             if player["health"] <= 0:
@@ -743,35 +742,22 @@ def interactive_storytelling(game_state):
             if player_action.lower().startswith("action:"):
                 player_action = player_action[7:].strip()
 
-            if player_action.lower() == "initiate combat" and not combat_initiated:
-                # Check if enemies exist; if not, create one
-                if not game_state["enemies"]:
-                    position = "current_position_placeholder"  # Replace with actual position
-                    create_enemy(position, game_state)
-                
-                # Extract players and enemies from game_state
-                players = game_state["players"]
-                enemies = game_state["enemies"]
-                
-                # Initiate combat with the players and enemies
-                initiate_combat_with_prompt(players, enemies)
-                combat_initiated = True  # Set flag to True to prevent multiple initiations
-                continue  # Skip processing further actions after initiating combat
+            # Process the player's action through process_input
+            story_response = process_input({
+                "action": player_action,
+                "player": player["name"],
+                "game_state": game_state,
+            })
 
-            # Process the player's action if combat has not been initiated
-            if combat_initiated:
-                # Process other player actions here (attacking, defending, etc.)
-                story_response = process_input({
-                    "action": player_action,
-                    "player": player["name"],
-                    "game_state": game_state,
-                })
-
-                # Limit response to a single paragraph
+            # Check for errors or combat messages
+            if isinstance(story_response, dict) and "error" in story_response:
+                print(story_response["error"])
+            elif isinstance(story_response, str):
+                print("\n", story_response)
+            else:
+                # Limit response to a single paragraph for storytelling
                 limited_response = story_response.strip().split("\n\n")[0]
                 print("\n", limited_response)
-            else:
-                print("You must initiate combat first by typing 'initiate combat'.")
 
             
 def update_world_state(player, action):
@@ -798,6 +784,20 @@ def process_input(data):
 
     if not player:
         return {"error": f"Player {player_name} not found."}
+    if user_input.lower() == "initiate combat":
+        if not current_state["enemies"]:
+            position = player.get("position", "unknown location")  # Replace with actual logic
+            create_enemy(position, current_state)
+        
+        players = current_state["players"]
+        enemies = current_state["enemies"]
+
+        if not enemies:
+            return "No enemies available to initiate combat with."
+        
+        # Start combat
+        initiate_combat_with_prompt(players, enemies)
+        return "Combat has been initiated! Players and enemies are ready to fight."
 
     # Check if combat is ongoing
     enemies_in_combat = [enemy for enemy in current_state["enemies"] if enemy["health"] > 0]
