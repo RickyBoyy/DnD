@@ -32,7 +32,6 @@ const Lobby = () => {
       console.log("Updated selections:", updatedSelections); // Debugging
       setCharacterSelections(updatedSelections);
     });
-    
 
     socket.on("gameStarted", () => {
       navigate(`/game/${gameCode}`);
@@ -91,7 +90,6 @@ const Lobby = () => {
         const data = await response.json();
         setCharacters(data.characters);
         console.log("Characters fetched:", data.characters);
-
       } else {
         alert("Failed to fetch characters.");
       }
@@ -102,19 +100,21 @@ const Lobby = () => {
 
   const startGame = () => {
     const allSelected = players.every((player) => {
-      console.log(`Checking player ${player.name}:`, characterSelections[player.name]);
+      console.log(
+        `Checking player ${player.name}:`,
+        characterSelections[player.name]
+      );
       return characterSelections[player.name];
     });
-  
+
     if (!allSelected) {
       alert("All players must select a character before starting the game.");
       return;
     }
-  
+
     const socket = getSocket();
-    socket.emit("startGame", { gameCode });
+    socket.emit("startGame", { gameCode, characterSelections });
   };
-  
 
   const openCharacterModal = () => {
     fetchCharacters();
@@ -124,7 +124,6 @@ const Lobby = () => {
   const handleCharacterSelect = (character) => {
     setSelectedCharacter(character);
     console.log("Character selected:", character);
-
   };
 
   const confirmCharacterSelection = () => {
@@ -150,13 +149,27 @@ const Lobby = () => {
         <div className="game-code">Game Code: {gameCode}</div>
 
         <div className="player-slots">
-  {[...Array(maxPlayers)].map((_, index) => (
-    <div key={index} className={`player-slot ${index < players.length ? index === 0 ? "host" : "filled" : "empty"}`}>
-      {index < players.length ? `${players[index].name} ${characterSelections[players[index].name] ? "(Ready)" : "(Not Ready)"}` : "Available"}
-    </div>
-  ))}
-</div>
-
+          {[...Array(maxPlayers)].map((_, index) => (
+            <div
+              key={index}
+              className={`player-slot ${
+                index < players.length
+                  ? index === 0
+                    ? "host"
+                    : "filled"
+                  : "empty"
+              }`}
+            >
+              {index < players.length
+                ? `${players[index].name} ${
+                    characterSelections[players[index].name]
+                      ? "(Ready)"
+                      : "(Not Ready)"
+                  }`
+                : "Available"}
+            </div>
+          ))}
+        </div>
 
         <button className="character-select-btn" onClick={openCharacterModal}>
           Select Character
@@ -170,37 +183,36 @@ const Lobby = () => {
       </div>
 
       {/* Character Selection Modal */}
-{showCharacterModal && (
-  <div className="character-modal">
-    <h2>Select Your Character</h2>
-    <div className="character-list">
-      {characters.map((character) => (
-        <div
-          key={character.id}
-          className={`character-item ${
-            selectedCharacter?.id === character.id ? "selected" : ""
-          }`}
-          onClick={() => handleCharacterSelect(character)}
-        >
-          {/* Exibe a imagem personalizada ou a imagem padrão */}
-          <img
-            src={character.character_image || characterimage} 
-            alt={character.character_name}
-            style={{
-              width: "100px", 
-              height: "100px",
-              objectFit: "cover", 
-              borderRadius: "8px", 
-            }}
-          />
-          <h4>{character.character_name}</h4>
+      {showCharacterModal && (
+        <div className="character-modal">
+          <h2>Select Your Character</h2>
+          <div className="character-list">
+            {characters.map((character) => (
+              <div
+                key={character.id}
+                className={`character-item ${
+                  selectedCharacter?.id === character.id ? "selected" : ""
+                }`}
+                onClick={() => handleCharacterSelect(character)}
+              >
+                {/* Exibe a imagem personalizada ou a imagem padrão */}
+                <img
+                  src={character.character_image || characterimage}
+                  alt={character.character_name}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
+                />
+                <h4>{character.character_name}</h4>
+              </div>
+            ))}
+          </div>
+          <button onClick={confirmCharacterSelection}>Confirm</button>
         </div>
-      ))}
-    </div>
-    <button onClick={confirmCharacterSelection}>Confirm</button>
-  </div>
-)}
-
+      )}
     </div>
   );
 };
