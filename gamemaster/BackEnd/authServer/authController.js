@@ -3,14 +3,23 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+const { read } = require("fs");
 
 // Configuração do pool de conexão MySQL
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
+const writePool = mysql.createPool({
+  host: process.env.DB_MASTER_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
+
+const readPool = mysql.createPool({
+  host: process.env.DB_SLAVE_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
 
 
 const storage = multer.diskStorage({
@@ -66,7 +75,7 @@ exports.uploadAvatar = async (req, res) => {
 
 
       // Update avatar URL in the database
-      const [result] = await pool.execute(
+      const [result] = await writePool.execute(
         "UPDATE users SET avatar_url = ? WHERE id = ?",
         [avatarUrl, userId]
       );
@@ -93,7 +102,7 @@ exports.register = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    await pool.execute(
+    await writePool.execute(
       "INSERT INTO users (email, password, country) VALUES (?, ?, ?)",
       [email, hashedPassword, country]
     );
@@ -118,7 +127,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
+    const [rows] = await readPool.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     if (rows.length === 0) {
       return res.status(400).json({ message: "Invalid email or password" });
@@ -162,7 +171,7 @@ exports.setUsername = async (req, res) => {
   }
 
   try {
-    const [result] = await pool.execute(
+    const [result] = await writePool.execute(
       "UPDATE users SET username = ? WHERE email = ?",
       [username, email]
     );
@@ -203,7 +212,7 @@ exports.createCharacter = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const [existingCharacter] = await pool.execute(
+    const [existingCharacter] = await readPool.execute(
       "SELECT * FROM character_player WHERE character_name = ? AND character_user_id = ?",
       [name, userId]
     );
@@ -212,7 +221,7 @@ exports.createCharacter = async (req, res) => {
       return res.status(400).json({ message: "Character name already exists for this user" });
     }
 
-    await pool.execute(
+    await writePool.execute(
       `INSERT INTO character_player 
       (character_name, character_race, character_class, character_alignment, character_strength, character_dexterity, 
       character_constitution, character_intelligence, character_wisdom, character_charisma, 
@@ -252,7 +261,7 @@ exports.getCharacters = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const [characters] = await pool.execute(
+    const [characters] = await readPool.execute(
       "SELECT * FROM character_player WHERE character_user_id = ?",
       [userId]
     );
@@ -269,7 +278,7 @@ exports.getProfile = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const [rows] = await pool.execute(
+    const [rows] = await readPool.execute(
       "SELECT username, email, avatar_url FROM users WHERE id = ?",
       [userId]
     );

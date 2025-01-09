@@ -641,11 +641,9 @@ def narrate_combat(players, enemies, recent_action):
 
 def interactive_storytelling(game_state):
     """Handles interactive storytelling in a turn-based manner for multiple players."""
+    combat_initiated = False
     while True:
         for player in game_state["players"]:
-            # Debugging output
-            print(f"Processing action for player: {player['name']}")
-
             if player["health"] <= 0:
                 print(f"{player['name']} is unconscious and cannot take a turn.")
                 continue
@@ -653,23 +651,39 @@ def interactive_storytelling(game_state):
             print(f"\n{player['name']}'s turn! What would you like to do?")
             player_action = input().strip()
 
+            # Remove "action:" if it exists
             if player_action.lower().startswith("action:"):
-                action = player_action[7:].strip()
-                # Debugging output: Ensure only one call per action
-                print("Calling process_input for action:", action)
+                player_action = player_action[7:].strip()
 
+            if player_action.lower() == "initiate combat" and not combat_initiated:
+                # Check if enemies exist; if not, create one
+                if not game_state["enemies"]:
+                    position = "current_position_placeholder"  # Replace with actual position
+                    create_enemy(position, game_state)
+                
+                # Extract players and enemies from game_state
+                players = game_state["players"]
+                enemies = game_state["enemies"]
+                
+                # Initiate combat with the players and enemies
+                initiate_combat_with_prompt(players, enemies)
+                combat_initiated = True  # Set flag to True to prevent multiple initiations
+                continue  # Skip processing further actions after initiating combat
+
+            # Process the player's action if combat has not been initiated
+            if combat_initiated:
+                # Process other player actions here (attacking, defending, etc.)
                 story_response = process_input({
-                    "action": action,
+                    "action": player_action,
                     "player": player["name"],
                     "game_state": game_state,
                 })
-                
-                # Limit response to a single paragraph
-                
-                limited_response = story_response.strip().split("\n\n")[0]
-                
 
-                print("\nStory response:", limited_response)
+                # Limit response to a single paragraph
+                limited_response = story_response.strip().split("\n\n")[0]
+                print("\n", limited_response)
+            else:
+                print("You must initiate combat first by typing 'initiate combat'.")
 
 
             
@@ -690,38 +704,48 @@ def update_world_state(player, action):
 
 def process_input(data):
     """Process user input and continue the story."""
-    user_input = data.get("action")
-    player_name = data.get("player")
-    current_state = data.get("game_state", game_state)
-    player = next((p for p in current_state["players"] if p["name"] == player_name), None)
+    try:
+        user_input = data.get("action")
+        player_name = data.get("player")
+        current_state = data.get("game_state", game_state)
 
-    if not player:
-        return {"error": f"Player {player_name} not found."}
+        # Ensure player exists in the game state
+        player = next((p for p in current_state["players"] if p["name"] == player_name), None)
+        if not player:
+            print(f"Player {player_name} not found in game state.")
+            return {"error": f"Player {player_name} not found."}
 
-    # Check if combat is ongoing
-    enemies_in_combat = [enemy for enemy in current_state["enemies"] if enemy["health"] > 0]
+        # Check if combat is ongoing
+        enemies_in_combat = [enemy for enemy in current_state["enemies"] if enemy["health"] > 0]
 
-    # Define a prompt for storytelling or combat
-    if enemies_in_combat:
-        prompt = (
-            f"The player {player_name}, a {player['name']}, is engaged in combat with "
-            f"a {enemies_in_combat[0]['type']} with {enemies_in_combat[0]['health']} HP. "
-            f"The player takes the action: '{user_input}'. "
-            f"Describe the result of this action in detail, including its effects on the enemy and the environment. "
-            f"Do not repeat details already described earlier in the story. Focus on dynamic, fresh narration."
-        )
-    else:
-        prompt = (
-           f"The player {player_name}, a {player['name']}, is currently located in {player['position']}.\n"
-        f"The story so far:\n{'\n'.join(game_history)}\n\n"
-        f"The player takes the action: '{user_input}'.\n"
-        f"Continue the story in a logical way, ensuring it aligns with the context and avoids repetition. "
-        f"Focus on advancing the narrative and providing clear options for the next move."
-        )
+        # Define a prompt for storytelling or combat
+        if enemies_in_combat:
+            prompt = (
+                f"The player {player_name}, a {player['name']}, is engaged in combat with "
+                f"a {enemies_in_combat[0]['type']} with {enemies_in_combat[0]['health']} HP. "
+                f"The player takes the action: '{user_input}'. "
+                f"Describe the result of this action in detail, including its effects on the enemy and the environment. "
+                f"Do not repeat details already described earlier in the story. Focus on dynamic, fresh narration."
+            )
+        else:
+            prompt = (
+                f"The player {player_name}, a {player['name']}. "
+                f"The story so far:\n{''.join(game_history)}\n\n"
+                f"The player takes the action: '{user_input}'.\n"
+                f"Continue the story in a logical way, ensuring it aligns with the context and avoids repetition. "
+                f"Focus on advancing the narrative and providing clear options for the next move."
+            )
 
-    # Generate the response
-    response = call_groq(prompt)
-    return response
+        # Generate the response
+        response = call_groq(prompt)
+        return response
+
+    except Exception as e:
+        print(f"Error in process_input: {str(e)}")
+        return {"error": f"Processing failed: {str(e)}"}
+
+
+
 
 
 
@@ -784,24 +808,24 @@ def transform_to_json(response_text):
 def start_game_endpoint():
     global game_state
     data = request.json
-    print("Received data:", data)
-
     game_code = data.get("gameCode")
     players = data.get("players")
 
     if not game_code or not players:
-        print("Invalid data received.")
         return jsonify({"error": "Invalid data: Missing gameCode or players"}), 400
 
     game_state["players"] = players
 
     try:
-        introduction = start_game()  
+        introduction = start_game()  # Generates AI-driven intro
+        game_state["introduction"] = introduction
     except Exception as e:
-        print("Error during game initialization:", str(e))
+        print(f"Error generating introduction: {e}")
+        introduction = "Welcome to the adventure! Prepare yourself!"
         return jsonify({"error": "Internal Server Error"}), 500
 
     return jsonify({"introduction": introduction, "gameState": game_state})
+
 
 
 
@@ -822,7 +846,7 @@ def process_action_endpoint():
 
     if not action or not player or not game_state:
         print("Invalid data received:", data)
-        return jsonify({"error": "Invalid data"}), 400
+        return jsonify({"success": False, "response": "Invalid data: action, player, or gameState missing."}), 400
 
     try:
         # Process the action using the AI
@@ -832,10 +856,13 @@ def process_action_endpoint():
             "game_state": game_state,
         })
         print("Generated AI response:", response)
-        return jsonify({"response": response})
+        return jsonify({"success": True, "response": response})
     except Exception as e:
         print("Error processing action:", str(e))
-        return jsonify({"error": "Internal Server Error"}), 500
+        return jsonify({"success": False, "response": f"Processing failed: {str(e)}"}), 500
+
+
+
 
 
 PORT = int(os.getenv('GAME_PORT',6001))
@@ -1002,4 +1029,4 @@ def start_combat_test():
 
 
 if __name__ == "__main__":
-   main()
+   start_combat_test()

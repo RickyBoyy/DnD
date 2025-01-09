@@ -10,11 +10,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "gameserver": "file:",
+    "http": "^0.0.1-security",
+    "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
     "muller": "^1.1.0",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "socket.io-redis": "^5.4.0"
   }
 }

@@ -39,7 +39,7 @@ app.post("/uploadAvatar", authenticate, authController.uploadAvatar);
   //res.sendFile(path.join(__dirname, "build", "index.html"));
 //});
 
-const PORT = process.env.AUTH_PORT || 3001;
+const PORT = process.env.AUTH_PORT || 5001;
 app.listen(PORT, () =>
   console.log(`Auth Server running on http://localhost:${PORT}`)
 );

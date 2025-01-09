@@ -1,63 +1,111 @@
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: gamemaster-frontend:latest
+    deploy:
+      replicas: 2  # Replicate 3 instances for load balancing
     ports:
       - "8080:80"
+    networks:
+      - gamemaster-network
 
   gameserver:
-    build:
-      context: ./BackEnd/gameServer
-      dockerfile: Dockerfile
+    image: gamemaster-gameserver:latest
     environment:
       - NODE_ENV=production
+    deploy:
+      replicas: 1
     ports:
       - "4000:4000"
     depends_on:
-      - database
+      - database_master
+   
+    networks:
+      - gamemaster-network
 
   authserver:
-    build:
-      context: ./BackEnd/authServer
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
+    image: gamemaster-authserver:latest
     environment:
       - NODE_ENV=production
+    deploy:
+      replicas: 2  # Replicate 2 instances for redundancy
+    ports:
+      - "5000:5000"
     depends_on:
-      - database
+      - database_master
     volumes:
       - uploads:/uploads
+    networks:
+      - gamemaster-network
 
   gamemaster:
-    build:
-      context: ./BackEnd/game
-      dockerfile: Dockerfile
+    image: gamemaster-gamemaster:latest
+    deploy:
+      replicas: 1
     ports:
       - "6000:6000"
     environment:
-      - GROQ_API_KEY=${GROQ_API_KEY}  # Pass the API key
+      - GROQ_API_KEY=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
     depends_on:
-      - database
+      - database_master
+    networks:
+      - gamemaster-network
 
-  database:
+  database_master:
     image: mysql:8
-    container_name: database
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: mydb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     volumes:
-      - db_data:/var/lib/mysql
+      - db_master_data:/var/lib/mysql
     ports:
       - "3307:3306"
+    networks:
+      - gamemaster-network
+    command: >
+      --server-id=1
+      --log-bin=mysql-bin
+      --mysql-native-password=ON
+      
+      
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  database_slave:
+    image: mysql:8
+    container_name: database_slave
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - db_slave_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    networks:
+      - gamemaster-network
+    depends_on:
+      - database_master
+    command: >
+      --server-id=2
+      --relay-log=mysql-relay-bin
+      --mysql-native-password=ON
+      
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: gamemaster-nginx:latest
+    deploy:
+      replicas: 1  # Nginx typically runs as a single instance in a Swarm setup
     ports:
       - "80:80"
     depends_on:
@@ -65,7 +113,24 @@ services:
       - gameserver
       - authserver
       - gamemaster
+    networks:
+      - gamemaster-network
+    
+  redis:
+    image: redis:latest
+    ports:
+    - "6379:6379"
+    networks:
+    - gamemaster-network
+
+
+ 
 
 volumes:
-  db_data:
+  db_master_data:
+  db_slave_data:
   uploads:
+
+networks:
+  gamemaster-network:
+    driver: overlay  # Use overlay network for Swarm

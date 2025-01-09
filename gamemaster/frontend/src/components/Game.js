@@ -6,103 +6,124 @@ import getSocket from "../socket";
 const Game = () => {
   const { gameCode } = useParams();
   const [players, setPlayers] = useState([]);
-  const [gameIntroduction, setGameIntroduction] = useState("");
-  const [currentTurnPlayer, setCurrentTurnPlayer] = useState("");
+  const [gameIntroduction, setGameIntroduction] = useState("Waiting for game to start...");
   const [chatMessages, setChatMessages] = useState([]);
   const [playerName, setPlayerName] = useState("");
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [processedResponses, setProcessedResponses] = useState(new Set());
 
   const addChatMessage = (message, className) => {
-    setChatMessages((prevMessages) => [...prevMessages, { message, className }]);
+    setChatMessages((prevMessages) => {
+      if (prevMessages.some((msg) => msg.message === message)) return prevMessages;
+      return [...prevMessages, { message, className }];
+    });
   };
 
   useEffect(() => {
     const socket = getSocket();
 
-    if (!socket) return;
+    if (!socket) {
+      console.error("Socket connection is not initialized.");
+      return;
+    }
 
     socket.emit("getPlayersInGame", gameCode);
+    console.log(`Requesting players for gameCode: ${gameCode}`);
+
+    const handleUpdatePlayers = (updatedPlayers) => {
+      setPlayers(updatedPlayers);
+      console.log("Players updated:", updatedPlayers);
+    };
+
+    const handleGameStarted = ({ introduction }) => {
+      console.log("Game started event received:", { introduction });
+      const introMessage = introduction || "Welcome to the adventure!";
+      
+      // Update introduction and set the game as started
+      setGameIntroduction(introMessage);
+      setIsGameStarted(true);
+    };
+    
+    const handleGameStateUpdated = (updatedState) => {
+      console.log("Game state updated:", updatedState);
+      
+      // Update players
+      setPlayers(updatedState.players || []);
+      
+      // Set introduction only if it differs and the game hasn't started
+      if (
+        updatedState.introduction &&
+        updatedState.introduction !== gameIntroduction &&
+        !isGameStarted
+      ) {
+        setGameIntroduction(updatedState.introduction);
+      }
+    };
+    
+
+    const handleAIResponse = ({ player, action, response }) => {
+      const responseId = `${player}-${action}-${response}`;
+      if (processedResponses.has(responseId)) return;
+
+      setProcessedResponses((prev) => new Set(prev).add(responseId));
+      const playerMessage = player === playerName ? `You: ${action}` : `${player} performed: ${action}`;
+      addChatMessage(playerMessage, "outgoing");
+      addChatMessage(response, "incoming");
+    };
 
     socket.on("connect", () => {
+      console.log(`Socket connected with ID: ${socket.id}`);
       setPlayerName(socket.id);
     });
 
-    socket.on("playersUpdated", (updatedPlayers) => setPlayers(updatedPlayers));
-    socket.on("playerJoined", (updatedPlayers) => setPlayers(updatedPlayers));
-    socket.on("playerLeft", (updatedPlayers) => setPlayers(updatedPlayers));
-    socket.on("turnUpdate", ({ player }) => setCurrentTurnPlayer(player));
-
-    socket.on("gameStateUpdated", (updatedState) => {
-      setPlayers((prevPlayers) =>
-        Array.isArray(updatedState.players) ? updatedState.players : prevPlayers
-      );
-      setGameIntroduction((prev) =>
-        updatedState.introduction || prev || "Waiting for the game to start..."
-      );
-      setCurrentTurnPlayer((prev) => updatedState.currentTurnPlayer || prev);
-    });
-
-    socket.on("aiResponse", ({ player, action, response }) => {
-      addChatMessage(`${player} performed: ${action}`, "outgoing");
-      addChatMessage(response, "incoming");
-    });
-
-    socket.on("gameStarted", ({ introduction, gameState, currentTurnPlayer }) => {
-      console.log("Received gameStarted event:", { introduction, gameState, currentTurnPlayer });
-    
-      if (introduction) {
-        setGameIntroduction(introduction);
-        addChatMessage(introduction, "incoming");
-      } else {
-        console.error("Introduction is missing from gameStarted event.");
-      }
-    
-      if (gameState?.players) {
-        setPlayers(gameState.players);
-      } else {
-        console.error("Players are missing from gameState.");
-      }
-    
-      if (currentTurnPlayer) {
-        setCurrentTurnPlayer(currentTurnPlayer);
-      } else {
-        console.error("Current turn player is missing.");
-      }
-    });
-    
-    
+    socket.on("playersUpdated", handleUpdatePlayers);
+    socket.on("playerJoined", handleUpdatePlayers);
+    socket.on("playerLeft", handleUpdatePlayers);
+    socket.on("gameStarted", handleGameStarted);
+    socket.on("gameStateUpdated", handleGameStateUpdated);
+    socket.on("aiResponse", handleAIResponse);
 
     return () => {
-      socket.off("playersUpdated");
-      socket.off("playerJoined");
-      socket.off("playerLeft");
-      socket.off("gameStarted");
-      socket.off("turnUpdate");
-      socket.off("aiResponse");
-      socket.off("gameStateUpdated");
+      socket.off("playersUpdated", handleUpdatePlayers);
+      socket.off("playerJoined", handleUpdatePlayers);
+      socket.off("playerLeft", handleUpdatePlayers);
+      socket.off("gameStarted", handleGameStarted);
+      socket.off("gameStateUpdated", handleGameStateUpdated);
+      socket.off("aiResponse", handleAIResponse);
     };
-  }, [gameCode]);
+  }, [gameCode, gameIntroduction, isGameStarted, processedResponses, playerName]);
 
   const handleSendMessage = () => {
     const chatInput = document.querySelector("#chat-input");
-    const message = chatInput.value.trim();
-    if (message && currentTurnPlayer === playerName) {
-      const socket = getSocket();
-      console.log("Emitting playerAction:", { action: message, player: playerName });
-      addChatMessage(`You: ${message}`, "outgoing");
-      socket.emit("playerAction", { action: message, player: playerName }, (response) => {
-        console.log("Response from server:", response);
+    const input = chatInput.value.trim();
+
+    if (!input) {
+      addChatMessage("Please enter an action.", "error");
+      return;
+    }
+
+    const socket = getSocket();
+    if (!socket) {
+      addChatMessage("Socket connection is not available.", "error");
+      return;
+    }
+
+    addChatMessage(`You: ${input}`, "outgoing");
+
+    socket.emit(
+      "playerAction",
+      { action: input, player: playerName, gameState: { players } },
+      (response) => {
         if (response.success) {
+          setGameIntroduction(response.introduction || gameIntroduction);
           addChatMessage(response.response, "incoming");
         } else {
-          addChatMessage("Error: " + response.response, "error");
+          addChatMessage(response.response || "An error occurred.", "error");
         }
-      });
-      chatInput.value = "";
-    } else if (!message) {
-      alert("Please enter an action.");
-    } else {
-      alert("It's not your turn!");
-    }
+      }
+    );
+
+    chatInput.value = "";
   };
 
   return (
@@ -114,55 +135,55 @@ const Game = () => {
         />
       </Helmet>
       <div id="GameId">
-        <div className="players_display">
-          <div className="turn-notification">
-            {currentTurnPlayer && <p>It's {currentTurnPlayer}'s turn!</p>}
-          </div>
-          <div className="side_nav">
-            <span>Players</span>
-            <div className="players_icons">
-              {(players && players.length > 0) ? (
-                players.map((player, index) => (
-                  <div key={index} className="player_info">
-                    <h3>{player.name || "Unknown Player"}</h3>
-                  </div>
-                ))
-              ) : (
-                <p>No players in the game yet.</p>
-              )}
+        <div className="layout">
+          <div className="players_display">
+            <div className="side_nav">
+              <span>Players</span>
+              <div className="players_icons">
+                {players.length > 0 ? (
+                  players.map((player, index) => (
+                    <div key={player.id || index} className="player_info">
+                      <h3>{player.name || "Unknown Player"}</h3>
+                    </div>
+                  ))
+                ) : (
+                  <p>No players in the game yet.</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="chat-container">
-          {gameIntroduction ? (
-            <div className="chat introduction">
-              <p>{gameIntroduction}</p>
+          <div className="main-content">
+            <div className="chat-container">
+              <div className="chat introduction">
+                <p>{gameIntroduction}</p>
+              </div>
+              {chatMessages.map((msg, index) => (
+                <div key={index} className={`chat ${msg.className}`}>
+                  {typeof msg.message === "string" ? (
+                    <p>{msg.message}</p>
+                  ) : (
+                    <pre>{JSON.stringify(msg.message, null, 2)}</pre>
+                  )}
+                </div>
+              ))}
             </div>
-          ) : (
-            <p>Waiting for the game to start...</p>
-          )}
-          {chatMessages.map((msg, index) => (
-            <div key={index} className={`chat ${msg.className}`}>
-              <p>{msg.message}</p>
-            </div>
-          ))}
-        </div>
-        <div className="typing-container">
-          <div className="typing-content">
-            <div className="typing-textarea">
-              <textarea
-                id="chat-input"
-                placeholder={currentTurnPlayer !== playerName ? "Wait for your turn..." : "Enter prompt here!!"}
-                disabled={currentTurnPlayer !== playerName}
-                required
-              ></textarea>
-              <span
-                id="send_btn"
-                className="material-symbols-rounded"
-                onClick={handleSendMessage}
-              >
-                send
-              </span>
+            <div className="typing-container">
+              <div className="typing-content">
+                <div className="typing-textarea">
+                  <textarea
+                    id="chat-input"
+                    placeholder="Enter your action..."
+                    required
+                  ></textarea>
+                  <span
+                    id="send_btn"
+                    className="material-symbols-rounded"
+                    onClick={handleSendMessage}
+                  >
+                    send
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

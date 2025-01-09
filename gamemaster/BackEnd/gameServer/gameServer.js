@@ -89,10 +89,6 @@ io.on("connection", (socket) => {
       return socket.emit("lobbyError", "Lobby not found.");
     }
 
-    if (!Array.isArray(lobby.players)) {
-      lobby.players = [];
-    }
-
     const player = lobby.players.find((p) => p.name === username);
     if (!player) {
       return socket.emit("lobbyError", "Player not found in the lobby.");
@@ -108,9 +104,6 @@ io.on("connection", (socket) => {
   socket.on("getPlayersInGame", (gameCode) => {
     const lobby = lobbies[gameCode];
     if (lobby) {
-      if (!Array.isArray(lobby.players)) {
-        lobby.players = [];
-      }
       socket.emit("playersUpdated", lobby.players);
     } else {
       socket.emit("lobbyError", "Lobby not found.");
@@ -123,10 +116,6 @@ io.on("connection", (socket) => {
       return socket.emit("lobbyError", "Lobby not found.");
     }
 
-    if (!Array.isArray(lobby.players)) {
-      lobby.players = [];
-    }
-
     if (lobby.players.length < 2) {
       return socket.emit("lobbyError", "At least 2 players are required.");
     }
@@ -134,9 +123,7 @@ io.on("connection", (socket) => {
     if (lobby.players.some((player) => !player.selectedCharacter)) {
       return socket.emit("lobbyError", "All players must select a character.");
     }
-
-    lobby.currentTurnIndex = 0;
-
+    if (lobby.players.every((p) => p.selectedCharacter)) {
     try {
       const response = await axios.post("http://gamemaster:6000/startGame", {
         gameCode,
@@ -146,21 +133,19 @@ io.on("connection", (socket) => {
       lobby.introduction = response.data.introduction;
 
       io.to(gameCode).emit("gameStarted", {
-        introduction: response.data.introduction,
-        gameState: {
-          players: lobby.players,
-        },
-        currentTurnPlayer: lobby.players[lobby.currentTurnIndex]?.name || null,
-      });
-      console.log("Emitting gameStarted:", {
+        introduction: response.data.introduction || "Welcome to the adventure!",
+        gameState: { players: lobby.players },
+    });
+    
+      console.log("gameStarted event emitted with:", {
         introduction: response.data.introduction,
         gameState: { players: lobby.players },
-        currentTurnPlayer: lobby.players[lobby.currentTurnIndex]?.name || null,
       });
-      
+      console.log("Game started for gameCode:", gameCode);
     } catch (error) {
       console.error("Error communicating with GameMaster AI:", error.message);
       socket.emit("lobbyError", "Failed to start the game.");
+    }
     }
   });
 
@@ -179,37 +164,26 @@ io.on("connection", (socket) => {
       return callback({ success: false, response: "Lobby not found." });
     }
 
-    const currentTurnPlayer = lobby.players[lobby.currentTurnIndex];
-    if (!currentTurnPlayer || currentTurnPlayer.id !== socket.id) {
-      return callback({ success: false, response: "It's not your turn." });
-    }
-
-    if (!Array.isArray(lobby.players)) {
-      lobby.players = [];
-    }
-
     try {
       const response = await axios.post("http://gamemaster:6000/processAction", {
         action,
-        player: currentTurnPlayer.name,
+        player: socket.user.username,
         gameState: lobby,
       });
 
       io.to(gameCode).emit("aiResponse", {
-        player: currentTurnPlayer.name,
+        player: socket.user.username,
         action,
         response: response.data.response,
       });
 
       callback({ success: true, response: response.data.response });
 
-      const nextPlayer = advanceTurn(lobby);
-      io.to(gameCode).emit("turnUpdate", { player: nextPlayer.name });
-
       io.to(gameCode).emit("gameStateUpdated", {
         players: lobby.players,
         introduction: lobby.introduction,
       });
+      
     } catch (error) {
       callback({ success: false, response: "Failed to process the action." });
     }
@@ -239,9 +213,4 @@ server.listen(4000, () => {
 
 function generateGameCode() {
   return Math.random().toString(36).substr(2, 6).toUpperCase();
-}
-
-function advanceTurn(lobby) {
-  lobby.currentTurnIndex = (lobby.currentTurnIndex + 1) % lobby.players.length;
-  return lobby.players[lobby.currentTurnIndex];
 }
