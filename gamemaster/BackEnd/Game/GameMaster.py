@@ -40,13 +40,17 @@ SPECIAL_ABILITIES = {
 
 def call_groq(prompt):
     global game_history
-    game_history.append(prompt)
+    prune_game_history()  
+    if not game_history:
+        game_history.append("The adventure begins. The players find themselves in a mysterious setting.")
 
     full_prompt = (
-        "You are a Dungeon Master. The story so far is as follows:\n"
-        + "\n".join(game_history)
-        + "\n\n"
-        + "Now continue the story based on the player's latest action."
+        "You are a Dungeon Master. Here is the summarized story so far:\n"
+        + game_history[0]  
+        + "\nRecent developments:\n"
+        + "\n".join(game_history[1:])
+        + "\n\nNow respond to the following:\n"
+        + prompt
     )
 
     response = language_model.generate_response(full_prompt)
@@ -54,13 +58,22 @@ def call_groq(prompt):
     if response:
         first_paragraph = response.strip().split("\n\n")[0]
         sentences = first_paragraph.split('. ')
-        limited_response = '. '.join(sentences[:5]).strip()  
+        limited_response = '. '.join(sentences[:5]).strip()
         if not limited_response.endswith('.'):
-            limited_response += '.' 
+            limited_response += '.'
         return limited_response
     else:
         return "Error: Unable to generate response."
 
+def summarize_game_history(history):
+    """Summarize the older parts of the game history."""
+    combined_history = " ".join(history)
+    prompt = (
+        "Summarize the following game history to retain key context and important events:\n"
+        + combined_history
+    )
+    summary = language_model.generate_response(prompt)
+    return summary.strip() if summary else "Summary not available."
     
 def add_location_to_history(location):
     """Track visited locations to ensure variety in descriptions."""
@@ -142,7 +155,7 @@ def initiate_combat_with_prompt(players, enemies):
 
             # Narrate the combat after the player's turn
             narration = narrate_combat(players, enemies, recent_action)
-            print(f"\n[NARRATION]: {narration}")
+            print(f"\n{narration}")
 
             # Check if all enemies are defeated
             if all(enemy["health"] <= 0 for enemy in enemies):
@@ -396,51 +409,125 @@ def roll_dexterity_check(player, enemies):
     # Player succeeds if their roll is higher than the enemy's roll
     return player_roll > enemy_roll
 
-
 def create_enemy(position, game_state):
     """Create a new enemy based on the player's current position and game state."""
-    
-    enemy_types = ['Goblin', 'Orc', 'Troll', 'Dragon']
-    enemy_type = random.choice(enemy_types)
-    
-    
-    if enemy_type == 'Goblin':
-        hp = random.randint(10, 30)
-    elif enemy_type == 'Orc':
-        hp = random.randint(30, 60)
-    elif enemy_type == 'Troll':
-        hp = random.randint(60, 100)
-    elif enemy_type == 'Dragon':
-        hp = random.randint(100, 200)
-    
-    # Set the attributes for the enemy
-    attributes = {
-        'STR': random.randint(8, 15),
-        'DEX': random.randint(8, 15),
-        'CON': random.randint(8, 15),
-        'INT': random.randint(8, 15),
-        'WIS': random.randint(8, 15),
-        'CHA': random.randint(8, 15)
-    }
-    
-    
-    enemy = {
-        'type': enemy_type,
-        'health': hp,
-        'position': position,  
-        'attributes': attributes  
-    }
-    
+    global game_history
+
+    # Use the game's history and position to craft a dynamic enemy description
+    story_so_far = "\n".join(game_history)
+    prompt = (
+        f"The player is currently at {position}. Based on the game's current narrative:\n\n"
+        f"{story_so_far}\n\n"
+        f"Describe an enemy that would be appropriate to this setting. "
+        f"Provide the enemy's name, type, health, attributes (STR, DEX, CON, INT, WIS, CHA), and any "
+        f"special traits that fit the situation. "
+        f"Ensure that you provide the complete description of the enemy, including these details in the response."
+    )
+
+    # Get the AI's response
+    response = call_groq(prompt)
+
+    # Debugging: Print the raw response from call_groq to inspect it
+    print("\n[DEBUG] Raw response from call_groq:")
+    print(response)
+
+    try:
+        # Ensure that we have a valid response
+        if not response:
+            raise ValueError("Empty response received from call_groq.")
+
+        # Initialize name, type, and other attributes as defaults
+        name = "Riporos"
+        enemy_type = "Dragon"
+        health = random.randint(50, 100)
+        attributes = {
+            'STR': random.randint(8, 15),
+            'DEX': random.randint(8, 15),
+            'CON': random.randint(8, 15),
+            'INT': random.randint(8, 15),
+            'WIS': random.randint(8, 15),
+            'CHA': random.randint(8, 15),
+        }
+        special_traits = ["Hard Scales"]  # Default special trait
+
+        # Parse the AI response directly to extract the name, type, attributes, etc.
+        # Assuming a structured response format like:
+        # "The enemy is a [name], a [type] creature. Health: [value], STR: [value], DEX: [value], etc."
+
+        if "enemy is a" in response.lower():
+            name_start = response.lower().find("enemy is a") + len("enemy is a")
+            name_end = response.find(",", name_start)
+            name = response[name_start:name_end].strip() if name_end != -1 else response[name_start:].strip()
+
+        # Attempt to extract the type of the enemy from the description
+        if "creature" in response.lower():
+            type_start = response.lower().find(name.lower()) + len(name)
+            type_end = response.lower().find("creature", type_start)
+            if type_end == -1:
+                type_end = response.lower().find("enemy", type_start)
+            enemy_type = response[type_start:type_end].strip() if type_end != -1 else "Unknown Type"
+
+        # Extract other attributes, such as health, STR, DEX, etc.
+        health_match = re.search(r"Health: (\d+)", response)
+        if health_match:
+            health = int(health_match.group(1))
+
+        # Extract the attributes if available
+        attribute_matches = re.findall(r"([A-Z]+): (\d+)", response)
+        for attribute, value in attribute_matches:
+            if attribute in attributes:
+                attributes[attribute] = int(value)
+
+        # Extract any special traits, if they exist
+        special_traits_match = re.findall(r"special trait: (\w+)", response)
+        if special_traits_match:
+            special_traits = special_traits_match
+
+        # Debugging: Print the extracted details
+        print(f"[DEBUG] Extracted name: {name}")
+        print(f"[DEBUG] Extracted type: {enemy_type}")
+        print(f"[DEBUG] Extracted health: {health}")
+        print(f"[DEBUG] Extracted attributes: {attributes}")
+        print(f"[DEBUG] Extracted special traits: {special_traits}")
+
+        # Create an enemy object based on extracted information
+        enemy = {
+            'name': name,
+            'type': enemy_type,
+            'health': health,
+            'position': position,
+            'attributes': attributes,
+            'special_traits': special_traits
+        }
+
+    except Exception as e:
+        # Fallback in case something goes wrong during parsing
+        print(f"[ERROR] Failed to parse response: {e}")
+        # Default fallback
+        enemy = {
+            'name': 'Mysterious Creature',
+            'type': 'Mysterious Enemy',
+            'health': random.randint(10, 100),
+            'position': position,
+            'attributes': {
+                'STR': random.randint(8, 15),
+                'DEX': random.randint(8, 15),
+                'CON': random.randint(8, 15),
+                'INT': random.randint(8, 15),
+                'WIS': random.randint(8, 15),
+                'CHA': random.randint(8, 15),
+            },
+            'special_traits': ["Unpredictable"],
+        }
+
     # Add the new enemy to the game_state
     game_state["enemies"].append(enemy)
-
-    print("\nUpdated Game State:")
-    print(json.dumps(game_state, indent=2))
-
+    print("\nNew enemy created based on story context:")
+    print(json.dumps(enemy, indent=2))
     return enemy
 
+    
 def check_for_encounter(player, game_state):
-    """Determine if a combat encounter should occur based on the AI's narrative decision."""
     global game_history
 
     story_so_far = "\n".join(game_history).replace("\\", "\\\\")
@@ -452,16 +539,17 @@ def check_for_encounter(player, game_state):
     )
 
     response = call_groq(prompt)
-
+    
     combat_keywords = ["enemy", "threat", "attack", "ambush", "danger"]
     if any(keyword in response.lower() for keyword in combat_keywords):
-        if "enemy" in response.lower():
-            new_enemy = create_enemy(player["position"], game_state)
-            print(f"\nAs the story progresses, an enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
-            return [new_enemy]
+        print("\nAI Response:", response) 
+        new_enemy = create_enemy(player["position"], game_state)
+        print(f"An enemy appears: {new_enemy['type']} with {new_enemy['health']} HP!")
+        return [new_enemy]
 
-    print(f"\n{response.strip()}")
+    print("No combat encounter detected.")
     return []
+
 
 def process_player_action(action, player, enemies):
     """Process the player's action."""
@@ -535,7 +623,7 @@ def handle_run(action, player, enemies):
     
 def attack_roll(attacker, defender):
     """Perform an attack roll using DnD mechanics."""
-    attack_bonus = attacker["attributes"].get("STR", 0) // 2 - 5  # Default to STR for melee
+    attack_bonus = attacker["attributes"].get("STR", 0) // 2 - 5  
     roll = roll_dice("1d20") + attack_bonus
     armor_class = 10 + (defender["attributes"].get("DEX", 0) // 2 - 5)
 
@@ -755,7 +843,8 @@ def process_input(data):
 
 def start_game():
     """Starts the game with an AI-generated introduction and map."""
-    
+    global game_history
+
     intro_prompt = (
         "You are a Dungeon Master creating an immersive introduction for a group of players in a Dungeons and Dragons game. "
         "The introduction should be at least six lines long, including deep descriptions of the setting, "
@@ -765,10 +854,15 @@ def start_game():
         "The players are starting in a specific place, and you should describe what they are doing in that moment. "
         "Don't forget to end with an engaging prompt that invites the players to take action."
     )
+
+    if not game_history:
+        game_history.append("The adventure begins. A group of travelers gathers in a dimly lit tavern...")
+
     intro = call_groq(intro_prompt)
     game_history.append(intro)
     print(intro)
     return intro
+
 
 
    
@@ -894,6 +988,8 @@ def main():
             "CHA": 15,
               
         },
+        "defending": False,
+        "special_cooldown": 0,
     }
 
     player2 = {
@@ -911,6 +1007,8 @@ def main():
             "CHA": 15,
               
         },
+        "defending": False,
+        "special_cooldown": 0,
     }
 
     game_state["players"] = [player1, player2]

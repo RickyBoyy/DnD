@@ -487,7 +487,7 @@ select {
 
 button.submit-btn {
   padding: 0.75rem 1.5rem;
-  background-color: darkred;
+  background-color: #9f1d14;
   color: white;
   border: none;
   border-radius: 4px;
@@ -495,7 +495,7 @@ button.submit-btn {
 }
 
 button.submit-btn:hover {
-  background-color: red;
+  background-color: #8b0000;
 }
 .character_background {
   margin-left: 5%;
@@ -520,12 +520,14 @@ button.submit-btn:hover {
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  margin-top: 30px;
+  margin: 30px auto 0; 
+  display: block; 
 }
 
 .ending_character_button:hover {
   background-color: #8b0000;
 }
+
 
 /*Lobby*/
 
@@ -1314,30 +1316,41 @@ span.material-symbols-rounded {
   margin-bottom: 10px; 
 }
 
+.header-buttons {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  width: 100%; 
+  padding: 0 20px; 
+}
+
+.profile-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  cursor: pointer;
+}
+
+.profile-pic1 {
+  width: 100%; 
+  height: 100%;
+  border-radius: 50%; 
+  object-fit: cover; 
+}
+
 .create-character-button {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: #9f1d14;
-  color: #fff;
+  background: #9f1d14; 
+  color: #fff; 
   font-size: 1rem;
-  padding: 10px 20px;
+  padding: 10px 20px; 
   border: none;
-  border-radius: 5px;
+  border-radius: 5px; 
   cursor: pointer;
 }
 
 .create-character-button:hover {
-  background: #8b0000;
-}
-
-.profile-button{
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ccc;
-  transition: transform 0.2s;
+  background: #8b0000; 
 }
 
 /*SetUsername*/
