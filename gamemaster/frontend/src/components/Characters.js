@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 import profilePicPlaceholder from "../assets/1547006.jpg"; 
+import characterimage from "../assets/personagem d&d.jpg";
 
 const Characters = () => {
   const [characters, setCharacters] = useState([]); // State to store fetched characters
@@ -75,13 +76,15 @@ const Characters = () => {
           <div key={character.id} className="card_character">
             <div className="main_display">
               <div className="character-info">
+                {/* Mostra a imagem personalizada ou a imagem padrão */}
                 <img
-                  src={character.image || "/path/to/default-image.jpg"} // Use character-specific image or default
+                  src={character.character_image || characterimage}
                   alt="character_picture"
                   style={{
                     width: "150px",
                     height: "150px",
                     marginRight: "10px",
+                    objectFit: "cover", 
                   }}
                 />
                 <h4>{character.character_name}</h4>
