@@ -10,9 +10,13 @@ const Game = () => {
   const [currentTurnPlayer, setCurrentTurnPlayer] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [playerName, setPlayerName] = useState("");
+  const [characterSelections, setCharacterSelections] = useState({});
 
   const addChatMessage = (message, className) => {
-    setChatMessages((prevMessages) => [...prevMessages, { message, className }]);
+    setChatMessages((prevMessages) => [
+      ...prevMessages,
+      { message, className },
+    ]);
   };
 
   useEffect(() => {
@@ -35,8 +39,11 @@ const Game = () => {
       setPlayers((prevPlayers) =>
         Array.isArray(updatedState.players) ? updatedState.players : prevPlayers
       );
-      setGameIntroduction((prev) =>
-        updatedState.introduction || prev || "Waiting for the game to start..."
+      setGameIntroduction(
+        (prev) =>
+          updatedState.introduction ||
+          prev ||
+          "Waiting for the game to start..."
       );
       setCurrentTurnPlayer((prev) => updatedState.currentTurnPlayer || prev);
     });
@@ -46,30 +53,43 @@ const Game = () => {
       addChatMessage(response, "incoming");
     });
 
-    socket.on("gameStarted", ({ introduction, gameState, currentTurnPlayer }) => {
-      console.log("Received gameStarted event:", { introduction, gameState, currentTurnPlayer });
-    
-      if (introduction) {
-        setGameIntroduction(introduction);
-        addChatMessage(introduction, "incoming");
-      } else {
-        console.error("Introduction is missing from gameStarted event.");
+    socket.on(
+      "gameStarted",
+      ({ introduction, gameState, currentTurnPlayer, characterSelections }) => {
+        console.log("Received gameStarted event:", {
+          introduction,
+          gameState,
+          currentTurnPlayer,
+          characterSelections,
+        });
+
+        if (introduction) {
+          setGameIntroduction(introduction);
+          addChatMessage(introduction, "incoming");
+        } else {
+          console.error("Introduction is missing from gameStarted event.");
+        }
+
+        if (gameState?.players) {
+          setPlayers(gameState.players);
+        } else {
+          console.error("Players are missing from gameState.");
+        }
+
+        if (currentTurnPlayer) {
+          setCurrentTurnPlayer(currentTurnPlayer);
+        } else {
+          console.error("Current turn player is missing.");
+        }
+        if (characterSelections) {
+          setCharacterSelections(characterSelections);
+        } else {
+          console.error(
+            "Character selections are missing from gameStarted event."
+          );
+        }
       }
-    
-      if (gameState?.players) {
-        setPlayers(gameState.players);
-      } else {
-        console.error("Players are missing from gameState.");
-      }
-    
-      if (currentTurnPlayer) {
-        setCurrentTurnPlayer(currentTurnPlayer);
-      } else {
-        console.error("Current turn player is missing.");
-      }
-    });
-    
-    
+    );
 
     return () => {
       socket.off("playersUpdated");
@@ -87,16 +107,23 @@ const Game = () => {
     const message = chatInput.value.trim();
     if (message && currentTurnPlayer === playerName) {
       const socket = getSocket();
-      console.log("Emitting playerAction:", { action: message, player: playerName });
-      addChatMessage(`You: ${message}`, "outgoing");
-      socket.emit("playerAction", { action: message, player: playerName }, (response) => {
-        console.log("Response from server:", response);
-        if (response.success) {
-          addChatMessage(response.response, "incoming");
-        } else {
-          addChatMessage("Error: " + response.response, "error");
-        }
+      console.log("Emitting playerAction:", {
+        action: message,
+        player: playerName,
       });
+      addChatMessage(`You: ${message}`, "outgoing");
+      socket.emit(
+        "playerAction",
+        { action: message, player: playerName },
+        (response) => {
+          console.log("Response from server:", response);
+          if (response.success) {
+            addChatMessage(response.response, "incoming");
+          } else {
+            addChatMessage("Error: " + response.response, "error");
+          }
+        }
+      );
       chatInput.value = "";
     } else if (!message) {
       alert("Please enter an action.");
@@ -121,9 +148,17 @@ const Game = () => {
           <div className="side_nav">
             <span>Players</span>
             <div className="players_icons">
-              {(players && players.length > 0) ? (
+              {players && players.length > 0 ? (
                 players.map((player, index) => (
                   <div key={index} className="player_info">
+                    <img
+                      src={
+                        characterSelections[player.name]?.image ||
+                        "/default-image.jpg"
+                      }
+                      alt={`${player.name}'s character`}
+                      className="player-character-icon"
+                    />
                     <h3>{player.name || "Unknown Player"}</h3>
                   </div>
                 ))
@@ -152,7 +187,11 @@ const Game = () => {
             <div className="typing-textarea">
               <textarea
                 id="chat-input"
-                placeholder={currentTurnPlayer !== playerName ? "Wait for your turn..." : "Enter prompt here!!"}
+                placeholder={
+                  currentTurnPlayer !== playerName
+                    ? "Wait for your turn..."
+                    : "Enter prompt here!!"
+                }
                 disabled={currentTurnPlayer !== playerName}
                 required
               ></textarea>
