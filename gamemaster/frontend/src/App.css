@@ -826,6 +826,19 @@ button.submit-btn:hover {
   overflow: hidden;
 }
 
+
+.player_name{
+  color: white;
+}
+
+.player-character-icon {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
 .main-content {
   flex: 3;
   display: flex;

@@ -101,7 +101,7 @@ const Profile = () => {
   const handleLogout = () => {
     sessionStorage.removeItem("token");
     setProfile(null);
-    navigate("/login");
+    navigate("/");
   };
 
   if (error) {

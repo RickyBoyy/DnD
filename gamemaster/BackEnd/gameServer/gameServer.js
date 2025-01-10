@@ -171,6 +171,9 @@ io.on("connection", (socket) => {
         gameState: lobby,
       });
 
+      console.log("Processing action for player:", socket.user.username);
+
+
       io.to(gameCode).emit("aiResponse", {
         player: socket.user.username,
         action,
@@ -183,6 +186,9 @@ io.on("connection", (socket) => {
         players: lobby.players,
         introduction: lobby.introduction,
       });
+
+      console.log("Game state being sent for processing:", lobby);
+
       
     } catch (error) {
       callback({ success: false, response: "Failed to process the action." });
